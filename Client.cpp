@@ -18,7 +18,7 @@ states Client::getState(void) const { return _state; }
 
 int  Client::getFd() const { return _fd; }
 
-void Client::readRequest() { 
+void Client::readRequest() {
     int buf_size = 128;
     char buf[buf_size];
     int bytes_read = recv(this->_fd, buf, buf_size - 1, 0);
@@ -32,7 +32,6 @@ void Client::readRequest() {
         if (found != std::string::npos) {
             std::cout << "full request received" << std::endl;
             this->_state = st_generate_response;
-            this->generateResponse();
         }
     }
 }
@@ -43,8 +42,15 @@ void Client::closeConnection() {
 }
 
 void Client::sendResponse() {
-    send(_fd, _response.data(), _response.length(), 0);
-    this->_state = st_read_request;
+    size_t bytes_sent = send(_fd, _response.data(), _response.length(), 0);
+    if (bytes_sent == _response.length()) {
+        this->_request = "";
+        this->_state = st_read_request;
+    } else {
+        std::cout << "full response not sent, it must be chunked" << std::endl;
+        this->_request = "";
+        this->_state = st_read_request;
+    }
 }
 
 void Client::generateResponse() {
@@ -59,10 +65,4 @@ void Client::generateResponse() {
         _response = "HTTP/1.1 200 OK\n"
             "Content-Type: text/plain\nContent-Length: 12\n\nHello world!";
     this->_state = st_send_response;
-    this->clearRequest();
-    this->sendResponse();
-}
-
-void Client::clearRequest() {
-    this->_request = "";
 }

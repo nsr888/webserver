@@ -12,8 +12,7 @@
 #include <iostream>
 #include "Client.hpp"
 
-int main()
-{
+int main() {
     int ls;
     struct sockaddr_in addr;
     int port = 7777;
@@ -29,7 +28,7 @@ int main()
     }
 
     fcntl(ls, F_SETFL, O_NONBLOCK);
-    
+
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = INADDR_ANY;
@@ -68,6 +67,10 @@ int main()
         /* ________ main cycle wait here on select _____ */
         int res = select(max_fd + 1, &readfds, &writefds, NULL, &timeout);
 
+        if (res == 0) {
+            std::cerr << "select timeout: " << strerror(errno) << std::endl;
+            exit(3);
+        }
         if (res < 1) {
             if (errno != EINTR) {
                 std::cerr << "select error: " << strerror(errno) << std::endl;
@@ -77,11 +80,6 @@ int main()
                 exit(3);
             }
             continue;
-        }
-        if (res == 0) {
-            std::cerr << "select timeout: " << strerror(errno) << std::endl;
-            exit(3);
-            /* continue; */
         }
         if (FD_ISSET(ls, &readfds)) {
             int sd;
@@ -98,6 +96,10 @@ int main()
                 it != clients.end(); ) {
             if (FD_ISSET(it->getFd(), &readfds)) {
                 it->readRequest();
+                if (it->getState() == st_generate_response)
+                    it->generateResponse();
+                if (it->getState() == st_send_response)
+                    it->sendResponse();
                 if (it->getState() == st_close_connection) {
                     it->closeConnection();
                     it = clients.erase(it);

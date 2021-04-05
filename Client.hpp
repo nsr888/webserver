@@ -27,8 +27,6 @@ class Client {
 
     states                      getState(void) const;
     int                         getFd() const;
-    
-    void                        clearRequest();
 
  private:
     states                      _state;
