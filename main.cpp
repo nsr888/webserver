@@ -65,8 +65,8 @@ int main()
         timeout.tv_sec = 15;
         timeout.tv_usec = 0;
 
+        /* ________ main cycle wait here on select _____ */
         int res = select(max_fd + 1, &readfds, &writefds, NULL, &timeout);
-        /* == main cyle wait here on select == */
 
         if (res < 1) {
             if (errno != EINTR) {
