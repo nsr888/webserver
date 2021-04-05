@@ -1,64 +1,68 @@
 #include "Client.hpp"
 
-Client::Client(const Client & other)
-{
-    *this = other;
-}
+Client::Client(const Client & other) { *this = other; }
 
-Client::Client(int fd)
-    : _fd(fd)
-    , _want_to_read(true)
-    , _want_to_write(false)
-{
-}
+Client::Client(int fd) : _state(st_read_request), _fd(fd) { }
 
 Client::Client(void) { }
 
-Client::~Client(void)
-{
-}
+Client::~Client(void) { }
 
-Client & Client::operator=(const Client & other)
-{
-    this->_fd = other._fd;
-    this->_want_to_read = other._want_to_read;
-    this->_want_to_write = other._want_to_write;
+Client & Client::operator=(const Client & other) {
+    this->_fd = other.getFd();
+    this->_state = other.getState();
     return *this;
 }
 
-bool Client::WantToRead(void) const
-{
-	return _want_to_read;
+states Client::getState(void) const { return _state; }
+
+int  Client::getFd() const { return _fd; }
+
+void Client::readRequest() { 
+    int buf_size = 128;
+    char buf[buf_size];
+    int bytes_read = recv(this->_fd, buf, buf_size - 1, 0);
+    std::cout << "bytes_read: " << bytes_read << std::endl;
+    if (bytes_read <= 0) {
+        this->_state = st_close_connection;
+    } else {
+        buf[bytes_read] = '\0';
+        _request = _request + std::string(buf);
+        std::size_t found = _request.find("\r\n\r\n");
+        if (found != std::string::npos) {
+            std::cout << "full request received" << std::endl;
+            this->_state = st_generate_response;
+            this->generateResponse();
+        }
+    }
 }
 
-bool Client::WantToWrite(void) const
-{
-	return _want_to_write;
+void Client::closeConnection() {
+    std::cout << "close connection" << _fd << ", 0 bytes readed\n";
+    close(this->_fd);
 }
 
-int  Client::getFd() const
-{
-	return _fd;
-}
-
-void  Client::sendResponse()
-{
+void Client::sendResponse() {
     send(_fd, _response.data(), _response.length(), 0);
-    this->_want_to_write = false;
+    this->_state = st_read_request;
 }
 
-void Client::processRequest(const char * request)
-{
-    std::string tmp(request);
-    /* bool is_request_header_full = false; */
-    /* if (tmp.find("\r\n\r\n") != std::string::npos) */
-    /*     bool is_request_header_full = true; */
-    std::cout << tmp << std::endl;
-    std::size_t found = tmp.find("GET /1 HTTP/1.1");
+void Client::generateResponse() {
+    std::cout << "\n------ start request -------\n";
+    std::cout << _request << std::endl;
+    std::cout << "\n------ end request -------" << std::endl;
+    std::size_t found = _request.find("GET /1 HTTP/1.1");
     if (found != std::string::npos)
-        _response = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 11\n\nArgument 1!";
+        _response = "HTTP/1.1 200 OK\n"
+            "Content-Type: text/plain\nContent-Length: 11\n\nArgument 1!";
     else
-        _response = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-    this->_want_to_write = true;
+        _response = "HTTP/1.1 200 OK\n"
+            "Content-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    this->_state = st_send_response;
+    this->clearRequest();
+    this->sendResponse();
 }
 
+void Client::clearRequest() {
+    this->_request = "";
+}

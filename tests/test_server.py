@@ -9,7 +9,7 @@ https://pytest-docs-ru.readthedocs.io/ru/latest/fixture.html
 
 @pytest.fixture
 def connection(request):
-    '''Return connection to localhost'''
+    '''Prepair connection'''
     _connection = http.client.HTTPConnection("localhost", port=7777)
 
     def fin():
@@ -19,7 +19,7 @@ def connection(request):
 
 
 def test_connection(connection):
-    '''Test for correct response headers'''
+    '''Test responses'''
     connection.request("GET", "/")
     resp = connection.getresponse()
     assert "Hello world!" in resp.read().decode('utf-8')
