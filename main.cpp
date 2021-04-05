@@ -64,7 +64,7 @@ int main() {
         timeout.tv_sec = 15;
         timeout.tv_usec = 0;
 
-        /* ________ main cycle wait here on select _____ */
+        /* ________ main cycle wait here _____ */
         int res = select(max_fd + 1, &readfds, &writefds, NULL, &timeout);
 
         if (res == 0) {
@@ -79,7 +79,6 @@ int main() {
                 std::cerr << "select signal: " << strerror(errno) << std::endl;
                 exit(3);
             }
-            continue;
         }
         if (FD_ISSET(ls, &readfds)) {
             int sd;

@@ -22,7 +22,6 @@ void Client::readRequest() {
     int buf_size = 128;
     char buf[buf_size];
     int bytes_read = recv(this->_fd, buf, buf_size - 1, 0);
-    std::cout << "bytes_read: " << bytes_read << std::endl;
     if (bytes_read <= 0) {
         this->_state = st_close_connection;
     } else {
@@ -30,7 +29,7 @@ void Client::readRequest() {
         _request = _request + std::string(buf);
         std::size_t found = _request.find("\r\n\r\n");
         if (found != std::string::npos) {
-            std::cout << "full request received" << std::endl;
+            // request header received
             this->_state = st_generate_response;
         }
     }
@@ -47,9 +46,7 @@ void Client::sendResponse() {
         this->_request = "";
         this->_state = st_read_request;
     } else {
-        std::cout << "full response not sent, it must be chunked" << std::endl;
-        this->_request = "";
-        this->_state = st_read_request;
+        std::cout << "response must be chunked here" << std::endl;
     }
 }
 
