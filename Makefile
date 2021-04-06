@@ -1,6 +1,7 @@
 NAME = webserver
-SRC = main.cpp \
-	  Client.cpp
+SRC = 	main.cpp \
+		Client.cpp \
+		WebServer.cpp
 OBJ = $(SRC:%.cpp=%.o)
 CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -g -O2

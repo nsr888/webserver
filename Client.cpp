@@ -22,13 +22,17 @@ void Client::readRequest() {
     int buf_size = 128;
     char buf[buf_size];
     int bytes_read = recv(this->_fd, buf, buf_size - 1, 0);
-    if (bytes_read <= 0) {
+    if (bytes_read <= 0)
+    {
         this->_state = st_close_connection;
-    } else {
+    }
+    else
+    {
         buf[bytes_read] = '\0';
         _request = _request + std::string(buf);
         std::size_t found = _request.find("\r\n\r\n");
-        if (found != std::string::npos) {
+        if (found != std::string::npos)
+        {
             // request header received
             this->_state = st_generate_response;
         }
@@ -42,10 +46,13 @@ void Client::closeConnection() {
 
 void Client::sendResponse() {
     size_t bytes_sent = send(_fd, _response.data(), _response.length(), 0);
-    if (bytes_sent == _response.length()) {
+    if (bytes_sent == _response.length())
+    {
         this->_request = "";
         this->_state = st_read_request;
-    } else {
+    }
+    else
+    {
         std::cout << "response must be chunked here" << std::endl;
     }
 }
@@ -56,10 +63,14 @@ void Client::generateResponse() {
     std::cout << "\n------ end request -------" << std::endl;
     std::size_t found = _request.find("GET /1 HTTP/1.1");
     if (found != std::string::npos)
+    {
         _response = "HTTP/1.1 200 OK\n"
             "Content-Type: text/plain\nContent-Length: 11\n\nArgument 1!";
+    }
     else
+    {
         _response = "HTTP/1.1 200 OK\n"
             "Content-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    }
     this->_state = st_send_response;
 }
