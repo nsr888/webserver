@@ -5,8 +5,9 @@
 # include <vector>
 # include <string>
 # include <iostream>
+# include "Request.hpp"
 
-enum states {
+enum client_states {
     st_read_request,
     st_generate_response,
     st_send_response,
@@ -25,15 +26,17 @@ class Client {
     void                        sendResponse();
     void                        closeConnection();
 
-    states                      getState(void) const;
+    client_states               getState(void) const;
     int                         getFd() const;
 
  private:
-    states                      _state;
+    client_states               _client_state;
     int                         _fd;
-    std::vector<unsigned char>  _buf;
+    std::vector<char>  _buf;
     std::string                 _response;
-    std::string                 _request;
+    /* std::string                 _request; */
+    Request                     _request;
+
 
     Client(void);
     friend bool operator< (Client const& lhs, Client const& rhs) {
