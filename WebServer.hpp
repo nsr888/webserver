@@ -9,30 +9,32 @@
 # include <fcntl.h>
 # include <errno.h>
 # include <map>
+# include <vector>
+# include <string>
 # include <iostream>
 # include "Client.hpp"
 # include "Settings.hpp"
 
 class WebServer {
-public:
+ public:
     explicit WebServer(const Settings & config);
     ~WebServer(void);
     WebServer(const WebServer & other);
     WebServer & operator=(const WebServer & other);
 
-    void                    runServer();
+    void                    initServer();
 
     int                     getLs() const;
     Settings                getConfig() const;
-    std::vector<Client>     getClients() const;
+    std::vector<Client>&    getClients();
+    sockaddr_in             getAddr() const;
+    void                    push_back(Client client);
 
-private:
+ private:
     int                     _ls;
     Settings                _config;
     std::vector<Client>     _clients;
     struct sockaddr_in      _addr;
-
-    void                    _initServer();
 
     WebServer(void);
 };
