@@ -32,11 +32,9 @@ class Client {
  private:
     client_states               _client_state;
     int                         _fd;
-    std::vector<char>  _buf;
+    std::vector<char>           _buf;
     std::string                 _response;
-    /* std::string                 _request; */
     Request                     _request;
-
 
     Client(void);
     friend bool operator< (Client const& lhs, Client const& rhs) {
