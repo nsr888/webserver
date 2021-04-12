@@ -1,27 +1,34 @@
-NAME = webserver
+NAME = webserv
 SRC = 	main.cpp \
 		Client.cpp \
-		WebServer.cpp
+		WebServer.cpp \
+		EventLoop.cpp \
+		Request.cpp
 OBJ = $(SRC:%.cpp=%.o)
 CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -g -O2
 INC = -I.
 
-all: $(OBJ)
-	$(CXX) $(CXXFLAGS) $(INC) $(OBJ) -o $(NAME)
+all: $(NAME)
+
+$(NAME): $(OBJ)
+	cd libft && make
+	$(CXX) $(CXXFLAGS) $(INC) $(OBJ) -Llibft -lft -o $(NAME)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -Ilibft -c $< -o $@
 	
 clean:
+	cd libft && make $@
 	rm -rf $(OBJ)
 
 fclean: clean
+	cd libft && make $@
 	rm -rf $(NAME)
 
 re: fclean all
 
-test: 
+test: $(NAME)
 	@./$(NAME) & echo $$! > ./tests/webserver.PID
 	@cd ./tests/ && python -m pytest
 	@if [ -a ./tests/webserver.PID ]; then \
@@ -29,12 +36,12 @@ test:
 	fi;
 	@rm -rf ./tests/webserver.PID
 
-debug: 
+echo: $(NAME)
 	@./$(NAME) & echo $$! > ./tests/webserver.PID
-	@cd ./tests/ && python3 debug_server.py
+	@cd ./tests/ && python3 echo_server.py
 	@if [ -a ./tests/webserver.PID ]; then \
 		kill -TERM $$(cat ./tests/webserver.PID) || true; \
 	fi;
 	@rm -rf ./tests/webserver.PID
 
-.PONY: all fclean clean re test
+.PONY: all fclean clean re test echo
