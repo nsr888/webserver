@@ -27,6 +27,27 @@ Request & Request::operator=(const Request & other)
 
 Request::~Request(void) {}
 
+void    Request::_printBuf(std::string msg) {
+    std::cout << yel << "\n------ start " << msg << "-------\n" << res;
+    std::vector<char>::iterator itv = _buf.begin();
+    while (itv != _buf.end())
+    {
+        std::cout << *itv;
+        ++itv;
+    }
+    std::cout << yel << "\n----- end " << msg << " -------" << res << std::endl;
+}
+
+void    Request::_deleteHeaderInBuf() {
+    const char *crlf = "\r\n\r\n";
+    std::vector<char>::iterator it = std::search(_buf.begin(), _buf.end(), crlf, crlf + std::strlen(crlf));
+    if (it != _buf.end())
+    {
+        it = it + 4;
+        _buf.assign(it, _buf.end());
+    }
+}
+
 bool Request::_parseHeader() {
     const char *get = "GET";
     std::vector<char>::iterator it = std::search(_buf.begin(), _buf.end(), get, get + std::strlen(get));
@@ -96,27 +117,6 @@ std::vector<char> & Request::getBody(void) {
 
 std::vector<char> Request::getBody(void) const {
 	return _body;
-}
-
-void    Request::_printBuf(std::string msg) {
-    std::cout << yel << "\n------ start " << msg << "-------\n" << res;
-    std::vector<char>::iterator itv = _buf.begin();
-    while (itv != _buf.end())
-    {
-        std::cout << *itv;
-        ++itv;
-    }
-    std::cout << yel << "\n----- end " << msg << " -------" << res << std::endl;
-}
-
-void    Request::_deleteHeaderInBuf() {
-        const char *crlf = "\r\n\r\n";
-        std::vector<char>::iterator it = std::search(_buf.begin(), _buf.end(), crlf, crlf + std::strlen(crlf));
-        if (it != _buf.end())
-        {
-            it = it + 4;
-            _buf.assign(it, _buf.end());
-        }
 }
 
 bool    Request::isHeaderParsed()
