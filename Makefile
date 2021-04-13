@@ -1,12 +1,8 @@
 NAME = webserv
-SRC = 	main.cpp \
-		Client.cpp \
-		WebServer.cpp \
-		EventLoop.cpp \
-		Request.cpp
+SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp
 OBJ = $(SRC:%.cpp=%.o)
 CXX = clang++
-CXXFLAGS = -Wall -Wextra -Werror -g -O2
+CXXFLAGS = -Wall -Wextra -Werror -g -O2 -std=c++98 -pedantic
 INC = -I.
 
 all: $(NAME)
@@ -28,6 +24,7 @@ fclean: clean
 
 re: fclean all
 
+# python unit tests with pytest
 test: $(NAME)
 	@./$(NAME) & echo $$! > ./tests/webserver.PID
 	@cd ./tests/ && python -m pytest
@@ -36,6 +33,7 @@ test: $(NAME)
 	fi;
 	@rm -rf ./tests/webserver.PID
 
+# echo webserver response to cmd
 echo: $(NAME)
 	@./$(NAME) & echo $$! > ./tests/webserver.PID
 	@cd ./tests/ && python3 echo_server.py
