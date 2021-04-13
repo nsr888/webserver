@@ -26,40 +26,32 @@ client_states Client::getState(void) const { return _client_state; }
 int  Client::getFd() const { return _fd; }
 
 void Client::readRequest() {
-    int buf_size = 2; // must be 2 or more
-    char buf[buf_size];
-    int bytes_read = recv(_fd, buf, buf_size - 1, 0);
-    buf[bytes_read] = '\0';
+    std::vector<char> buf_read(8);
+    int bytes_read = recv(_fd, &buf_read[0], buf_read.size(), 0);
+    buf_read.resize(bytes_read);
     if (bytes_read <= 0)
     {
         _client_state = st_close_connection;
+        return;
     }
-    else
+    _request.push_back(buf_read);
+    if (_request.isHeaderParsed())
     {
-        if (_request.getState() == st_header_feed ||
-            _request.getState() == st_body_feed)
+        if (_request.getStartLine().method == "GET")
         {
-            _request.appendBuf(buf);
-        }
-        if (_request.getState() == st_header_found)
-        {
-            _request.parseHeader();
-        }
-        if (_request.getState() == st_header_parsed)
-        {
-            if (_request.getStartLine().method == "GET")
-            {
-                std::cout << "\nGET header parsed" << std::endl;
-                _client_state = st_generate_response; 
-            }
-            else if (_request.getStartLine().method == "POST")
-            {
-                std::cout << "\nPOST header parsed" << std::endl;
-                _request.checkBodyFull();
-            }
-        }
-        if (_request.getState() == st_body_ready)
+            std::cout << "\nGET header parsed\n";
             _client_state = st_generate_response; 
+        }
+        else if (_request.getStartLine().method == "POST" && 
+                _request.isBodyParsed())
+        {
+            std::cout << "\nPOST header and body parsed\n";
+            _client_state = st_generate_response; 
+        }
+    }
+    else if (_request.isBodyParsed())
+    {
+        _client_state = st_generate_response; 
     }
 }
 
