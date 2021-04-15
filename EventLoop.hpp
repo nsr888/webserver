@@ -9,7 +9,7 @@
 class EventLoop {
  public:
     EventLoop(void);
-    explicit EventLoop(std::vector<Settings> config);
+    explicit EventLoop(std::vector<Setting> config);
     ~EventLoop(void);
     EventLoop(const EventLoop & other);
     EventLoop & operator=(const EventLoop & other);

@@ -12,9 +12,9 @@ EventLoop::EventLoop(const EventLoop & other) {
     *this = other;
 }
 
-EventLoop::EventLoop(std::vector<Settings> config)
+EventLoop::EventLoop(std::vector<Setting> config)
 {
-    for ( std::vector<Settings>::iterator it = config.begin();
+    for ( std::vector<Setting>::iterator it = config.begin();
             it != config.end();++it)
         this->push_back(WebServer(*it));
 }

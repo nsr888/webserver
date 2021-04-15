@@ -15,3 +15,4 @@ void Setting::setServerName(std::string& server_name) {
 void Setting::setErrorPage(std::string& error_page) {
 	_errorPage = error_page;
 }
+
