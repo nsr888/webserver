@@ -49,40 +49,57 @@ void    Request::_deleteHeaderInBuf() {
 }
 
 bool Request::_parseHeader() {
-    const char *get = "GET";
-    std::vector<char>::iterator it = std::search(_buf.begin(), _buf.end(), get, get + std::strlen(get));
-    if (it != _buf.end())
-    {
-        _start_line.method = "GET";
-        _start_line.request_target = "/";
-        _start_line.http_version = "HTTP/1.1";
-        _header["Host"] = "localhost";
-        _header["Accept"] = "*/*";
-        _printBuf("print raw buf, before delete header");
-        _deleteHeaderInBuf();
-        _request_state = st_body_feed;
-        return true;
+    
+    std::vector<char>::iterator head = _buf.begin();
+   	std::vector<char>::iterator tail = head;
+
+	// Find type
+	while (tail != _buf.end() && *tail != ' ')
+		++tail;
+	_start_line.method = std::string(head, tail);
+
+	// Find path
+	while (tail != _buf.end() && *tail == ' ')
+		++tail;
+	head = tail;
+	while (tail != _buf.end() && *tail != ' ')
+		++tail;
+	_start_line.request_target = std::string(head, tail);
+
+	// Find HTTP version
+	while (tail != _buf.end() && *tail == ' ')
+		++tail;
+	head = tail;
+	while (tail != _buf.end() && *tail != '\r')
+		++tail;
+	_start_line.http_version = std::string(head, tail);
+	while (tail != _buf.end() && (*tail == '\r' || *tail == '\n'))
+		++tail; // skip /r
+
+	// All headers in map (key - value)
+	head = tail;
+	while (head != _buf.end() && *head != '\r')
+	{
+		while (tail != _buf.end() && *tail != '\r')
+			++tail;
+		std::vector<char>::iterator separator = head;
+		while (separator != _buf.end() && separator != tail && *separator != ':')
+			++separator;
+		if (separator == tail)
+			break;
+		std::string key(head, separator);
+   		std::vector<char>::iterator value = ++separator;
+		while (value != tail && (*value == ' ' || *value == ':'))
+			++value;
+		_header[key] = std::string(value, tail);
+		while (tail != _buf.end() && (*tail == '\r' || *tail == '\n'))
+			++tail;
+		head = tail;
     }
-    const char *post = "POST";
-    std::vector<char>::iterator it_post = std::search(_buf.begin(), _buf.end(), post, post + std::strlen(post));
-    if (it_post != _buf.end())
-    {
-        _start_line.method = "POST";
-        _start_line.request_target = "/echo/post/form";
-        _start_line.http_version = "HTTP/1.1";
-        _header["Content-type"] = "application/x-www-form-urlencoded";
-        _header["Host"] = "localhost";
-        _header["Content-Length"] = "23";
-        _header["Accept"] = "text/plain";
-        _printBuf("print raw buf, before delete header");
-        _deleteHeaderInBuf();
-        _request_state = st_body_feed;
-        return true;
-    }
-    /* if header cant be parsed, then _deleteHeaderInBuf and set _request_state = st_header_feed */
+    _printBuf("print raw buf, before delete header");
     _deleteHeaderInBuf();
-    _request_state = st_header_feed;
-    return false;
+    _request_state = st_body_feed;
+    return true;
 }
 
 request_states Request::getState() const {
