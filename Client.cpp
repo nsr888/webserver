@@ -26,7 +26,7 @@ client_states Client::getState(void) const { return _client_state; }
 int  Client::getFd() const { return _fd; }
 
 void Client::readRequest() {
-    std::vector<char> buf_read(8);
+    std::vector<char> buf_read(1);
     int bytes_read = recv(_fd, &buf_read[0], buf_read.size(), 0);
     buf_read.resize(bytes_read);
     if (bytes_read <= 0)
@@ -39,13 +39,13 @@ void Client::readRequest() {
     {
         if (_request.getStartLine().method == "GET")
         {
-            std::cout << "\nGET header parsed\n";
+            /* std::cout << "\nGET header parsed\n"; */
             _client_state = st_generate_response; 
         }
         else if (_request.getStartLine().method == "POST" && 
                 _request.isBodyParsed())
         {
-            std::cout << "\nPOST header and body parsed\n";
+            /* std::cout << "\nPOST header and body parsed\n"; */
             _client_state = st_generate_response; 
         }
     }
@@ -64,7 +64,9 @@ void Client::sendResponse() {
     size_t bytes_sent = send(_fd, _response.data(), _response.length(), 0);
     if (bytes_sent == _response.length())
     {
-        std::cout << "Response was sent" << std::endl;
+        std::cout << red << "\n------ start response -------\n" << res;
+        std::cout << _response << std::endl;
+        std::cout << red << "------ end response -------\n" << res;
         _request.clear();
         _client_state = st_read_request;
     }
@@ -76,10 +78,23 @@ void Client::sendResponse() {
 }
 
 void Client::generateResponse() {
-    std::cout << yel << "\n------ start print parsed request -------\n" << res;
+    std::cout << yel << "\n------ start parsed request -------\n" << res;
     std::cout << _request << std::endl;
-    std::cout << yel << "\n------ end print parsed request -------" << res << std::endl;
-    _response = "HTTP/1.1 200 OK\n"
-        "Content-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    std::cout << yel << "------ end parsed request -------" << res << std::endl;
+    if (_request.getStartLine().method == "POST" &&
+        _request.isHeaderContains("Content-Length") &&
+        _request.getHeaderFieldAsNumber("Content-Length") == 0)
+    {
+        std::string response_body("Method Not Allowed");
+        _response = "HTTP/1.1 405 Method Not Allowed\n"
+            "Content-Type: text/plain\nContent-Length: " +
+            std::string(ft_itoa(response_body.size())) + 
+            "\n\n" + response_body;
+    }
+    else
+    {
+        _response = "HTTP/1.1 200 OK\n"
+            "Content-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    }
     _client_state = st_send_response;
 }
