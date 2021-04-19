@@ -11,7 +11,7 @@ WebServer::WebServer(const WebServer & other) { *this = other; }
 
 WebServer::WebServer(void) { }
 
-WebServer::WebServer(const Settings & config)
+WebServer::WebServer(const Setting & config)
     : _ls()
     , _config(config)
     , _clients()
@@ -29,7 +29,7 @@ WebServer & WebServer::operator=(const WebServer & other) {
 
 int WebServer::getLs() const { return this->_ls; }
 
-Settings WebServer::getConfig() const { return this->_config; }
+Setting WebServer::getConfig() const { return this->_config; }
 
 sockaddr_in WebServer::getAddr() const {
     return this->_addr;
@@ -49,7 +49,7 @@ void WebServer::initServer() {
         throw std::runtime_error(std::string("socket: ") + strerror(errno));
     fcntl(_ls, F_SETFL, O_NONBLOCK);
     _addr.sin_family = AF_INET;
-    _addr.sin_port = htons(_config.port);
+    _addr.sin_port = htons(_config.getPort());
     _addr.sin_addr.s_addr = INADDR_ANY;
     int yes = 1;
     if (setsockopt(_ls, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
@@ -58,5 +58,5 @@ void WebServer::initServer() {
         throw std::runtime_error(std::string("bind: ") + strerror(errno));
     listen(_ls, 5);
     std::cout << grn << "Webserver started " << res << "(port "
-        << _config.port << ", listen socket: " << _ls << ")" << std::endl;
+        << _config.getPort() << ", listen socket: " << _ls << ")" << std::endl;
 }

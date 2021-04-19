@@ -13,11 +13,11 @@
 # include <string>
 # include <iostream>
 # include "Client.hpp"
-# include "Settings.hpp"
+# include "Setting.hpp"
 
 class WebServer {
  public:
-    explicit WebServer(const Settings & config);
+    explicit WebServer(const Setting & config);
     ~WebServer(void);
     WebServer(const WebServer & other);
     WebServer & operator=(const WebServer & other);
@@ -25,14 +25,14 @@ class WebServer {
     void                    initServer();
 
     int                     getLs() const;
-    Settings                getConfig() const;
+    Setting                 getConfig() const;
     std::vector<Client>&    getClients();
     sockaddr_in             getAddr() const;
     void                    push_back(Client client);
 
  private:
     int                     _ls;
-    Settings                _config;
+    Setting                 _config;
     std::vector<Client>     _clients;
     struct sockaddr_in      _addr;
 

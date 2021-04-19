@@ -4,7 +4,7 @@ import http.client
 import urllib.parse
 
 connection = http.client.HTTPConnection("localhost", port=7777)
-params = urllib.parse.urlencode({'@key1': 'val', '@key2': 'va2'})
+params = urllib.parse.urlencode({'@key1': 'value1', '@key2': 'value2!!!!'})
 headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 connection.request("POST", "/echo/post/form", params, headers)
 response = connection.getresponse()

@@ -4,6 +4,9 @@
 ![workflow diagram](https://github.com/nsr888/webserver/blob/main/workflow_diagram.jpg?raw=true)
 ## Objects relationship diagram
 ![class diagram](https://github.com/nsr888/webserver/blob/main/objects_diagram_.jpg?raw=true)
+## CGI diagram
+![cgi diagram](https://github.com/nsr888/webserver/blob/main/cgi_diagram.svg?raw=true)
+https://lectureswww.readthedocs.io/5.web.server/cgi.html
 
 ## Subject
 * You must write a HTTP server in C++ 98
