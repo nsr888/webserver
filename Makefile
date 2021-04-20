@@ -1,6 +1,6 @@
 NAME = webserv
 SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp \
-	  Setting.cpp
+	  Setting.cpp utils.cpp
 OBJ = $(SRC:%.cpp=%.o)
 CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -g -O2 -std=c++98 -pedantic
@@ -10,17 +10,20 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	cd libft && make
-	$(CXX) $(CXXFLAGS) $(INC) $(OBJ) -Llibft -lft -o $(NAME)
+	cd libgnl && make
+	$(CXX) $(CXXFLAGS) $(INC) $(OBJ) -Llibft -lft -Llibgnl -lgnl -o $(NAME)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -Ilibft -c $< -o $@
+	$(CXX) $(CXXFLAGS) -Ilibft -Ignl -c $< -o $@
 	
 clean:
 	cd libft && make $@
+	cd libgnl && make $@
 	rm -rf $(OBJ)
 
 fclean: clean
 	cd libft && make $@
+	cd libgnl && make $@
 	rm -rf $(NAME)
 
 re: fclean all
