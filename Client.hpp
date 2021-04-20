@@ -6,6 +6,7 @@
 # include <string>
 # include <iostream>
 # include "Request.hpp"
+# include "utils.hpp"
 
 enum client_states {
     st_read_request,

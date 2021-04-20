@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include <exception>
 
 const std::string yel("\033[0;33m");
 const std::string red("\033[0;31m");
@@ -93,8 +94,21 @@ void Client::generateResponse() {
     }
     else
     {
-        _response = "HTTP/1.1 200 OK\n"
+        if (_request.getStartLine().request_target == "/files/test_large_file.html")
+        {
+            std::vector<char> tmp;
+            tmp = utils::read_file("./files/test_large_file.html");
+            std::string s(tmp.begin(), tmp.end());
+            _response = "HTTP/1.1 200 OK"
+                "Content-Type: text/plain\nContent-Length: " +
+                std::string(ft_itoa(s.size())) + 
+                "\n\n" + s;
+        }
+        else
+        {
+            _response = "HTTP/1.1 200 OK\n"
             "Content-Type: text/plain\nContent-Length: 12\n\nHello world!";
+        }
     }
     _client_state = st_send_response;
 }
