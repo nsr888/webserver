@@ -1,5 +1,5 @@
 NAME = webserv
-SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp \
+SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp Response.cpp\
 	  Setting.cpp
 OBJ = $(SRC:%.cpp=%.o)
 CXX = clang++

@@ -106,7 +106,7 @@ request_states Request::getState() const {
     return _request_state;
 }
 
-std::map<std::string, std::string> Request::getHeader() const {
+const std::map<std::string, std::string> &  Request::getHeader() const {
     return _header;
 }
 

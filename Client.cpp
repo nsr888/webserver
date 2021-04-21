@@ -79,7 +79,9 @@ void Client::generateResponse() {
     std::cout << yel << "\n------ start print parsed request -------\n" << res;
     std::cout << _request << std::endl;
     std::cout << yel << "\n------ end print parsed request -------" << res << std::endl;
-    _response = "HTTP/1.1 200 OK\n"
-        "Content-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    _response_struct.setCode(200); /* Нужна функция для установки кода */
+    _response_struct.generateResponse1(_request, 1, /* Здесь должен быть путь исходя из которого будет сформирован body */_request.getStartLine().request_target);
+    _response = _response_struct.getBuf();
+    std::cout << "Response message:" << _response << std::endl;
     _client_state = st_send_response;
 }

@@ -33,14 +33,14 @@ public:
     void                push_back(std::vector<char> buf_read);
     void                clear();
 
-    request_states                      getState() const;
-    t_start_line                        getStartLine(void) const;
-    std::vector<char>                   getBuf(void) const;
-    std::vector<char> &                 getBuf(void);
-    std::vector<char>                   getBody(void) const;
-    std::vector<char> &                 getBody(void);
-    std::map<std::string, std::string>  getHeader() const;
-    std::string &                       getHeaderField(const std::string & key);
+    request_states                              getState() const;
+    t_start_line                                getStartLine(void) const;
+    std::vector<char>                           getBuf(void) const;
+    std::vector<char> &                         getBuf(void);
+    std::vector<char>                           getBody(void) const;
+    std::vector<char> &                         getBody(void);
+    const std::map<std::string, std::string> &  getHeader() const;
+    std::string &                               getHeaderField(const std::string & key);
 
 private:
     request_states                      _request_state;
