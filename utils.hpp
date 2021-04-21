@@ -1,5 +1,6 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
+# include <unistd.h>
 # include <fcntl.h>
 # include <string>
 # include <vector>
