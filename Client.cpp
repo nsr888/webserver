@@ -94,41 +94,45 @@ void Client::generateResponse() {
     std::cout << yel << "\n------ start parsed request -------\n" << res;
     std::cout << _request << std::endl;
     std::cout << yel << "------ end parsed request -------" << res << std::endl;
-    if (_request.getStartLine().method == "POST" &&
-        _request.isHeaderContains("Content-Length") &&
-        _request.getHeaderFieldAsNumber("Content-Length") == 0)
-    {
-        std::string body("Method Not Allowed");
-        std::string header = "HTTP/1.1 405 Method Not Allowed\n"
-            "Content-Type: text/plain\nContent-Length: " +
-            std::string(ft_itoa(body.size())) + "\n\n";
-        _response.assign(header.begin(), header.end());
-        _response.insert(_response.end(), body.begin(), body.end());
-    }
-    else
-    {
-        if (_request.getStartLine().request_target == "/files/test_large_file.html")
-        {
-            std::vector<char> tmp;
-            tmp = utils::read_file("./files/test_large_file.html");
-            std::string body(tmp.begin(), tmp.end());
-            std::string header = "HTTP/1.1 200 OK\n"
-                "Content-Type: text/html\nContent-Length: " +
-                std::string(ft_itoa(body.size())) + "\n\n";
-            _response.assign(header.begin(), header.end());
-            _response.insert(_response.end(), body.begin(), body.end());
-        }
-        else
-        {
-            std::string msg = "HTTP/1.1 200 OK\n"
-                "Content-Type: text/plain\n"
-                "Content-Length: 12\n\n"
-                "Hello world!";
-            _response.assign(msg.begin(), msg.end());
-        }
-    }
+    /* if (_request.getStartLine().method == "POST" && */
+    /*     _request.isHeaderContains("Content-Length") && */
+    /*     _request.getHeaderFieldAsNumber("Content-Length") == 0) */
+    /* { */
+    /*     std::string body("Method Not Allowed"); */
+    /*     std::string header = "HTTP/1.1 405 Method Not Allowed\n" */
+    /*         "Content-Type: text/plain\nContent-Length: " + */
+    /*         std::string(ft_itoa(body.size())) + "\n\n"; */
+    /*     _response.assign(header.begin(), header.end()); */
+    /*     _response.insert(_response.end(), body.begin(), body.end()); */
+    /* } */
+    /* else */
+    /* { */
+    /*     if (_request.getStartLine().request_target == "/files/test_large_file.html") */
+    /*     { */
+    /*         std::vector<char> tmp; */
+    /*         tmp = utils::read_file("./files/test_large_file.html"); */
+    /*         std::string body(tmp.begin(), tmp.end()); */
+    /*         std::string header = "HTTP/1.1 200 OK\n" */
+    /*             "Content-Type: text/html\nContent-Length: " + */
+    /*             std::string(ft_itoa(body.size())) + "\n\n"; */
+    /*         _response.assign(header.begin(), header.end()); */
+    /*         _response.insert(_response.end(), body.begin(), body.end()); */
+    /*     } */
+    /*     else */
+    /*     { */
+    /*         std::string msg = "HTTP/1.1 200 OK\n" */
+    /*             "Content-Type: text/plain\n" */
+    /*             "Content-Length: 12\n\n" */
+    /*             "Hello world!"; */
+    /*         _response.assign(msg.begin(), msg.end()); */
+    /*     } */
+    /* } */
+    _response_struct.setCode(200); /* Нужна функция для установки кода */
+    _response_struct.generateResponse1(_request, 1, _request.getStartLine().request_target);
+    _response.assign(_response_struct.getBuf().begin(), _response_struct.getBuf().end());
+
     _client_state = st_send_response;
-    std::cout << red << "\n------ start response (first 200 symbols) -------\n" << res;
-    std::cout << std::string(_response.begin(), _response.end()).substr(0, 200) << std::endl;
-    std::cout << red << "------ end response (first 200 symbols) -------\n" << res;
+    std::cout << red << "\n------ start response (first 400 symbols) -------\n" << res;
+    std::cout << std::string(_response.begin(), _response.end()).substr(0, 400) << std::endl;
+    std::cout << red << "------ end response (first 400 symbols) -------\n" << res;
 }
