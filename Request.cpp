@@ -48,7 +48,6 @@ void    Request::_deleteHeaderInBuf() {
     {
         it = it + 4;
         _buf.erase(_buf.begin(), it);
-        /* _buf.assign(it, _buf.end()); */
     }
 }
 
@@ -57,6 +56,10 @@ bool Request::_parseHeader() {
     std::vector<char>::iterator head = _buf.begin();
    	std::vector<char>::iterator tail = head;
 
+    // Skip CRLF, it appear after POST request
+	while (tail != _buf.end() && !std::isalpha(*tail))
+		++tail;
+	head = tail;
 	// Find type
 	while (tail != _buf.end() && *tail != ' ')
 		++tail;
