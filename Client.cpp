@@ -48,6 +48,7 @@ void Client::readRequest() {
     _request.push_back(buf_read);
     if (_request.isHeaderParsed())
     {
+        /* std::cout << "\nheader parsed with method: " << _request.getStartLine().method << std::endl; */
         if (_request.getStartLine().method == "GET")
         {
             /* std::cout << "\nGET header parsed\n"; */
@@ -62,6 +63,7 @@ void Client::readRequest() {
     }
     else if (_request.isBodyParsed())
     {
+        /* std::cout << "\nbody parsed\n"; */
         _client_state = st_generate_response; 
     }
 }

@@ -99,13 +99,16 @@ void EventLoop::_processClients() {
         {
             if (FD_ISSET(it->getFd(), &_readfds))
             {
+                /* std::cout << "readRequest" << std::endl; */
                 it->readRequest();
                 if (it->getState() == st_generate_response)
                 {
+                    /* std::cout << "generateResponse" << std::endl; */
                     it->generateResponse();
                 }
                 /* if (it->getState() == st_send_response) */
                 /* { */
+                /*     std::cout << "sendResponse after readRequest" << std::endl; */
                 /*     it->sendResponse(); */
                 /* } */
                 if (it->getState() == st_close_connection)
@@ -116,7 +119,10 @@ void EventLoop::_processClients() {
                 }
             }
             if (FD_ISSET(it->getFd(), &_writefds))
+            {
+                /* std::cout << "sendResponse at the end" << std::endl; */
                 it->sendResponse();
+            }
             ++it;
         }
     }
