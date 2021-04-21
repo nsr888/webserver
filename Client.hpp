@@ -34,7 +34,7 @@ class Client {
     client_states               _client_state;
     int                         _fd;
     std::vector<char>           _buf;
-    std::string                 _response;
+    std::vector<char>           _response;
     Request                     _request;
 
     Client(void);
