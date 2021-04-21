@@ -178,15 +178,16 @@ std::string get_time()
 
 void		Response::addHeader(Request &request, std::string &headers)
 {
-	std::map < std::string, std::string >::const_iterator it = request.getHeader().find("Connection");
+    (void)(request);
+	/* std::map < std::string, std::string >::const_iterator it = request.getHeader().find("Connection"); */
 
 	_start_line.http_version = HTTP;
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
 	_header["Server"] = "ServerCeccentr"; /* Название сервера? */
-	_header[it->first] = it->second; /* Connection где-то есть где-то нет? */
-	_header["Accept-Ranges"] = "bytes"; /* Всегда bytes? */
+	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
+	/* _header["Accept-Ranges"] = "bytes"; /1* Всегда bytes? *1/ */
 	_header["Content-Length"] = toString(_body_size);
 	_header["Content-Type"] = "text/plain"; /* Всегда text/plain? */
 
