@@ -39,7 +39,7 @@ std::vector<Client>& WebServer::getClients() {
     return this->_clients;
 }
 
-void WebServer::push_back(Client client) {
+void WebServer::appendClient(Client client) {
     this->_clients.push_back(client);
 }
 
@@ -53,7 +53,9 @@ void WebServer::initServer() {
     _addr.sin_addr.s_addr = INADDR_ANY;
     int yes = 1;
     if (setsockopt(_ls, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-        throw std::runtime_error(std::string("setsockopt: ") + strerror(errno));
+        throw std::runtime_error(std::string("setsockopt (SO_REUSEADDR) failed: ") + strerror(errno));
+    if (setsockopt(_ls, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int)) == -1)
+        throw std::runtime_error(std::string("setsockopt(SO_REUSEPORT) failed: ") + strerror(errno));
     if (bind(_ls, (struct sockaddr *)&_addr, sizeof(_addr)) < 0)
         throw std::runtime_error(std::string("bind: ") + strerror(errno));
     listen(_ls, 5);
