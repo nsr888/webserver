@@ -16,7 +16,7 @@ EventLoop::EventLoop(std::vector<Setting> config)
 {
     for ( std::vector<Setting>::iterator it = config.begin();
             it != config.end();++it)
-        this->push_back(WebServer(*it));
+        this->appendWebServer(WebServer(*it));
 }
 
 EventLoop::EventLoop(void) { }
@@ -28,7 +28,7 @@ EventLoop & EventLoop::operator=(const EventLoop & other) {
     return *this;
 }
 
-void EventLoop::push_back(WebServer server) {
+void EventLoop::appendWebServer(WebServer server) {
     this->_webservers.push_back(server);
 }
 
@@ -52,12 +52,12 @@ void EventLoop::initServers() {
 void EventLoop::_prepairSelect() {
     /* collect fds from all webservers clients*/
     for (std::vector<WebServer>::iterator it_server = _webservers.begin();
-            it_server != _webservers.end(); ++it_server)
+            it_server != _webservers.end();++it_server)
     {
         FD_SET(it_server->getLs(), &_readfds);
-        std::vector<Client> clients = it_server->getClients();
-        for (std::vector<Client>::iterator it = clients.begin();
-                it != clients.end(); ++it)
+        std::vector<Client>::iterator it = it_server->getClients().begin();
+        /* int n = 0; */
+        while (it != it_server->getClients().end())
         {
             if (it->getState() == st_read_request)
                 FD_SET(it->getFd(), &_readfds);
@@ -65,13 +65,14 @@ void EventLoop::_prepairSelect() {
                 FD_SET(it->getFd(), &_writefds);
             if (it->getFd() > this->_max_fd)
                 this->_max_fd = it->getFd();
+            ++it;
         }
     }
 }
 
 void EventLoop::_acceptConnection() {
-    for (std::vector<WebServer>::iterator it = _webservers.begin();
-            it != _webservers.end(); ++it)
+    std::vector<WebServer>::iterator it = _webservers.begin();
+    while (it != _webservers.end())
     {
         int ls = it->getLs();
         sockaddr_in addr = it->getAddr();
@@ -83,8 +84,9 @@ void EventLoop::_acceptConnection() {
             if (sd == -1)
                 throw std::runtime_error(std::string("accept: ") + strerror(errno));
             fcntl(sd, F_SETFL, O_NONBLOCK);
-            it->push_back(Client(sd));
+            it->appendClient(Client(sd));
         }
+        ++it;
     }
 }
 
@@ -93,17 +95,19 @@ void EventLoop::_processClients() {
             it_server != _webservers.end();++it_server)
     {
         std::vector<Client>::iterator it = it_server->getClients().begin();
-        /* int n = 0; */
         while (it != it_server->getClients().end())
         {
-            /* std::cout << n++ << std::endl; */
             if (FD_ISSET(it->getFd(), &_readfds))
             {
                 it->readRequest();
                 if (it->getState() == st_generate_response)
+                {
                     it->generateResponse();
-                if (it->getState() == st_send_response)
-                    it->sendResponse();
+                }
+                /* if (it->getState() == st_send_response) */
+                /* { */
+                /*     it->sendResponse(); */
+                /* } */
                 if (it->getState() == st_close_connection)
                 {
                     it->closeConnection();

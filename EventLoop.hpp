@@ -17,7 +17,7 @@ class EventLoop {
     void                    initServers();
     void                    runLoop();
     void                    shutdown();
-    void                    push_back(WebServer server);
+    void                    appendWebServer(WebServer server);
 
  private:
     std::vector<WebServer>  _webservers;
