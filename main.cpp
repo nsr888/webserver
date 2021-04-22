@@ -28,6 +28,7 @@ int main() {
     setting->testfillFavicon();
     setting->testfillIndex();
     setting->testfillRoot();
+    setting->setMaxBodySize(100);
 
     try {
         loop->initServers();
