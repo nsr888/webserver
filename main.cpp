@@ -19,6 +19,16 @@ int main() {
 
     EventLoop *loop = new EventLoop(config);
 
+    // инициализация сеттинга
+    Setting *setting = new Setting();
+    setting->setHost("127.0.0.1");
+    setting->setServerName("localhost");
+    setting->setPort(8080);
+    setting->testfillError();
+    setting->testfillFavicon();
+    setting->testfillIndex();
+    setting->testfillRoot();
+
     try {
         loop->initServers();
         loop->runLoop();
