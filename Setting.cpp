@@ -12,11 +12,9 @@ void Setting::setServerName(std::string server_name) {
 	_server_name = server_name;
 }
 
-<<<<<<< Updated upstream
 void Setting::setErrorPage(std::string& error_page) {
 	_errorPage = error_page;
 }
-=======
 
 void Setting::testfillError(void) {
 	_errorLocation.push_back("Users");
@@ -59,4 +57,3 @@ void Setting::testfillRoot(void) {
 	_rootLocation.push_back("webserver");
 	_rootLocation.push_back("webserver");
 }
->>>>>>> Stashed changes

@@ -6,6 +6,8 @@
 # include <string>
 # include <iostream>
 # include "Request.hpp"
+# include "utils.hpp"
+# include "Response.hpp"
 
 enum client_states {
     st_read_request,
@@ -33,8 +35,9 @@ class Client {
     client_states               _client_state;
     int                         _fd;
     std::vector<char>           _buf;
-    std::string                 _response;
+    std::vector<char>           _response;
     Request                     _request;
+    Response                    _response_struct;
 
     Client(void);
     friend bool operator< (Client const& lhs, Client const& rhs) {
