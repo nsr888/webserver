@@ -12,6 +12,10 @@ void Setting::setServerName(std::string server_name) {
 	_server_name = server_name;
 }
 
+void Setting::setMaxBodySize(int BodySize) {
+	_maxBodySizeMB = BodySize;
+}
+
 void Setting::testfillError(void) {
 	_errorLocation.push_back("Users");
 	_errorLocation.push_back("anasyrov");

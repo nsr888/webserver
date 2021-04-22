@@ -13,6 +13,7 @@ private:
     std::vector<std::string>    _indexLocation;
     std::vector<std::string>    _faviconLocation;
     std::vector<std::string>    _rootLocation;
+    int                         _maxBodySizeMB;
 
 public:
     Setting(void) {
@@ -24,6 +25,7 @@ public:
         _indexLocation;
         _faviconLocation;
         _rootLocation;
+        _maxBodySizeMB;
     };
 
     ~Setting() {};
@@ -32,6 +34,7 @@ public:
     void			setHost(std::string host);
 	void			setPort(int port);
 	void			setServerName(std::string server_name);
+    void            setMaxBodySize(int BodySize);
 
     /* for test only */
     void Setting::testfillError(void);
@@ -43,6 +46,7 @@ public:
 	std::string& 		getHost() { return _host; }
 	int	                getPort() { return _port; }
 	std::string& 		getServerName() { return _server_name; }
+    int	                getMaxBodySize() { return _maxBodySizeMB; }
 };
 
 #endif
