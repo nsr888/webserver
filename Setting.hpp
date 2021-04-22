@@ -12,19 +12,9 @@ private:
     std::vector<std::string>    _errorLocation;
     std::vector<std::string>    _indexLocation;
     std::vector<std::string>    _faviconLocation;
-    std::vector<std::string>    _rootLocation;
 
 public:
-    Setting(void) {
-        _server_name;
-        _host;
-        _port;
-        _rootLocation;
-        _errorLocation;
-        _indexLocation;
-        _faviconLocation;
-        _rootLocation;
-    };
+    Setting(void) {};
 
     ~Setting() {};
 
@@ -34,10 +24,10 @@ public:
 	void			setServerName(std::string server_name);
 
     /* for test only */
-    void Setting::testfillError(void);
-    void Setting::testfillIndex(void);
-    void Setting::testfillFavicon(void);
-    void Setting::testfillRoot(void);
+    void testfillError(void);
+    void testfillIndex(void);
+    void testfillFavicon(void);
+    void testfillRoot(void);
 
     /* Getters */
 	std::string& 		getHost() { return _host; }

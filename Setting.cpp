@@ -12,10 +12,6 @@ void Setting::setServerName(std::string server_name) {
 	_server_name = server_name;
 }
 
-void Setting::setErrorPage(std::string& error_page) {
-	_errorPage = error_page;
-}
-
 void Setting::testfillError(void) {
 	_errorLocation.push_back("Users");
 	_errorLocation.push_back("anasyrov");

@@ -9,25 +9,31 @@
 #include "EventLoop.hpp"
 
 int main() {
-    Setting sample_server_config;
-    sample_server_config.setPort(7777);
     std::vector<Setting> config;
-    config.push_back(sample_server_config);
-    Setting sample_server_config2;
-    sample_server_config2.setPort(7778);
-    config.push_back(sample_server_config2);
+
+    Setting setting;
+    setting.setHost("127.0.0.1");
+    setting.setServerName("localhost");
+    setting.setPort(7777);
+    setting.testfillError();
+    setting.testfillFavicon();
+    setting.testfillIndex();
+    setting.testfillRoot();
+
+    config.push_back(setting);
+
+    Setting setting2;
+    setting2.setHost("127.0.0.1");
+    setting2.setServerName("localhost");
+    setting2.setPort(7777);
+    setting2.testfillError();
+    setting2.testfillFavicon();
+    setting2.testfillIndex();
+    setting2.testfillRoot();
+
+    config.push_back(setting2);
 
     EventLoop *loop = new EventLoop(config);
-
-    // инициализация сеттинга
-    Setting *setting = new Setting();
-    setting->setHost("127.0.0.1");
-    setting->setServerName("localhost");
-    setting->setPort(8080);
-    setting->testfillError();
-    setting->testfillFavicon();
-    setting->testfillIndex();
-    setting->testfillRoot();
 
     try {
         loop->initServers();
