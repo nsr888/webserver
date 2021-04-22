@@ -70,14 +70,14 @@ def test_post_chunked_request(connection):
     assert resp.reason == 'OK'
 
 
-def test_get_large_request(connection):
-    '''Test get request'''
-    connection.request("GET", "/files/test_large_file.html")
-    resp = connection.getresponse()
-    print(resp.status, resp.reason)
-    resp.read()
-    # assert "Hello world!" in resp.read().decode('utf-8')
-    assert resp.getheader('Content-Type') == 'text/html'
-    assert resp.version == 11
-    assert resp.status == 200
-    assert resp.reason == 'OK'
+# def test_get_large_request(connection):
+#     '''Test get request'''
+#     connection.request("GET", "/files/test_large_file.html")
+#     resp = connection.getresponse()
+#     print(resp.status, resp.reason)
+#     resp.read()
+#     # assert "Hello world!" in resp.read().decode('utf-8')
+#     assert resp.getheader('Content-Type') == 'text/html'
+#     assert resp.version == 11
+#     assert resp.status == 200
+#     assert resp.reason == 'OK'
