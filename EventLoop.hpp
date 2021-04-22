@@ -9,7 +9,7 @@
 class EventLoop {
  public:
     EventLoop(void);
-    explicit EventLoop(std::vector<Settings> config);
+    explicit EventLoop(std::vector<Setting> config);
     ~EventLoop(void);
     EventLoop(const EventLoop & other);
     EventLoop & operator=(const EventLoop & other);
@@ -17,7 +17,7 @@ class EventLoop {
     void                    initServers();
     void                    runLoop();
     void                    shutdown();
-    void                    push_back(WebServer server);
+    void                    appendWebServer(WebServer server);
 
  private:
     std::vector<WebServer>  _webservers;

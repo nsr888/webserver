@@ -4,17 +4,17 @@
 #include <map>
 #include <iostream>
 #include "Client.hpp"
-#include "Settings.hpp"
+#include "Setting.hpp"
 #include "WebServer.hpp"
 #include "EventLoop.hpp"
 
 int main() {
-    Settings sample_server_config;
-    sample_server_config.port = 7777;
-    std::vector<Settings> config;
+    Setting sample_server_config;
+    sample_server_config.setPort(7777);
+    std::vector<Setting> config;
     config.push_back(sample_server_config);
-    Settings sample_server_config2;
-    sample_server_config2.port = 7778;
+    Setting sample_server_config2;
+    sample_server_config2.setPort(7778);
     config.push_back(sample_server_config2);
 
     EventLoop *loop = new EventLoop(config);
@@ -33,7 +33,7 @@ int main() {
         loop->initServers();
         loop->runLoop();
     } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         exit(EXIT_FAILURE);
     }
 
