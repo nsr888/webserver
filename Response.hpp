@@ -31,10 +31,12 @@ private:
 	int									_code;
 	t_response_start_line				_start_line;
 	std::map<std::string, std::string>  _header;
-    std::string                   		_buf;
+    std::vector<char>                  	_buf;
     std::string                  		_body;
 	size_t								_body_size;
 	size_t								_header_size;
+	bool								_error_flag;
+	std::string							_real_path;
 
 	void 								initCodeList();
 
@@ -44,29 +46,34 @@ public:
 
 	std::string 						getMessage(int code);
 	t_response_start_line               getStartLine(void) const;
-    std::string                   		getBuf(void) const;
-    std::string &                 		getBuf(void);
+    std::vector<char>                   getBuf(void) const;
+    std::vector<char> &                 getBuf(void);
     std::string                   		getBody(void) const;
     std::string &                 		getBody(void);
+	std::string                   		getPath(void) const;
+	std::string	&						getPath(void);
     std::map<std::string, std::string>  getHeader() const;
 	int									getBodySize() const;
 	int									getHeaderSize() const;
 
-	void								setHeader();
 	void								setBody();
 	void								setCode(int code);
+	void								setErrorFlag(bool flag);
+	void								setPath(std::string path);
 
-	void								generateResponse1(Request &request, int error_flag, const std::string &path);
-	std::string							generateErrorMsg(int error_flag, const std::string &path);
+	void								check_path(Request &request);
 	void								check_error(const std::string &error_msg);
-	std::string							toString(int nbr);
+	void								check_syntax(Request &request);
+	void								check_method(Request &request);
+	void								check_authentication(Request &request);
+	
+	void								generateResponseMsg(Request &request);
+	std::string							generateErrorMsg();
 	void								addHeader(Request &request, std::string &headers);
 	void								addBody(const std::string &error_msg);
 
-
-
-
-
+	std::string							toString(int nbr);
+	std::string 						get_time();
 
 	
 };
