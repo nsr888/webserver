@@ -1,6 +1,6 @@
 NAME = webserv
 SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp Response.cpp \
-	  Setting.cpp utils.cpp
+	  Setting.cpp utils.cpp ProcessMethod.cpp
 OBJ = $(SRC:%.cpp=%.o)
 CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -g -O2 -std=c++98 -pedantic
