@@ -10,3 +10,4 @@ ProcessMethod::ProcessMethod(Request &request, Response &respone, std::string me
 ProcessMethod::~ProcessMethod()
 {
 }
+

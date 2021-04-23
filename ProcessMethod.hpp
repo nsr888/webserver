@@ -1,5 +1,5 @@
-#ifndef RESPONSE_HPP
-# define RESPONSE_HPP
+#ifndef PROCESSMETHOD_HPP
+# define PROCESSMETHOD_HPP
 
 # include <iostream>
 # include "Response.hpp"
