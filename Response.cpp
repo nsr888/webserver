@@ -184,6 +184,7 @@ std::string	Response::generateErrorMsg()
 
 void		Response::check_path(Request &request)
 {
+    (void)(request);
 	/* Проверка пути
 	путь получаем так: request.getStartLine().request_target
 	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
@@ -204,6 +205,7 @@ void		Response::check_error(const std::string &error_msg)
 
 void		Response::check_syntax(Request &request)
 {
+    (void)(request);
 	/* Проверка на валидно есть, если не валид
 	
 	setCode(400); 
@@ -212,6 +214,7 @@ void		Response::check_syntax(Request &request)
 
 void		Response::check_method(Request &request)
 {
+    (void)(request);
 	/* Проверка на вызываемый метод отсюда мы должны отправить наш итоговый запрос c названием метода в класс
 	ProcessMethod(request, *this, std::string method(например "GET"));
 	В итоге этот класс должен заполнить 
@@ -227,6 +230,7 @@ void		Response::check_method(Request &request)
 
 void		Response::check_authentication(Request &request)
 {
+    (void)(request);
 	/* Проверка на аутентификацию, если нужна
 	
 	setCode(401);
