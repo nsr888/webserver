@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strtrim.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ksinistr <ksinistr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: resther <resther@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/07 10:13:13 by ksinistr          #+#    #+#             */
-/*   Updated: 2020/05/12 15:55:50 by ksinistr         ###   ########.fr       */
+/*   Updated: 2021/04/26 18:22:16 by resther          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static char	*fill(char *ret, const char *s1, int cnt)
 	return (ret);
 }
 
-char		*ft_strtrim(char const *s1, char const *set)
+char		*ft_strtrim(char *s1, char const *set)
 {
 	char		*ret;
 	const char	*tmp;

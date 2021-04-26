@@ -8,6 +8,7 @@
 #include "WebServer.hpp"
 #include "EventLoop.hpp"
 
+<<<<<<< Updated upstream
 int main() {
     Setting sample_server_config;
     sample_server_config.setPort(7777);
@@ -16,6 +17,36 @@ int main() {
     Setting sample_server_config2;
     sample_server_config2.setPort(7778);
     config.push_back(sample_server_config2);
+=======
+int main(int argc, char** argv) {
+    // инициализация конфига парсером
+    const char *config_file = "config/default.conf"; // конфиг по умолчанию
+    if (argc != 1) {
+        config_file = argv[1]; // если при запуске дают другой конфиг берём его
+    }
+    std::vector<Setting> config;
+    Parser parser;
+    config = parser.startParsing(config_file);
+    size_t i = 0;
+
+    while (i < 4) {                                                 //проверка парсинга конфига, выводит все 4 пути из дефолтного конфига
+		std::cout << config[0].getLocationPath(i) << std::endl;
+		i++;
+	}
+
+    EventLoop *loop = new EventLoop(config);
+
+    // инициализация сеттинга вручную
+    // Setting *setting = new Setting();
+    // setting->setHost("127.0.0.1");
+    // setting->setServerName("localhost");
+    // setting->setPort(8080);
+    // setting->testfillError();
+    // setting->testfillFavicon();
+    // setting->testfillIndex();
+    // setting->testfillRoot();
+    // setting->setMaxBodySize(100);
+>>>>>>> Stashed changes
 
     EventLoop *loop = new EventLoop(config);
 

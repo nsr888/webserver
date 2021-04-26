@@ -1,24 +1,34 @@
 #ifndef PARSER_HPP
 # define PARSER_HPP
 # include <string>
+# include <vector>
+# include "Setting.hpp"
+# include "utils.hpp"
+
 extern "C" {
-    char    *ft_strchr(const char *s, int c);
-    char    *ft_strrchr(const char *s, int c);
+    int 	ft_atoi(const char *str);
+	char	*ft_strtrim(char *s1, char const *set);
+	char	*ft_strdup(const char *s1);
+	char	*ft_substr(char const *s, unsigned int start, size_t len);
+	size_t	ft_strlen(const char *s);
+
 }
 
 class Parser {
+private:
+	int			_isOneMoreServer;
+	int			_stringReaded;
+
 public:
-	static void fileParser(std::string& file);
-	static void configParser(std::string& config);
-	static std::string getArgument(const std::string &dst, int start);
-	static void	setRequestLimits(const std::string& body_size);
-	static void	setAutoIndex(const std::string& autoindex);
-	static void	setRoot(const std::string& root);
-	static void	setIndex(const std::string& index);
-	static void	setAllowMethods(const std::string& allow_methods);
-	static void	setCgiPath(const std::string& path_and_file);
-	static void parseLocationParam(std::vector<std::string> &config, size_t &i, VirtualServer &server);
-	static void parseServerParam(std::vector<std::string> &config, size_t &index, VirtualServer &server);
+	
+	Parser(void);
+
+	std::vector<Setting>	startParsing(const char *config_file);
+	Setting					get_config(std::vector<std::string> temp);
+	std::string				getArgument(const std::string &dst, int start);
+	Location				getLocation(std::vector<std::string> temp, int i);
+	
+	~Parser() {};
 };
 
 #endif

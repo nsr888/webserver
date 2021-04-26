@@ -16,6 +16,13 @@ void Setting::setMaxBodySize(int BodySize) {
 	_maxBodySizeMB = BodySize;
 }
 
+<<<<<<< Updated upstream
+=======
+void Setting::pushNewLocation(Location temp) {
+	_location.push_back(temp);
+}
+
+>>>>>>> Stashed changes
 void Setting::testfillError(void) {
 	_errorLocation.push_back("Users");
 	_errorLocation.push_back("anasyrov");
