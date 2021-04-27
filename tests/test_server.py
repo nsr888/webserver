@@ -10,7 +10,7 @@ import urllib.parse
 
 @pytest.yield_fixture(scope="session")
 def connection():
-    _connection = http.client.HTTPConnection("localhost", port=7777)
+    _connection = http.client.HTTPConnection("localhost", port=8080)
     yield _connection
     _connection.close()
 
