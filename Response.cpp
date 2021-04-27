@@ -4,10 +4,10 @@ Response::Response()
 {
 	if (this->_code_list.empty())
 		initCodeList();
-	_buf = "";
 	_body = "";
 	_body_size = 0;
 	_header_size = 0;
+	_error_flag = false;
 
 }
 
@@ -70,14 +70,24 @@ t_response_start_line Response::getStartLine(void) const
 	return _start_line;
 }
 
-std::string & Response::getBuf(void) 
+std::vector<char> & Response::getBuf(void) 
 {
 	return _buf;
 }
 
-std::string Response::getBuf(void) const 
+std::vector<char> Response::getBuf(void) const 
 {
 	return _buf;
+}
+
+std::string & Response::getPath(void) 
+{
+	return _real_path;
+}
+
+std::string Response::getPath(void) const 
+{
+	return _real_path;
 }
 
 std::string & Response::getBody(void) 
@@ -114,10 +124,16 @@ std::string	Response::toString(int nbr)
 	return (status_code);
 }
 
-void		Response::generateResponse1(Request &request, int error_flag, const std::string &path)
+void		Response::generateResponseMsg(Request &request)
 {
-	std::string error_msg = generateErrorMsg(error_flag, path);
+	std::string error_msg;
 	std::string headers;
+
+	check_syntax(request);
+	check_path(request);
+	check_method(request);
+
+	error_msg = generateErrorMsg();
 
 	_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
 	_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
@@ -125,17 +141,25 @@ void		Response::generateResponse1(Request &request, int error_flag, const std::s
 	check_error(error_msg);
 	addHeader(request, headers);
 	headers.append(CRLF);
-	_buf = headers;
+
+	std::string::iterator beg = headers.begin();
+	std::string::iterator end = headers.end();
+
+	while (beg != end)
+	{
+		_buf.push_back(*beg);
+		++beg;
+	}
 	addBody(error_msg);
 }
 
-std::string	Response::generateErrorMsg(int error_flag, const std::string &path)
+std::string	Response::generateErrorMsg()
 {
 	std::string error;
 
-	if (error_flag == 1)
+	if (_error_flag == 1)
 	{
-		int fd = open(path.c_str(), O_RDONLY);
+		int fd = open(_real_path.c_str(), O_RDONLY);
 		char buf[100];
 		bzero(buf, 100);
 		int pos = 0;
@@ -158,10 +182,61 @@ std::string	Response::generateErrorMsg(int error_flag, const std::string &path)
 
 }
 
+void		Response::check_path(Request &request)
+{
+    (void)(request);
+	/* Проверка пути
+	путь получаем так: request.getStartLine().request_target
+	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
+	
+	после проверки записать путь setPath(std::string path);
+
+	если не найден путь
+	
+	setCode(404);
+	setErrorFlag(true);*/
+}
+
 void		Response::check_error(const std::string &error_msg)
 {
 	if (_code >= 400)
 		_body_size = error_msg.length();
+}
+
+void		Response::check_syntax(Request &request)
+{
+    (void)(request);
+	/* Проверка на валидно есть, если не валид
+	
+	setCode(400); 
+	setErrorFlag(true);*/
+}
+
+void		Response::check_method(Request &request)
+{
+    (void)(request);
+	/* Проверка на вызываемый метод отсюда мы должны отправить наш итоговый запрос c названием метода в класс
+	ProcessMethod(request, *this, std::string method(например "GET"));
+	В итоге этот класс должен заполнить 
+	- Response->_body
+	- Response->_body_size
+	- Response->setCode()
+	
+	если он деактивирован (методы GET HEAD не могут быть деактивированы)
+	
+	setCode(405);
+	setErrorFlag(true); */
+}
+
+void		Response::check_authentication(Request &request)
+{
+    (void)(request);
+	/* Проверка на аутентификацию, если нужна
+	
+	setCode(401);
+	setErrorFlag(true); 
+	
+	P.S надо понять от куда в этом случае будет браться body для сообщения (скорее всего после этого должен измениться путь)*/
 }
 
 void		Response::setCode(int code)
@@ -169,7 +244,12 @@ void		Response::setCode(int code)
 	_code = code;
 }
 
-std::string get_time() 
+void		Response::setErrorFlag(bool flag)
+{
+	_error_flag = flag;
+}
+
+std::string Response::get_time() 
 {
 	/* Написать функцию даты и времени */
 
@@ -185,7 +265,7 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
-	_header["Server"] = "ServerCeccentr"; /* Название сервера? */
+	_header["Server"] = "ServerCeccentr"; /* Из конфига? */
 	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
 	/* _header["Accept-Ranges"] = "bytes"; /1* Всегда bytes? *1/ */
 	_header["Content-Length"] = toString(_body_size);
@@ -210,7 +290,25 @@ void		Response::addHeader(Request &request, std::string &headers)
 void		Response::addBody(const std::string &error_msg)
 {	
 	if (_code < 400)
-		_buf.append(_body);
+	{
+		std::string::iterator beg = _body.begin();
+		std::string::iterator end = _body.end();
+
+		while (beg != end)
+		{
+			_buf.push_back(*beg);
+			++beg;
+		}
+	}
 	else
-		_buf.append(error_msg);
+	{
+		std::string::const_iterator beg = error_msg.begin();
+		std::string::const_iterator end = error_msg.end();
+
+		while (beg != end)
+		{
+			_buf.push_back(*beg);
+			++beg;
+		}
+	}
 }

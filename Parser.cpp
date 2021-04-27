@@ -19,7 +19,10 @@ Location	Parser::getLocation(std::vector<std::string> temp, int i) {
 	Location newLoc;
 	newLoc._locationName = getArgument(temp[i], ft_strchr(temp[i], '/'));
 	i++;
-	while (temp[i].find("server:", 0, 7) == std::string::npos && temp[i].find("location:", 0, 9) == std::string::npos && i < (temp.size() - 1)) {
+	while (temp[i].find("server:", 0, 7) == std::string::npos && 
+            temp[i].find("location:", 0, 9) == std::string::npos && 
+            static_cast<size_t>(i) < (temp.size() - 1)) 
+    {
 		if (temp[i].find("root:", 0, 5) != std::string::npos) {
 			newLoc._path = getArgument(temp[i], ft_strchr(temp[i], ':'));
 		}
@@ -98,3 +101,4 @@ std::vector<Setting> Parser::startParsing(const char *config_file) {
 	temp_config.push_back(get_config(temp));
 	return (temp_config);
 }
+

@@ -130,7 +130,7 @@ void Client::generateResponse() {
     /*     } */
     /* } */
     _response_struct.setCode(200); /* Нужна функция для установки кода */
-    _response_struct.generateResponse1(_request, 1, _request.getStartLine().request_target);
+    _response_struct.generateResponseMsg(_request);
     _response.assign(_response_struct.getBuf().begin(), _response_struct.getBuf().end());
 
     _client_state = st_send_response;
