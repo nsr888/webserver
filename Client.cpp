@@ -81,6 +81,7 @@ void Client::sendResponse() {
         std::cout << bytes_sent << " bytes was sent" << std::endl;
         _request.clear();
         _response.clear();
+        _response_struct.clear();
         _client_state = st_read_request;
     }
     else

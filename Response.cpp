@@ -312,3 +312,12 @@ void		Response::addBody(const std::string &error_msg)
 		}
 	}
 }
+
+void        Response::clear()
+{
+	_body = "";
+	_body_size = 0;
+	_header_size = 0;
+	_error_flag = false;
+    _buf.clear();
+}

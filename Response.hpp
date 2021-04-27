@@ -74,8 +74,7 @@ public:
 
 	std::string							toString(int nbr);
 	std::string 						get_time();
-
-	
+    void                                clear();	
 };
 
 #endif

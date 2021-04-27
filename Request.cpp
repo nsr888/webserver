@@ -57,7 +57,7 @@ bool Request::_parseHeader() {
    	std::vector<char>::iterator tail = head;
 
     // Skip CRLF, it appear after POST request
-	while (tail != _buf.end() && !std::isalpha(*tail))
+	while (tail != _buf.end() && (*tail == '\r' || *tail == '\n'))
 		++tail;
 	head = tail;
 	// Find type
