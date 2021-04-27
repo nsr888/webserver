@@ -5,33 +5,25 @@
 #include <iostream>
 #include "Client.hpp"
 #include "Setting.hpp"
+#include "Parser.hpp"
 #include "WebServer.hpp"
 #include "EventLoop.hpp"
 
-int main() {
+int main(int argc, char** argv) {
+    // инициализация конфига парсером
+    const char *config_file = "config/default.conf"; // конфиг по умолчанию
+    if (argc != 1) {
+        config_file = argv[1]; // если при запуске дают другой конфиг берём его
+    }
     std::vector<Setting> config;
+    Parser parser;
+    config = parser.startParsing(config_file);
+    size_t i = 0;
 
-    Setting setting;
-    setting.setHost("127.0.0.1");
-    setting.setServerName("localhost");
-    setting.setPort(7777);
-    setting.testfillError();
-    setting.testfillFavicon();
-    setting.testfillIndex();
-    setting.testfillRoot();
-
-    config.push_back(setting);
-
-    Setting setting2;
-    setting2.setHost("127.0.0.1");
-    setting2.setServerName("localhost");
-    setting2.setPort(7777);
-    setting2.testfillError();
-    setting2.testfillFavicon();
-    setting2.testfillIndex();
-    setting2.testfillRoot();
-
-    config.push_back(setting2);
+    while (i < 4) { //проверка парсинга конфига, выводит все 4 пути из дефолтного конфига
+		std::cout << config[0].getLocationPath(i) << std::endl;
+		i++;
+	}
 
     EventLoop *loop = new EventLoop(config);
 

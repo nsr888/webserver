@@ -3,7 +3,7 @@ import pprint
 import http.client
 import urllib.parse
 
-connection = http.client.HTTPConnection("localhost", port=7777)
+connection = http.client.HTTPConnection("localhost", port=8080)
 
 params = urllib.parse.urlencode({'@key1': 'value1', '@key2': 'value2!!!!'})
 headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
