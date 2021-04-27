@@ -2,8 +2,8 @@
 # define PROCESSMETHOD_HPP
 
 # include <iostream>
-# include "Response.hpp"
 # include "Request.hpp"
+# include "Response.hpp"
 
 class ProcessMethod
 {
@@ -13,10 +13,10 @@ private:
 	std::string		_method;
 
 public:
-	ProcessMethod(Request &request, Response &respone, std::string method);
+	ProcessMethod();
 	~ProcessMethod();
 
-	void			secretary_Request(); /* Функция секретарь для отправки в нужный метод */
+	void			secretary_Request(Request &request, Response &respone, const std::string &method); /* Функция секретарь для отправки в нужный метод */
 	void			generateBody(); /* функция должна читать по пути и в итоге записать это в Response::setBody(std::string) и Response::setBodySize(int) */
 	
 	void			processGetRequest();
@@ -32,6 +32,7 @@ public:
 	void			getFile();
 	void			generateListing();
 	void			generateCGI();
+	std::string		readPath(std::string path);
 
 };
 
