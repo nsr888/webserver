@@ -62,7 +62,7 @@ void Response::initCodeList()
 
 std::string Response::getMessage(int code)
 {
-	return (_code_list[code]);
+	return (_code_list.at(code));
 }
 
 t_response_start_line Response::getStartLine(void) const
@@ -135,8 +135,8 @@ void		Response::generateResponseMsg(Request &request)
 
 	error_msg = generateErrorMsg();
 
-	_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
-	_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
+	//_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
+	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
 
 	check_error(error_msg);
 	addHeader(request, headers);
@@ -185,6 +185,7 @@ std::string	Response::generateErrorMsg()
 void		Response::check_path(Request &request)
 {
     (void)(request);
+	setPath("/files/index.html");
 	/* Проверка пути
 	путь получаем так: request.getStartLine().request_target
 	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
@@ -206,7 +207,7 @@ void		Response::check_error(const std::string &error_msg)
 void		Response::check_syntax(Request &request)
 {
     (void)(request);
-	/* Проверка на валидно есть, если не валид
+	/* Проверка на валидность, если не валид
 	
 	setCode(400); 
 	setErrorFlag(true);*/
@@ -214,7 +215,10 @@ void		Response::check_syntax(Request &request)
 
 void		Response::check_method(Request &request)
 {
-    (void)(request);
+    std::string method = request.getStartLine().method;
+	ProcessMethod process;
+
+	process.secretary_Request(request, *this, method);
 	/* Проверка на вызываемый метод отсюда мы должны отправить наш итоговый запрос c названием метода в класс
 	ProcessMethod(request, *this, std::string method(например "GET"));
 	В итоге этот класс должен заполнить 
@@ -247,6 +251,16 @@ void		Response::setCode(int code)
 void		Response::setErrorFlag(bool flag)
 {
 	_error_flag = flag;
+}
+
+void	Response::setBody(const std::string &body)
+{
+	_body = body;
+}
+
+void	Response::setBodySize(size_t len)
+{
+	_body_size = len;
 }
 
 std::string Response::get_time() 
