@@ -10,8 +10,8 @@ ProcessMethod::~ProcessMethod()
 
 void	ProcessMethod::secretary_Request(Request &request, Response &respone, const std::string &method)
 {
-	_response = respone;
-	_request = request;
+	_response = &respone;
+	_request = &request;
 	_method = method;
 
 	if (method == "GET")
@@ -32,11 +32,11 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, const
 
 void	ProcessMethod::processGetRequest()
 {
-	std::string path = readPath(_response.getPath());
+	std::string path = readPath(_response->getPath());
 
-	_response.setCode(200);
-	_response.setBody(path);
-	_response.setBodySize(path.length());
+	_response->setCode(200);
+	_response->setBody(path);
+	_response->setBodySize(path.length());
 }
 
 void	ProcessMethod::processHeadRequest()

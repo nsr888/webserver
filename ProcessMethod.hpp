@@ -5,11 +5,13 @@
 # include "Request.hpp"
 # include "Response.hpp"
 
+class Response;
+
 class ProcessMethod
 {
 private:
-	Response		_response;
-	Request			_request;
+	Response*		_response;
+	Request*		_request;
 	std::string		_method;
 
 public:
@@ -35,6 +37,5 @@ public:
 	std::string		readPath(std::string path);
 
 };
-
 
 #endif
