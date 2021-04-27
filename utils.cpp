@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "utils.hpp"
 
 namespace utils {
@@ -13,6 +14,48 @@ namespace utils {
         buf.insert(buf.end(), line, line + std::strlen(line));
         close(fd);
         return buf;
+    }
+
+    std::vector<char> read_file_raw(std::string filename) {
+        std::vector<char>   buf;
+        int                 fd;
+        char                line[5];
+        int                 m;
+
+        if ((fd = open(filename.c_str(), O_RDONLY)) < 0)
+            throw std::runtime_error(std::string("open: ") + strerror(errno));
+        while ((m = read(fd, line, 5)) > 0)
+        {
+            if (m == -1)
+                throw std::runtime_error(std::string("write: ") + strerror(errno));
+            buf.insert(buf.end(), line, line + m);
+        }
+        close(fd);
+        return buf;
+    }
+
+    void write_file_raw(std::string filename, std::vector<char> buf) {
+        int                 fd;
+        int                 m;
+        int                 offset;
+
+        offset = 0;
+        m = 0;
+        if ((fd = open(filename.c_str(), O_WRONLY|O_CREAT)) < 0)
+            throw std::runtime_error(std::string("open: ") + strerror(errno));
+        std::vector<char>::iterator it = buf.begin();
+        while (it != buf.end())
+        {
+            if(lseek(fd, 0, SEEK_CUR) == -1)
+                throw std::runtime_error(std::string("lseek: ") + strerror(errno));
+            if ((m = write(fd, &buf[offset], 1)) != 1)
+                throw std::runtime_error(std::string("write: ") + strerror(errno));
+            offset = offset + m;
+            ++it;
+        }
+        if (m == -1)
+            throw std::runtime_error(std::string("write: ") + strerror(errno));
+        close(fd);
     }
 }
 

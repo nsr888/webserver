@@ -10,10 +10,13 @@
 
 extern "C" {
     int get_next_line(int fd, char **line);
+    void	*ft_calloc(size_t count, size_t size);
 }
 
 namespace utils {
     std::vector<char> read_file(std::string filename);
+    std::vector<char> read_file_raw(std::string filename);
+    void write_file_raw(std::string filename, std::vector<char> buf);
 }
 
 std::string					ft_strtrim(const std::string &s1, const std::string& set);
