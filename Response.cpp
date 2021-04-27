@@ -62,7 +62,7 @@ void Response::initCodeList()
 
 std::string Response::getMessage(int code)
 {
-	return (_code_list[code]);
+	return (_code_list.at(code));
 }
 
 t_response_start_line Response::getStartLine(void) const
@@ -133,12 +133,12 @@ void		Response::generateResponseMsg(Request &request)
 	check_path(request);
 	check_method(request);
 
-	error_msg = generateErrorMsg();
+	//error_msg = generateErrorMsg();
 
-	_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
-	_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
+	//_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
+	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
 
-	check_error(error_msg);
+	//check_error(error_msg);
 	addHeader(request, headers);
 	headers.append(CRLF);
 
@@ -157,7 +157,7 @@ std::string	Response::generateErrorMsg()
 {
 	std::string error;
 
-	if (_error_flag == 1)
+	if (_error_flag == false)
 	{
 		int fd = open(_real_path.c_str(), O_RDONLY);
 		char buf[100];
@@ -185,6 +185,7 @@ std::string	Response::generateErrorMsg()
 void		Response::check_path(Request &request)
 {
     (void)(request);
+	setPath("/Users/deniskozarezov/Desktop/webserver/files/index.html");
 	/* Проверка пути
 	путь получаем так: request.getStartLine().request_target
 	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
@@ -206,7 +207,7 @@ void		Response::check_error(const std::string &error_msg)
 void		Response::check_syntax(Request &request)
 {
     (void)(request);
-	/* Проверка на валидно есть, если не валид
+	/* Проверка на валидность, если не валид
 	
 	setCode(400); 
 	setErrorFlag(true);*/
@@ -214,7 +215,10 @@ void		Response::check_syntax(Request &request)
 
 void		Response::check_method(Request &request)
 {
-    (void)(request);
+    std::string method = request.getStartLine().method;
+	ProcessMethod process;
+
+	process.secretary_Request(request, *this, method);
 	/* Проверка на вызываемый метод отсюда мы должны отправить наш итоговый запрос c названием метода в класс
 	ProcessMethod(request, *this, std::string method(например "GET"));
 	В итоге этот класс должен заполнить 
@@ -249,6 +253,21 @@ void		Response::setErrorFlag(bool flag)
 	_error_flag = flag;
 }
 
+void	Response::setBody(const std::string &body)
+{
+	_body = body;
+}
+
+void	Response::setBodySize(size_t len)
+{
+	_body_size = len;
+}
+
+void	Response::setPath(std::string path)
+{
+	_real_path = path;
+}
+
 std::string Response::get_time() 
 {
 	/* Написать функцию даты и времени */
@@ -269,7 +288,7 @@ void		Response::addHeader(Request &request, std::string &headers)
 	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
 	/* _header["Accept-Ranges"] = "bytes"; /1* Всегда bytes? *1/ */
 	_header["Content-Length"] = toString(_body_size);
-	_header["Content-Type"] = "text/plain"; /* Всегда text/plain? */
+	_header["Content-Type"] = "text/html"; /* Всегда text/html? */
 
 	std::map < std::string, std::string >::iterator beg = _header.begin();
 	std::map < std::string, std::string >::iterator end = _header.end();
@@ -291,9 +310,11 @@ void		Response::addBody(const std::string &error_msg)
 {	
 	if (_code < 400)
 	{
+		std::cout << "проверка!" << _body << std::endl;
+
 		std::string::iterator beg = _body.begin();
 		std::string::iterator end = _body.end();
-
+		
 		while (beg != end)
 		{
 			_buf.push_back(*beg);

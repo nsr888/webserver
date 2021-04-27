@@ -14,6 +14,7 @@
 # include <cstdlib>
 # include <unistd.h>
 # include "Request.hpp"
+# include "ProcessMethod.hpp"
 extern "C" {
     char *ft_itoa(int n);
 }
@@ -56,7 +57,8 @@ public:
 	int									getBodySize() const;
 	int									getHeaderSize() const;
 
-	void								setBody();
+	void								setBody(const std::string &body);
+	void								setBodySize(size_t len);
 	void								setCode(int code);
 	void								setErrorFlag(bool flag);
 	void								setPath(std::string path);
