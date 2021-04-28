@@ -13,6 +13,7 @@
 # include <fcntl.h>
 # include <cstdlib>
 # include <unistd.h>
+# include "utils.hpp"
 # include "Request.hpp"
 # include "ProcessMethod.hpp"
 extern "C" {

@@ -17,6 +17,7 @@ Response::~Response()
 
 void Response::initCodeList()
 {
+    this->_code_list[0] = "CODE NOT SETTED IN RESPONSE.CPP !";
     this->_code_list[100] = "Continue";
     this->_code_list[101] = "Switching Protocols";
     this->_code_list[200] = "OK";
@@ -129,17 +130,30 @@ void		Response::generateResponseMsg(Request &request)
 	std::string error_msg;
 	std::string headers;
 
+    /* std::cout << "check_syntax" << std::endl; */
 	check_syntax(request);
-	check_path(request);
-	check_method(request);
+    if (_code == 0)
+    {
+        /* std::cout << "check_path" << std::endl; */
+        check_path(request);
+    }
+    if (_code == 0)
+    {
+        /* std::cout << "check_method" << std::endl; */
+        check_method(request);
+    }
 
-	//error_msg = generateErrorMsg();
+    /* std::cout << "generateErrorMsg" << std::endl; */
+	error_msg = generateErrorMsg();
 
 	//_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
 	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
 
-	//check_error(error_msg);
+    /* std::cout << "check_error" << std::endl; */
+	check_error(error_msg);
+    /* std::cout << "addHeader" << std::endl; */
 	addHeader(request, headers);
+    /* std::cout << "append CRLF" << std::endl; */
 	headers.append(CRLF);
 
 	std::string::iterator beg = headers.begin();
@@ -150,6 +164,7 @@ void		Response::generateResponseMsg(Request &request)
 		_buf.push_back(*beg);
 		++beg;
 	}
+    /* std::cout << "addBody" << std::endl; */
 	addBody(error_msg);
 }
 
@@ -185,7 +200,7 @@ std::string	Response::generateErrorMsg()
 void		Response::check_path(Request &request)
 {
     (void)(request);
-	setPath("/Users/deniskozarezov/Desktop/webserver/files/index.html");
+	setPath("./files/index.html");
 	/* Проверка пути
 	путь получаем так: request.getStartLine().request_target
 	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
@@ -206,11 +221,15 @@ void		Response::check_error(const std::string &error_msg)
 
 void		Response::check_syntax(Request &request)
 {
-    (void)(request);
-	/* Проверка на валидность, если не валид
-	
-	setCode(400); 
-	setErrorFlag(true);*/
+    if (!request.isHeaderValid())
+    {
+        setErrorFlag(true);
+        setCode(400); 
+        if (request.getStartLine().request_target.size() > 8000)
+            setCode(501); 
+        if (request.getStartLine().http_version != "HTTP/1.1")
+            setCode(505); 
+    }
 }
 
 void		Response::check_method(Request &request)
@@ -280,6 +299,8 @@ void		Response::addHeader(Request &request, std::string &headers)
     (void)(request);
 	/* std::map < std::string, std::string >::const_iterator it = request.getHeader().find("Connection"); */
 
+    /* std::cout << "_code" << _code << std::endl; */
+
 	_start_line.http_version = HTTP;
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
@@ -336,9 +357,15 @@ void		Response::addBody(const std::string &error_msg)
 
 void        Response::clear()
 {
+    _code = 0;
+    _start_line.code = "";
+    _start_line.message = "";
+    _start_line.http_version = "";
+    _header.clear();
+    _buf.clear();
 	_body = "";
 	_body_size = 0;
 	_header_size = 0;
 	_error_flag = false;
-    _buf.clear();
+    _real_path = "";
 }

@@ -63,6 +63,17 @@ namespace utils {
       struct stat   buffer;   
       return (stat (filename.c_str(), &buffer) == 0);
     }
+
+    bool in_array(const std::string &value, const std::vector<std::string> &array)
+    {
+        for ( std::vector<std::string>::const_iterator it = array.begin();
+            it != array.end(); ++it)
+        {
+            if (value == *it)
+                return true;
+        }
+        return false;
+    }
 }
 
 std::string	ft_strtrim(const std::string &s1, const std::string& set)

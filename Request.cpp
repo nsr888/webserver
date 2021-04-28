@@ -306,3 +306,25 @@ std::ostream & operator<<(std::ostream & o, Request const & request) {
     o << std::endl;
     return o;
 }
+
+bool    Request::isHeaderValid() const
+{
+    const char *methods[] = {
+        "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"
+    };
+    std::vector<std::string> allowed_methods(methods, methods + 8);
+    if (!utils::in_array(_start_line.method, allowed_methods))
+        return false;
+    if (_start_line.request_target.size() > 8000)
+        return false;
+    if (_start_line.http_version != "HTTP/1.1")
+        return false;
+    const std::string validChars = "!#$&'()*+,/:;=?@[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~%";
+    for (size_t i = 0; i != _start_line.request_target.size(); ++i) 
+    {
+        if (validChars.find_first_of(_start_line.request_target[i]) == std::string::npos)
+            return false;
+    }
+    return true;
+}
+

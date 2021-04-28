@@ -10,32 +10,61 @@ import urllib.parse
 
 @pytest.yield_fixture(scope="session")
 def connection():
-    _connection = http.client.HTTPConnection("localhost", port=8080)
+    _connection = http.client.HTTPConnection("localhost", port=8080,  timeout=10)
     yield _connection
     _connection.close()
 
 
 def test_get_request(connection):
-    '''Test get request'''
     connection.request("GET", "/")
     resp = connection.getresponse()
-    r = resp.read()
-    assert "Hello world!" in r.decode('utf-8')
-    assert resp.getheader('Content-Type') == 'text/plain'
+    body = resp.read()
+    assert "ksinistr, ceccentr, resther" in body.decode('utf-8')
+    # assert resp.getheader('Content-Type') == 'text/plain'
     assert resp.version == 11
     assert resp.status == 200
     assert resp.reason == 'OK'
 
 
+def test_wrong_method_request(connection):
+    connection.request("GETZ", "/")
+    resp = connection.getresponse()
+    # dont delet read, it important to call read()
+    resp.read()
+    assert resp.version == 11
+    assert resp.status == 400
+    assert resp.reason == 'Bad Request'
+
+
+def test_large_wrong_target_request(connection):
+    target = "a" * 8001
+    connection.request("GET", "/" + target)
+    resp = connection.getresponse()
+    # dont delet read, it important to call read()
+    resp.read()
+    assert resp.version == 11
+    assert resp.status == 501
+    assert resp.reason == 'Not Implemented'
+
+
+def test_wrong_target_request(connection):
+    connection.request("GET", "/^")
+    resp = connection.getresponse()
+    # dont delet read, it important to call read()
+    resp.read()
+    assert resp.version == 11
+    assert resp.status == 400
+    assert resp.reason == 'Bad Request'
+
+
 def test_post_request(connection):
-    '''Test post request'''
     params = urllib.parse.urlencode({'@key1': 'val', '@key2': 'va2'})
     headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
     connection.request("POST", "/", params, headers)
     resp = connection.getresponse()
-    r = resp.read()
-    assert "Hello world!" in r.decode('utf-8')
-    assert resp.getheader('Content-Type') == 'text/plain'
+    body = resp.read()
+    assert "ksinistr, ceccentr, resther" in body.decode('utf-8')
+    # assert resp.getheader('Content-Type') == 'text/plain'
     assert resp.version == 11
     assert resp.status == 200
     assert resp.reason == 'OK'
@@ -62,9 +91,9 @@ def test_post_chunked_request(connection):
     params = urllib.parse.urlencode({'@key1': 'val', '@key2': 'va2'})
     connection.send(chunk_data(params, 3).encode('utf-8'))
     resp = connection.getresponse()
-    r = resp.read()
-    assert "Hello world!" in r.decode('utf-8')
-    assert resp.getheader('Content-Type') == 'text/plain'
+    body = resp.read()
+    assert "ksinistr, ceccentr, resther" in body.decode('utf-8')
+    # assert resp.getheader('Content-Type') == 'text/plain'
     assert resp.version == 11
     assert resp.status == 200
     assert resp.reason == 'OK'

@@ -4,6 +4,8 @@
 # include <string>
 # include <vector>
 # include <map>
+# include "utils.hpp"
+
 extern "C" {
     int                 ft_atoi(const char *str);
     char				*ft_itoa(int n);
@@ -37,6 +39,7 @@ public:
     bool                isHeaderParsed();
     bool                isBodyParsed();
     bool                isHeaderContains(std::string str);
+    bool                isHeaderValid() const;
 
     void                push_back(std::vector<char> buf_read);
     void                setChunkState(chunk_states chunk_state);

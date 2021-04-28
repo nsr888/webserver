@@ -39,16 +39,21 @@ int  Client::getFd() const { return _fd; }
 void Client::readRequest() {
     std::vector<char> buf_read(3000);
     int bytes_read = recv(_fd, &buf_read[0], buf_read.size(), 0);
-    buf_read.resize(bytes_read);
     if (bytes_read <= 0)
     {
         _client_state = st_close_connection;
         return;
     }
+    buf_read.resize(bytes_read);
     _request.push_back(buf_read);
     if (_request.isHeaderParsed())
     {
         /* std::cout << "\nheader parsed with method: " << _request.getStartLine().method << std::endl; */
+        if (!_request.isHeaderValid())
+        {
+            _client_state = st_generate_response; 
+            return;
+        }
         if (_request.getStartLine().method == "GET")
         {
             /* std::cout << "\nGET header parsed\n"; */
