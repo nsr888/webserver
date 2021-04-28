@@ -139,7 +139,7 @@ void EventLoop::runLoop() {
         this->_prepairSelect();
 
         timeval timeout;
-        timeout.tv_sec = 60;
+        timeout.tv_sec = 30;
         timeout.tv_usec = 0;
 
         /* ________ main cycle wait here _____ */
