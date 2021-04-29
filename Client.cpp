@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "utils.hpp"
 #include <exception>
 #include <ostream>
 
@@ -17,6 +18,8 @@ Client::Client(int fd)
     , _buf()
     , _response()
     , _request()
+    , _response_struct()
+    , _time_last_response()
 { }
 
 Client::Client(void) { }
@@ -29,6 +32,8 @@ Client & Client::operator=(const Client & other) {
     _buf = other._buf;
     _response = other._response;
     _request = other._request;
+    _response_struct = other._response_struct;
+    _time_last_response = other._time_last_response;
     return *this;
 }
 
@@ -74,26 +79,29 @@ void Client::readRequest() {
 }
 
 void Client::closeConnection() {
-    close(_fd);
-    std::cout << "Connection " << _fd << " closed" << std::endl;
+    while (close(_fd) == EINTR)
+        ;
+    /* std::cout << "Connection " << _fd << " closed" << std::endl; */
 }
 
 void Client::sendResponse() {
     size_t bytes_sent = send(_fd, &_response[0], _response.size(), 0);
     if (bytes_sent == _response.size())
     {
-        std::cout << "Full response of ";
-        std::cout << bytes_sent << " bytes was sent" << std::endl;
+        /* std::cout << "Full response of "; */
+        /* std::cout << bytes_sent << " bytes was sent" << std::endl; */
         _request.clear();
         _response.clear();
         _response_struct.clear();
+        _time_last_response = utils::get_current_time_in_ms();
         _client_state = st_read_request;
+        utils::ft_usleep(10);
     }
     else
     {
         _response.erase(_response.begin(), _response.begin() + bytes_sent);
-        std::cout << "Response sent only ";
-        std::cout << bytes_sent << " bytes" << std::endl;
+        /* std::cout << "Response sent only "; */
+        /* std::cout << bytes_sent << " bytes" << std::endl; */
         _client_state = st_send_response;
     }
 }

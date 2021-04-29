@@ -8,12 +8,14 @@
 # include "Request.hpp"
 # include "utils.hpp"
 # include "Response.hpp"
+# include "utils.hpp"
 
 enum client_states {
     st_read_request,
     st_generate_response,
     st_send_response,
-    st_close_connection
+    st_close_connection,
+    st_wait
 };
 
 class Client {
@@ -38,6 +40,7 @@ class Client {
     std::vector<char>           _response;
     Request                     _request;
     Response                    _response_struct;
+    size_t                      _time_last_response;
 
     Client(void);
     friend bool operator< (Client const& lhs, Client const& rhs) {

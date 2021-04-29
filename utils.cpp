@@ -74,6 +74,34 @@ namespace utils {
         }
         return false;
     }
+
+    size_t get_current_time_in_ms(void)
+    {
+        struct timeval	tv;
+        size_t          time_in_mill;
+
+        gettimeofday(&tv, NULL);
+        time_in_mill = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+        return (time_in_mill);
+    }
+
+    void				ft_usleep(int ms)
+    {
+        size_t          start_time;
+        size_t          end_time;
+        int				elapsed_time;
+
+        start_time = get_current_time_in_ms();
+        end_time = get_current_time_in_ms();
+        elapsed_time = end_time - start_time;
+        while (elapsed_time < ms)
+        {
+            usleep(10);
+            end_time = get_current_time_in_ms();
+            elapsed_time = end_time - start_time;
+        }
+    }
+
 }
 
 std::string	ft_strtrim(const std::string &s1, const std::string& set)

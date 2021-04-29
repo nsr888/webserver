@@ -45,6 +45,8 @@ private:
 public:
 	Response();
 	~Response();
+    Response(const Response & other);
+    Response & operator=(const Response & other);
 
 	std::string 						getMessage(int code);
 	t_response_start_line               getStartLine(void) const;

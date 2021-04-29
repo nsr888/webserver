@@ -1,18 +1,37 @@
 #include "Response.hpp"
 
 Response::Response()
+    : _code_list()
+    , _code(0)
+    , _start_line()
+    , _header()
+    , _buf()
+    , _body()
+    , _body_size(0)
+    , _header_size(0)
+    , _error_flag(false)
+    , _real_path()
 {
 	if (this->_code_list.empty())
 		initCodeList();
-	_body = "";
-	_body_size = 0;
-	_header_size = 0;
-	_error_flag = false;
-
 }
 
-Response::~Response()
-{
+Response::~Response() { }
+
+Response::Response(const Response & other) { *this = other; }
+
+Response & Response::operator=(const Response & other) {
+    _code_list = other._code_list;
+    _code = other._code;
+    _start_line = other._start_line;
+    _header = other._header;
+    _buf = other._buf;
+    _body = other._body;
+    _body_size = other._body_size;
+    _header_size = other._header_size;
+    _error_flag = other._error_flag;
+    _real_path = other._real_path;
+    return *this;
 }
 
 void Response::initCodeList()
@@ -221,14 +240,29 @@ void		Response::check_error(const std::string &error_msg)
 
 void		Response::check_syntax(Request &request)
 {
-    if (!request.isHeaderValid())
+    if (!request.isMethodValid())
     {
         setErrorFlag(true);
         setCode(400); 
-        if (request.getStartLine().request_target.size() > 8000)
-            setCode(501); 
-        if (request.getStartLine().http_version != "HTTP/1.1")
-            setCode(505); 
+        return;
+    }
+    if (request.getStartLine().request_target.size() > 8000)
+    {
+        setErrorFlag(true);
+        setCode(501); 
+        return;
+    }
+    if (!request.isRequestTargetValid())
+    {
+        setErrorFlag(true);
+        setCode(400); 
+        return;
+    }
+    if (!request.isHttpVersionValid())
+    {
+        setErrorFlag(true);
+        setCode(505); 
+        return;
     }
 }
 
@@ -331,7 +365,7 @@ void		Response::addBody(const std::string &error_msg)
 {	
 	if (_code < 400)
 	{
-		std::cout << "проверка!" << _body << std::endl;
+		/* std::cout << "проверка!" << _body << std::endl; */
 
 		std::string::iterator beg = _body.begin();
 		std::string::iterator end = _body.end();

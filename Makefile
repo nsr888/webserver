@@ -13,7 +13,7 @@ $(NAME): $(OBJ)
 	cd libgnl && make
 	$(CXX) $(CXXFLAGS) $(INC) $(OBJ) -Llibft -lft -Llibgnl -lgnl -o $(NAME)
 
-%.o: %.cpp
+%.o: %.cpp %.hpp
 	$(CXX) $(CXXFLAGS) -Ilibft -Ignl -c $< -o $@
 	
 clean:

@@ -50,13 +50,11 @@ void EventLoop::initServers() {
 }
 
 void EventLoop::_prepairSelect() {
-    /* collect fds from all webservers clients*/
     for (std::vector<WebServer>::iterator it_server = _webservers.begin();
             it_server != _webservers.end();++it_server)
     {
         FD_SET(it_server->getLs(), &_readfds);
         std::vector<Client>::iterator it = it_server->getClients().begin();
-        /* int n = 0; */
         while (it != it_server->getClients().end())
         {
             if (it->getState() == st_read_request)
@@ -84,7 +82,9 @@ void EventLoop::_acceptConnection() {
             if (sd == -1)
                 throw std::runtime_error(std::string("accept: ") + strerror(errno));
             fcntl(sd, F_SETFL, O_NONBLOCK);
+            /* std::cout << "Append client fd " << sd << std::endl; */
             it->appendClient(Client(sd));
+            /* std::cout << "Clients size " << it->getClients().size() << std::endl; */
         }
         ++it;
     }
@@ -108,7 +108,7 @@ void EventLoop::_processClients() {
                 }
                 /* if (it->getState() == st_send_response) */
                 /* { */
-                /*     std::cout << "sendResponse after readRequest" << std::endl; */
+                /*     /1* std::cout << "sendResponse after readRequest" << std::endl; *1/ */
                 /*     it->sendResponse(); */
                 /* } */
                 if (it->getState() == st_close_connection)
@@ -169,6 +169,11 @@ void EventLoop::shutdown() {
     for (std::vector<WebServer>::iterator it_server = _webservers.begin();
             it_server != _webservers.end();++it_server)
     {
+        if(close(it_server->getLs()) < 0)
+        {
+                throw std::runtime_error(
+                        std::string("listen socket close: ") + strerror(errno));
+        }
         std::vector<Client>::iterator it = it_server->getClients().begin();
         while (it != it_server->getClients().end())
         {
