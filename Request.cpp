@@ -307,17 +307,30 @@ std::ostream & operator<<(std::ostream & o, Request const & request) {
     return o;
 }
 
-bool    Request::isHeaderValid() const
-{
+bool    Request::isHeaderValid() const {
+    if (!isMethodValid() || !isHttpVersionValid() || !isRequestTargetValid())
+        return false;
+    return true;
+}
+
+bool    Request::isMethodValid() const {
     const char *methods[] = {
         "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"
     };
     std::vector<std::string> allowed_methods(methods, methods + 8);
     if (!utils::in_array(_start_line.method, allowed_methods))
         return false;
-    if (_start_line.request_target.size() > 8000)
-        return false;
+    return true;
+}
+
+bool    Request::isHttpVersionValid() const {
     if (_start_line.http_version != "HTTP/1.1")
+        return false;
+    return true;
+}
+
+bool    Request::isRequestTargetValid() const {
+    if (_start_line.request_target.size() > 8000)
         return false;
     const std::string validChars = "!#$&'()*+,/:;=?@[]ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~%";
     for (size_t i = 0; i != _start_line.request_target.size(); ++i) 
@@ -327,4 +340,3 @@ bool    Request::isHeaderValid() const
     }
     return true;
 }
-

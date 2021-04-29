@@ -40,6 +40,9 @@ public:
     bool                isBodyParsed();
     bool                isHeaderContains(std::string str);
     bool                isHeaderValid() const;
+    bool                isMethodValid() const;
+    bool                isHttpVersionValid() const;
+    bool                isRequestTargetValid() const;
 
     void                push_back(std::vector<char> buf_read);
     void                setChunkState(chunk_states chunk_state);
