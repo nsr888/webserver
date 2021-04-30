@@ -20,7 +20,7 @@ def test_get_request(connection):
     resp = connection.getresponse()
     body = resp.read()
     assert "ksinistr, ceccentr, resther" in body.decode('utf-8')
-    # assert resp.getheader('Content-Type') == 'text/plain'
+    assert resp.getheader('Content-Type') == 'text/html'
     assert resp.version == 11
     assert resp.status == 200
     assert resp.reason == 'OK'
@@ -110,3 +110,56 @@ def test_post_chunked_request(connection):
 #     assert resp.version == 11
 #     assert resp.status == 200
 #     assert resp.reason == 'OK'
+
+
+def test_head_request(connection):
+    connection.request("HEAD", "/")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.version == 11
+    assert resp.status == 200
+    assert resp.reason == 'OK'
+
+
+def test_put_request(connection):
+    params = urllib.parse.urlencode({'@key1': 'val', '@key2': 'va2'})
+    headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+    connection.request("POST", "/test.txt", params, headers)
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.version == 11
+    assert (resp.status in [200, 204, 210])
+
+
+def test_delete_request(connection):
+    connection.request("DELETE", "/test.txt")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.version == 11
+    assert (resp.status in [200, 202, 204])
+
+
+def test_options_server_request(connection):
+    connection.request("OPTIONS", "*")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.version == 11
+    assert resp.status == 200
+
+
+def test_options_request(connection):
+    connection.request("OPTIONS", "/")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.version == 11
+    assert resp.status == 200
+
+
+# example: http://publib.boulder.ibm.com/httpserv/ihsdiag/http_trace.html
+def test_trace_request(connection):
+    connection.request("TRACE", "/")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.version == 11
+    assert resp.status == 200
+    assert resp.getheader('Content-Type') == 'message/http'
