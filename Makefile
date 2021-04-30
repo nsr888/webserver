@@ -31,6 +31,15 @@ re: fclean all
 # python unit tests with pytest
 test: $(NAME)
 	@./$(NAME) & echo $$! > ./tests/webserver.PID
+	@cd ./tests/ && python -m pytest --tb=line
+	@if [ -a ./tests/webserver.PID ]; then \
+		kill -TERM $$(cat ./tests/webserver.PID) || true; \
+	fi;
+	@rm -rf ./tests/webserver.PID
+
+# python unit tests with pytest (default) 'long' tracebacks
+test_long: $(NAME)
+	@./$(NAME) & echo $$! > ./tests/webserver.PID
 	@cd ./tests/ && python -m pytest --durations=0
 	@if [ -a ./tests/webserver.PID ]; then \
 		kill -TERM $$(cat ./tests/webserver.PID) || true; \
