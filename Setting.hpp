@@ -34,7 +34,10 @@ private:
     std::vector<std::string>                _indexLocation;
     std::vector<std::string>                _faviconLocation;
     int                                     _maxBodySizeMB;
+<<<<<<< Updated upstream
     int                                     _isLastServer;
+=======
+>>>>>>> Stashed changes
     std::vector<Location>                   _location;
 
 >>>>>>> Stashed changes
@@ -65,6 +68,7 @@ public:
 	void			setServerName(std::string server_name);
     void            setMaxBodySize(int BodySize);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
     /* for test only */
     void Setting::testfillError(void);
@@ -79,6 +83,10 @@ public:
     void            testfillIndex(void);
     void            testfillFavicon(void);
     void            testfillRoot(void);
+>>>>>>> Stashed changes
+=======
+    void            pushNewLocation(Location temp);
+ 
 >>>>>>> Stashed changes
 
     /* Getters */

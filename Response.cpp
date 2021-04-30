@@ -1,4 +1,6 @@
 #include "Response.hpp"
+#include "Parser.hpp"
+
 
 Response::Response()
 {
@@ -158,6 +160,31 @@ std::string	Response::generateErrorMsg(int error_flag, const std::string &path)
 
 }
 
+<<<<<<< Updated upstream
+=======
+void		Response::check_path(Request &request)
+{
+    (void)(request);
+	t_start_line temp = request.getStartLine();
+	setPath(getArgument(temp.request_target, ft_strchr(temp.request_target, '/'))); // getArgument находится в Parser.hpp\cpp подключил но у меня подчеркивает
+	
+
+	// setPath("./files/index.html");
+
+
+	/* Проверка пути
+	путь получаем так: request.getStartLine().request_target
+	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
+	
+	после проверки записать путь setPath(std::string path);
+
+	если не найден путь
+	
+	setCode(404);
+	setErrorFlag(true);*/
+}
+
+>>>>>>> Stashed changes
 void		Response::check_error(const std::string &error_msg)
 {
 	if (_code >= 400)

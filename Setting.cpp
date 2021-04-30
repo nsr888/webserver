@@ -21,6 +21,7 @@ void Setting::setMaxBodySize(int BodySize) {
 void Setting::pushNewLocation(Location temp) {
 	_location.push_back(temp);
 }
+<<<<<<< Updated upstream
 
 >>>>>>> Stashed changes
 void Setting::testfillError(void) {
@@ -64,3 +65,5 @@ void Setting::testfillRoot(void) {
 	_rootLocation.push_back("webserver");
 	_rootLocation.push_back("webserver");
 }
+=======
+>>>>>>> Stashed changes
