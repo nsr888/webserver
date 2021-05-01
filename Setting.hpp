@@ -23,7 +23,7 @@ private:
     std::vector<std::string>                _indexLocation;
     std::vector<std::string>                _faviconLocation;
     int                                     _maxBodySizeMB;
-    /* private field '_isLastServer' is not used */
+    /* error: private field '_isLastServer' is not used [-Werror,-Wunused-private-field] */
     /* int                                     _isLastServer; */
     std::vector<Location>                   _location;
 
@@ -37,14 +37,8 @@ public:
 	void			setPort(int port);
 	void			setServerName(std::string server_name);
     void            setMaxBodySize(int BodySize);
-
-    /* for test only */
     void            pushNewLocation(Location temp);
-    void            testfillError(void);
-    void            testfillIndex(void);
-    void            testfillFavicon(void);
-    void            testfillRoot(void);
-
+ 
     /* Getters */
 	std::string& 		getHost() { return _host; }
 	int	                getPort() { return _port; }

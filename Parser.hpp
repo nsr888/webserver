@@ -16,8 +16,8 @@ extern "C" {
 
 class Parser {
 private:
-	int			_isOneMoreServer;
-	int			_stringReaded;
+	int		_isOneMoreServer;
+	size_t	_stringReaded;
 
 public:
 	

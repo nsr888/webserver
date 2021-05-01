@@ -25,6 +25,13 @@ int main(int argc, char** argv) {
 		i++;
 	}
 
+    // i = 0;
+    // std::cout << std::endl;
+    // while (i < 4) { //проверка парсинга второго конфига, выводит все 4 пути из второго конфига мультисервера
+	// 	std::cout << config[1].getLocationPath(i) << std::endl;
+	// 	i++;
+	// }
+
     EventLoop *loop = new EventLoop(config);
 
     try {

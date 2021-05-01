@@ -51,7 +51,7 @@ Location	Parser::getLocation(std::vector<std::string> temp, int i) {
 Setting Parser::get_config(std::vector<std::string> temp) {
 	Setting	new_config;
 	size_t size = temp.size();
-	size_t i = 0;
+	size_t i = _stringReaded;
 	while(temp[i].find("server:") == std::string::npos)
 		i++;
 	i++;
@@ -73,10 +73,12 @@ Setting Parser::get_config(std::vector<std::string> temp) {
 		}
 		i++;
 	}
-	if (temp[i].find("server:") == std::string::npos)
-		_isOneMoreServer = 1;
-	else {
+	if (temp[i].find("server:") == std::string::npos) {
 		_isOneMoreServer = 0;
+	}
+	else {
+		_isOneMoreServer = 1;
+		_stringReaded = i;
 	}
 	return new_config;
 	
@@ -87,6 +89,8 @@ std::vector<Setting> Parser::startParsing(const char *config_file) {
 	std::fstream fd;
 	std::vector<std::string> temp;
 	std::string line;
+	_isOneMoreServer = 1;
+	_stringReaded = 0;
 	fd.open(config_file, std::fstream::in);
 	if (fd.is_open()) {
 		while (getline(fd, line)) {
@@ -98,7 +102,9 @@ std::vector<Setting> Parser::startParsing(const char *config_file) {
 		std::cout << "Reading error" << std::endl;
 	}
 	fd.close();
-	temp_config.push_back(get_config(temp));
+	while (_isOneMoreServer == 1) {
+		temp_config.push_back(get_config(temp));
+	}
 	return (temp_config);
 }
 
