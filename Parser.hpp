@@ -25,7 +25,7 @@ public:
 
 	std::vector<Setting>	startParsing(const char *config_file);
 	Setting					get_config(std::vector<std::string> temp);
-	std::string				getArgument(const std::string &dst, int start);
+	static std::string		getArgument(const std::string &dst, int start);
 	Location				getLocation(std::vector<std::string> temp, int i);
 	
 	~Parser() {};
