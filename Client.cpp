@@ -12,14 +12,15 @@ const std::string res("\033[0m");
 
 Client::Client(const Client & other) { *this = other; }
 
-Client::Client(int fd)
+Client::Client(int fd, Setting & config)
     : _client_state(st_read_request)
     , _fd(fd)
     , _buf()
     , _response()
     , _request()
-    , _response_struct()
+    , _response_struct(config)
     , _time_last_response()
+    , _config(config)
 { }
 
 Client::Client(void) { }
@@ -34,6 +35,7 @@ Client & Client::operator=(const Client & other) {
     _request = other._request;
     _response_struct = other._response_struct;
     _time_last_response = other._time_last_response;
+    _config = other._config;
     return *this;
 }
 

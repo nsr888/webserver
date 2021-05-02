@@ -25,7 +25,7 @@ class WebServer {
     void                    initServer();
 
     int                     getLs() const;
-    Setting                 getConfig() const;
+    Setting&                getConfig();
     std::vector<Client>&    getClients();
     sockaddr_in             getAddr() const;
     void                    appendClient(Client client);

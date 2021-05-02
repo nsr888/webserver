@@ -1,5 +1,23 @@
 #include "Setting.hpp"
 
+Setting::Setting(void) { }
+Setting::~Setting(void) { }
+
+Setting::Setting(const Setting & other) { *this = other; }
+
+Setting & Setting::operator=(const Setting & other) {
+    _server_name = other._server_name;
+    _host = other._host;
+    _port = other._port;
+    _rootLocation = other._rootLocation;
+    _errorLocation = other._errorLocation;
+    _indexLocation = other._indexLocation;
+    _faviconLocation = other._faviconLocation;
+    _maxBodySizeMB = other._maxBodySizeMB;
+    _location = other._location;
+    return *this;
+}
+
 void Setting::setHost(std::string host) {
 	_host = host;
 }

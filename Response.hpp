@@ -41,11 +41,13 @@ private:
 	size_t								_header_size;
 	bool								_error_flag;
 	std::string							_real_path;
+    Setting                             _config;
 
 	void 								initCodeList();
 
 public:
 	Response();
+	explicit Response(const Setting & config);
 	~Response();
     Response(const Response & other);
     Response & operator=(const Response & other);

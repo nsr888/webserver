@@ -28,9 +28,10 @@ private:
     std::vector<Location>                   _location;
 
 public:
-    Setting(void) {};
-
-    ~Setting() {};
+    Setting(void);
+    ~Setting();
+    Setting(const Setting & other);
+    Setting & operator=(const Setting & other);
 
     /* Setters */
     void			setHost(std::string host);

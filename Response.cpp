@@ -1,6 +1,5 @@
 #include "Response.hpp"
 
-
 Response::Response()
     : _code_list()
     , _code(0)
@@ -12,6 +11,21 @@ Response::Response()
     , _header_size(0)
     , _error_flag(false)
     , _real_path()
+    , _config()
+{ }
+
+Response::Response(const Setting & config)
+    : _code_list()
+    , _code(0)
+    , _start_line()
+    , _header()
+    , _buf()
+    , _body()
+    , _body_size(0)
+    , _header_size(0)
+    , _error_flag(false)
+    , _real_path()
+    , _config(config)
 {
 	if (this->_code_list.empty())
 		initCodeList();
@@ -32,6 +46,7 @@ Response & Response::operator=(const Response & other) {
     _header_size = other._header_size;
     _error_flag = other._error_flag;
     _real_path = other._real_path;
+    _config = other._config;
     return *this;
 }
 
@@ -139,6 +154,8 @@ int	Response::getHeaderSize() const
 std::string	Response::toString(int nbr)
 {
 	char *ch_code = ft_itoa(nbr);
+    if (!ch_code)
+        throw std::runtime_error(std::string("ft_itoa: ") + strerror(errno));
 	std::string status_code(ch_code);
 	delete ch_code;
 
@@ -149,6 +166,8 @@ void		Response::generateResponseMsg(Request &request)
 {
 	std::string error_msg;
 	std::string headers;
+
+    std::cout << "port from config: " << _config.getPort() << std::endl;
 
     /* std::cout << "check_syntax" << std::endl; */
 	check_syntax(request);

@@ -83,7 +83,7 @@ void EventLoop::_acceptConnection() {
                 throw std::runtime_error(std::string("accept: ") + strerror(errno));
             fcntl(sd, F_SETFL, O_NONBLOCK);
             /* std::cout << "Append client fd " << sd << std::endl; */
-            it->appendClient(Client(sd));
+            it->appendClient(Client(sd, it->getConfig()));
             /* std::cout << "Clients size " << it->getClients().size() << std::endl; */
         }
         ++it;

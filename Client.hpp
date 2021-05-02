@@ -20,7 +20,7 @@ enum client_states {
 
 class Client {
  public:
-    explicit Client(int fd);
+    explicit Client(int fd, Setting & config);
     ~Client(void);
     Client(const Client & other);
     Client & operator=(const Client & other);
@@ -41,6 +41,7 @@ class Client {
     Request                     _request;
     Response                    _response_struct;
     size_t                      _time_last_response;
+    Setting                     _config;
 
     Client(void);
     friend bool operator< (Client const& lhs, Client const& rhs) {

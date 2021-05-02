@@ -29,7 +29,7 @@ WebServer & WebServer::operator=(const WebServer & other) {
 
 int WebServer::getLs() const { return this->_ls; }
 
-Setting WebServer::getConfig() const { return this->_config; }
+Setting & WebServer::getConfig() { return this->_config; }
 
 sockaddr_in WebServer::getAddr() const {
     return this->_addr;
