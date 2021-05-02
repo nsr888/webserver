@@ -226,8 +226,12 @@ bool    Request::_parseChunk()
         {
             if (_chunk_size == 0)
             {
-                _header["Content-Length"] = std::string(ft_itoa(_body.size()));
+                char *body_size = ft_itoa(_body.size());
+                if (!body_size)
+                    throw std::runtime_error(std::string("ft_itoa: ") + strerror(errno));
+                _header["Content-Length"] = std::string(body_size);
                 _header.erase("Transfer-Encoding");
+                free(body_size);
                 return true;
             }
             if (_buf.size() >= _chunk_size + 4)
