@@ -14,12 +14,14 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, const
 	_request = &request;
 	_method = method;
 
+	_stat_num = stat(_response->getPath().c_str(), &_stat);
+
 	if (method == "GET")
 		processGetRequest();
 	if (method == "HEAD")
 		processHeadRequest();
 	if (method == "POST")
-		processPostRequest();
+		processPutRequest(); // пока не понял разницы между PUT и POST
 	if (method == "PUT")
 		processPutRequest();
 	if (method == "DELETE")
@@ -32,11 +34,16 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, const
 
 void	ProcessMethod::processGetRequest()
 {
-	std::string path = readPath(_response->getPath());
-
 	_response->setCode(200);
-	_response->setBody(path);
-	_response->setBodySize(path.length());
+	if (S_ISLNK(_stat.st_mode) || S_ISREG(_stat.st_mode))
+		_response->setBody(readPath(_response->getPath()));
+	else if (S_ISDIR(_stat.st_mode) /* && autoindex включен */)
+		_response->setBody(generateAutoindex(_response->getPath()));
+	else
+	{
+		_response->setErrorFlag(true);
+		_response->setCode(404);
+	}
 }
 
 void	ProcessMethod::processHeadRequest()
@@ -52,7 +59,22 @@ void	ProcessMethod::processPostRequest()
 
 void	ProcessMethod::processPutRequest()
 {
+	int fd = 0;
+	std::string request_body(_request->getBody().begin(),_request->getBody().end());
 	
+	if (S_ISDIR(_stat.st_mode))
+		_response->setCode(404);
+	if ((fd = open(_response->getPath().c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666)) < 0)
+		_response->setCode(500);
+	else
+	{
+		write(fd, request_body.c_str(), request_body.length());
+		if (_stat_num != -1)
+			_response->setCode(200);
+		else
+			_response->setCode(201);
+		close(fd);
+	}
 }
 
 void	ProcessMethod::processDeleteRequest()
@@ -84,4 +106,20 @@ std::string ProcessMethod::readPath(std::string path)
 		body.append(buf, pos);
 	close(fd);
 	return (body);
+}
+
+std::string ProcessMethod::generateAutoindex(std::string path) 
+{
+	std::string 	autoindex;
+	DIR*			directory = opendir(path.c_str());
+	struct dirent*	entry = nullptr;
+
+	if (directory)
+	{
+		autoindex.append("<html><head><title>Index of </title></head><body><h1>Index of </h1><br><hr><a href=\"../\">../</a><br>");
+		while ((entry = readdir(directory)) != nullptr) 
+			autoindex.append("<a href=\"" + std::string(entry->d_name) + "\">" + std::string(entry->d_name) + "</a><br>");
+		autoindex.append("</body></html>");
+	}
+	return (autoindex);
 }
