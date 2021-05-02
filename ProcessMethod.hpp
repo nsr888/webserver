@@ -4,6 +4,10 @@
 # include <iostream>
 # include "Request.hpp"
 # include "Response.hpp"
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <unistd.h>
+# include <dirent.h>
 
 class Response;
 
@@ -13,6 +17,8 @@ private:
 	Response*		_response;
 	Request*		_request;
 	std::string		_method;
+	struct stat		_stat;
+	int				_stat_num;
 
 public:
 	ProcessMethod();
@@ -35,6 +41,7 @@ public:
 	void			generateListing();
 	void			generateCGI();
 	std::string		readPath(std::string path);
+	std::string		generateAutoindex(std::string path);
 
 };
 

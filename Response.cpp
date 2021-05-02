@@ -191,27 +191,17 @@ void		Response::generateResponseMsg(Request &request)
 std::string	Response::generateErrorMsg()
 {
 	std::string error;
+	std::string	error_path = "./files/error.html";
 
-	if (_error_flag == false)
+	if (_error_flag == true)
 	{
-		int fd = open(_real_path.c_str(), O_RDONLY);
+		int fd = open(error_path.c_str(), O_RDONLY);
 		char buf[100];
 		bzero(buf, 100);
 		int pos = 0;
 		while ((pos = read(fd, &buf, 100)) > 0)
 			error.append(buf, pos);
 		close(fd);
-	}
-	else
-	{
-		error.append(
-			"<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" "
-			"content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" "
-			"content=\"ie=edge\"><title>" + toString(_code) + " " +
-			getMessage(_code) + "</title><style>h1, "
-			"p {text-align: center;}</style></head><body><h1>" +
-			toString(_code) + " " + getMessage(_code) +
-			"</h1><hr><p>ServerCeccentr</p></body></html>"); /* Что должно быть в случае ошибки??  */
 	}
 	return (error);
 
@@ -317,6 +307,7 @@ void		Response::setErrorFlag(bool flag)
 void	Response::setBody(const std::string &body)
 {
 	_body = body;
+	setBodySize(body.length());
 }
 
 void	Response::setBodySize(size_t len)
