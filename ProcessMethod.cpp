@@ -21,7 +21,7 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, const
 	if (method == "HEAD")
 		processHeadRequest();
 	if (method == "POST")
-		processPutRequest(); // пока не понял разницы между PUT и POST
+		processPostRequest();
 	if (method == "PUT")
 		processPutRequest();
 	if (method == "DELETE")
@@ -40,10 +40,7 @@ void	ProcessMethod::processGetRequest()
 	else if (S_ISDIR(_stat.st_mode) /* && autoindex включен */)
 		_response->setBody(generateAutoindex(_response->getPath()));
 	else
-	{
-		_response->setErrorFlag(true);
 		_response->setCode(404);
-	}
 }
 
 void	ProcessMethod::processHeadRequest()

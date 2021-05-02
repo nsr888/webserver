@@ -39,7 +39,6 @@ private:
     std::string                  		_body;
 	size_t								_body_size;
 	size_t								_header_size;
-	bool								_error_flag;
 	std::string							_real_path;
 
 	void 								initCodeList();
@@ -65,7 +64,7 @@ public:
 	void								setBody(const std::string &body);
 	void								setBodySize(size_t len);
 	void								setCode(int code);
-	void								setErrorFlag(bool flag);
+	std::string 						setContentType();
 	void								setPath(std::string path);
 
 	void								check_path(Request &request);
