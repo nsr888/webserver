@@ -22,7 +22,6 @@ Response::Response(const Setting & config)
     , _body()
     , _body_size(0)
     , _header_size(0)
-    , _error_flag(false)
     , _real_path()
     , _config(config)
 {
