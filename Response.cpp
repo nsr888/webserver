@@ -9,7 +9,6 @@ Response::Response()
     , _body()
     , _body_size(0)
     , _header_size(0)
-    , _error_flag(false)
     , _real_path()
     , _config()
 { }
@@ -44,7 +43,6 @@ Response & Response::operator=(const Response & other) {
     _body = other._body;
     _body_size = other._body_size;
     _header_size = other._header_size;
-    _error_flag = other._error_flag;
     _real_path = other._real_path;
     _config = other._config;
     return *this;
@@ -212,7 +210,7 @@ std::string	Response::generateErrorMsg()
 	std::string error;
 	std::string	error_path = "./files/error.html";
 
-	if (_error_flag == true)
+	if (_code == 404)
 	{
 		int fd = open(error_path.c_str(), O_RDONLY);
 		char buf[100];
@@ -221,6 +219,17 @@ std::string	Response::generateErrorMsg()
 		while ((pos = read(fd, &buf, 100)) > 0)
 			error.append(buf, pos);
 		close(fd);
+	}
+	else
+	{
+		error.append(
+				"<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" "
+				"content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" "
+				"content=\"ie=edge\"><title>" + toString(_code) + " " +
+				getMessage(_code) + "</title><style>h1, "
+												 "p {text-align: center;}</style></head><body><h1>" +
+				toString(_code) + " " + getMessage(_code) +
+				"</h1><hr><p>ServerCeccentr</p></body></html>");
 	}
 	return (error);
 
@@ -245,8 +254,7 @@ void		Response::check_path(Request &request)
 
 	если не найден путь
 	
-	setCode(404);
-	setErrorFlag(true);*/
+	setCode(404);*/
 }
 
 void		Response::check_error(const std::string &error_msg)
@@ -259,25 +267,21 @@ void		Response::check_syntax(Request &request)
 {
     if (!request.isMethodValid())
     {
-        setErrorFlag(true);
         setCode(400); 
         return;
     }
     if (request.getStartLine().request_target.size() > 8000)
     {
-        setErrorFlag(true);
         setCode(501); 
         return;
     }
     if (!request.isRequestTargetValid())
     {
-        setErrorFlag(true);
         setCode(400); 
         return;
     }
     if (!request.isHttpVersionValid())
     {
-        setErrorFlag(true);
         setCode(505); 
         return;
     }
@@ -298,8 +302,7 @@ void		Response::check_method(Request &request)
 	
 	если он деактивирован (методы GET HEAD не могут быть деактивированы)
 	
-	setCode(405);
-	setErrorFlag(true); */
+	setCode(405); */
 }
 
 void		Response::check_authentication(Request &request)
@@ -308,7 +311,6 @@ void		Response::check_authentication(Request &request)
 	/* Проверка на аутентификацию, если нужна
 	
 	setCode(401);
-	setErrorFlag(true); 
 	
 	P.S надо понять от куда в этом случае будет браться body для сообщения (скорее всего после этого должен измениться путь)*/
 }
@@ -316,11 +318,6 @@ void		Response::check_authentication(Request &request)
 void		Response::setCode(int code)
 {
 	_code = code;
-}
-
-void		Response::setErrorFlag(bool flag)
-{
-	_error_flag = flag;
 }
 
 void	Response::setBody(const std::string &body)
@@ -361,7 +358,7 @@ void		Response::addHeader(Request &request, std::string &headers)
 	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
 	/* _header["Accept-Ranges"] = "bytes"; /1* Всегда bytes? *1/ */
 	_header["Content-Length"] = toString(_body_size);
-	_header["Content-Type"] = "text/html"; /* Всегда text/html? */
+	_header["Content-Type"] = setContentType();
 
 	std::map < std::string, std::string >::iterator beg = _header.begin();
 	std::map < std::string, std::string >::iterator end = _header.end();
@@ -377,6 +374,30 @@ void		Response::addHeader(Request &request, std::string &headers)
 		headers.append(beg->second + CRLF);
 		++beg;
 	}
+}
+
+std::string Response::setContentType() 
+{
+	std::string type;
+	size_t dot_pos;
+
+	dot_pos = _real_path.rfind('.');
+	if (dot_pos != std::string::npos)
+		type = _real_path.substr(dot_pos + 1);
+	if (type == "txt")
+		return("text/plain;charset=utf-8");
+	else if (type == "html")
+		return("text/html;charset=utf-8");
+	else if (type == "jpg")
+		return("image/jpeg;");
+	else if (type == "gif")
+		return("image/gif;");
+	else if (type == "png")
+		return("image/png;");
+	else if (type == "ico")
+		return ("image/vnd.microsoft.icon;");
+	else
+		return("Content-Type: application/octet-stream");
 }
 
 void		Response::addBody(const std::string &error_msg)
@@ -418,6 +439,5 @@ void        Response::clear()
 	_body = "";
 	_body_size = 0;
 	_header_size = 0;
-	_error_flag = false;
     _real_path = "";
 }
