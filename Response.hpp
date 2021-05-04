@@ -13,6 +13,8 @@
 # include <fcntl.h>
 # include <cstdlib>
 # include <unistd.h>
+# include <sys/time.h>
+# include <ctime>
 # include "utils.hpp"
 # include "Request.hpp"
 # include "ProcessMethod.hpp"

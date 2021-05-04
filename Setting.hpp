@@ -52,6 +52,7 @@ public:
     int                 getLocationPost(int i) { return _location[i]._post; }
     int                 getLocationGet(int i) { return _location[i]._get; }
     int                 getLocationDelete(int i) { return _location[i]._delete; }
+    size_t              getLocatinSize() { return _location.size(); }
 
 };
 
