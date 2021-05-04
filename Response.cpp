@@ -228,7 +228,7 @@ std::string	Response::generateErrorMsg()
 				getMessage(_code) + "</title><style>h1, "
 												 "p {text-align: center;}</style></head><body><h1>" +
 				toString(_code) + " " + getMessage(_code) +
-				"</h1><hr><p>ServerCeccentr</p></body></html>");
+				"</h1><hr><p>" + _config.getServerName() + "</p></body></html>");
 	}
 	return (error);
 
@@ -259,7 +259,10 @@ void		Response::check_path(Request &request)
 void		Response::check_error(const std::string &error_msg)
 {
 	if (_code >= 400)
+	{
 		_body_size = error_msg.length();
+		_header["Content-Type"] = "text/html;charset=utf-8";
+	}
 }
 
 void		Response::check_syntax(Request &request)
@@ -291,17 +294,7 @@ void		Response::check_method(Request &request)
     std::string method = request.getStartLine().method;
 	ProcessMethod process;
 
-	process.secretary_Request(request, *this, method);
-	/* Проверка на вызываемый метод отсюда мы должны отправить наш итоговый запрос c названием метода в класс
-	ProcessMethod(request, *this, std::string method(например "GET"));
-	В итоге этот класс должен заполнить 
-	- Response->_body
-	- Response->_body_size
-	- Response->setCode()
-	
-	если он деактивирован (методы GET HEAD не могут быть деактивированы)
-	
-	setCode(405); */
+	process.secretary_Request(request, *this, _config, method);
 }
 
 void		Response::check_authentication(Request &request)
@@ -335,11 +328,61 @@ void	Response::setPath(std::string path)
 	_real_path = path;
 }
 
+int get_day_of_week(tm &timeinfo) 
+{
+	int last_number = timeinfo.tm_year % 100;
+	int year_code = (6 + last_number + last_number / 4) % 7;
+	int month = timeinfo.tm_mon + 1;
+	int month_code;
+	if (month == 1 || month == 10)		month_code = 1;
+	else if (month == 5) 				month_code = 2;
+	else if (month == 8)				month_code = 3;
+	else if (month == 6)				month_code = 5;
+	else if (month == 12 || month == 9)	month_code = 6;
+	else if (month == 7 || month == 4)	month_code = 0;
+	else								month_code = 4;
+	int day_of_week = (timeinfo.tm_mday + month_code + year_code) % 7;
+	if (day_of_week == 0 || day_of_week == 1)
+		day_of_week = (day_of_week == 0) ? 6 : 0;
+	return day_of_week;
+}
+
+void get_date(tm &timeinfo, long time) 
+{
+	int year = 70;
+	int number_month = 1;
+	timeinfo.tm_min = time % 3600 / 60;
+	timeinfo.tm_sec = time % 3600 % 60;
+	time /= 3600;
+	timeinfo.tm_hour = time % 24 + 3;
+	if (timeinfo.tm_hour >= 24) { timeinfo.tm_hour -= 24; ++timeinfo.tm_mday; }
+	time = (time - (timeinfo.tm_hour - 3)) / 24 + 1;
+	for (; time >= 365; ++year)
+		time -= (year % 4 == 0) ? 366 : 365;
+	timeinfo.tm_year = year;
+	bool leap = timeinfo.tm_year % 4 == 0;
+	for (; time >= 28 || (time >= 29 && leap); ++number_month)
+		if (number_month == 2)
+			time -= (leap) ? 29 : 28;
+		else if (number_month <= 8)
+			time -= (number_month % 2 != 0) ? 31 : 30;
+		else
+			time -= (number_month % 2 != 0) ? 30 : 31;
+	timeinfo.tm_mon = number_month - 1;
+	timeinfo.tm_mday = time;
+	timeinfo.tm_wday = get_day_of_week(timeinfo);
+}
+
 std::string Response::get_time() 
 {
-	/* Написать функцию даты и времени */
+	struct timeval time;
+	struct tm timeinfo;
+	char buff[100];
 
-	return ("Fri, 17 Jul 2010 16:09:18 GMT+2");
+	gettimeofday(&time, NULL);
+	get_date(timeinfo, time.tv_sec + (time.tv_usec / 1000000));
+	strftime(buff, 100, "%a,  %d %b %Y %X GTM", &timeinfo);
+	return std::string(buff);
 }
 
 void		Response::addHeader(Request &request, std::string &headers)
@@ -353,11 +396,12 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
-	_header["Server"] = "ServerCeccentr"; /* Из конфига? */
+	_header["Server"] = _config.getServerName(); /* Из конфига? */
 	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
-	/* _header["Accept-Ranges"] = "bytes"; /1* Всегда bytes? *1/ */
 	_header["Content-Length"] = toString(_body_size);
 	_header["Content-Type"] = setContentType();
+	_header["Content-Language"] = "en-US, ru-RU";
+	_header["Content-Location"] = request.getStartLine().request_target;
 
 	std::map < std::string, std::string >::iterator beg = _header.begin();
 	std::map < std::string, std::string >::iterator end = _header.end();
