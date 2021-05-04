@@ -148,6 +148,7 @@ std::string	Response::generateErrorMsg(int error_flag, const std::string &path)
 	else
 	{
 		error.append(
+<<<<<<< Updated upstream
 			"<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" "
 			"content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" "
 			"content=\"ie=edge\"><title>" + toString(_code) + " " +
@@ -155,6 +156,15 @@ std::string	Response::generateErrorMsg(int error_flag, const std::string &path)
 			"p {text-align: center;}</style></head><body><h1>" +
 			toString(_code) + " " + getMessage(_code) +
 			"</h1><hr><p>ServerCeccentr</p></body></html>"); /* Что должно быть в случае ошибки??  */
+=======
+				"<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" "
+				"content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" "
+				"content=\"ie=edge\"><title>" + toString(_code) + " " +
+				getMessage(_code) + "</title><style>h1, "
+												 "p {text-align: center;}</style></head><body><h1>" +
+				toString(_code) + " " + getMessage(_code) +
+				"</h1><hr><p>ServerCeccentr</p></body></html>");
+>>>>>>> Stashed changes
 	}
 	return (error);
 
@@ -166,22 +176,38 @@ void		Response::check_path(Request &request)
 {
     (void)(request);
 	t_start_line temp = request.getStartLine();
+<<<<<<< Updated upstream
 	setPath(getArgument(temp.request_target, ft_strchr(temp.request_target, '/'))); // getArgument находится в Parser.hpp\cpp подключил но у меня подчеркивает
 	
 
 	// setPath("./files/index.html");
+=======
+	setPath(Parser::getArgument(temp.request_target, ft_strchr(temp.request_target, '/')));
+	const char *path = getPath().c_str();
+	std::ifstream ifs;
+	DIR* dir = opendir(path);
+	ifs.open (path, std::ifstream::in);
+	if(!ifs && !dir) {
+		setCode(404);
+	}
+	ifs.close();
+	closedir(dir);
+>>>>>>> Stashed changes
 
+	// setPath("./files/index.html");
 
 	/* Проверка пути
 	путь получаем так: request.getStartLine().request_target
 	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
-	
 	после проверки записать путь setPath(std::string path);
+<<<<<<< Updated upstream
 
 	если не найден путь
 	
 	setCode(404);
 	setErrorFlag(true);*/
+=======
+>>>>>>> Stashed changes
 }
 
 >>>>>>> Stashed changes
@@ -189,6 +215,61 @@ void		Response::check_error(const std::string &error_msg)
 {
 	if (_code >= 400)
 		_body_size = error_msg.length();
+<<<<<<< Updated upstream
+=======
+}
+
+void		Response::check_syntax(Request &request)
+{
+    if (!request.isMethodValid())
+    {
+        setCode(400); 
+        return;
+    }
+    if (request.getStartLine().request_target.size() > 8000)
+    {
+        setCode(501); 
+        return;
+    }
+    if (!request.isRequestTargetValid())
+    {
+        setCode(400); 
+        return;
+    }
+    if (!request.isHttpVersionValid())
+    {
+        setCode(505); 
+        return;
+    }
+}
+
+void		Response::check_method(Request &request)
+{
+    std::string method = request.getStartLine().method;
+	ProcessMethod process;
+
+	process.secretary_Request(request, *this, method);
+	/* Проверка на вызываемый метод отсюда мы должны отправить наш итоговый запрос c названием метода в класс
+	ProcessMethod(request, *this, std::string method(например "GET"));
+	В итоге этот класс должен заполнить 
+	- Response->_body
+	- Response->_body_size
+	- Response->setCode()
+	
+	если он деактивирован (методы GET HEAD не могут быть деактивированы)
+	
+	setCode(405); */
+}
+
+void		Response::check_authentication(Request &request)
+{
+    (void)(request);
+	/* Проверка на аутентификацию, если нужна
+	
+	setCode(401);
+	
+	P.S надо понять от куда в этом случае будет браться body для сообщения (скорее всего после этого должен измениться путь)*/
+>>>>>>> Stashed changes
 }
 
 void		Response::setCode(int code)
@@ -196,7 +277,27 @@ void		Response::setCode(int code)
 	_code = code;
 }
 
+<<<<<<< Updated upstream
 std::string get_time() 
+=======
+void	Response::setBody(const std::string &body)
+{
+	_body = body;
+	setBodySize(body.length());
+}
+
+void	Response::setBodySize(size_t len)
+{
+	_body_size = len;
+}
+
+void	Response::setPath(std::string path)
+{
+	_real_path = path;
+}
+
+std::string Response::get_time() 
+>>>>>>> Stashed changes
 {
 	/* Написать функцию даты и времени */
 
@@ -212,11 +313,19 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
+<<<<<<< Updated upstream
 	_header["Server"] = "ServerCeccentr"; /* Название сервера? */
 	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
 	/* _header["Accept-Ranges"] = "bytes"; /1* Всегда bytes? *1/ */
 	_header["Content-Length"] = toString(_body_size);
 	_header["Content-Type"] = "text/plain"; /* Всегда text/plain? */
+=======
+	_header["Server"] = "ServerCeccentr"; /* Из конфига? */
+	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
+	/* _header["Accept-Ranges"] = "bytes"; /1* Всегда bytes? *1/ */
+	_header["Content-Length"] = toString(_body_size);
+	_header["Content-Type"] = setContentType();
+>>>>>>> Stashed changes
 
 	std::map < std::string, std::string >::iterator beg = _header.begin();
 	std::map < std::string, std::string >::iterator end = _header.end();

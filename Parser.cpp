@@ -17,6 +17,11 @@ std::string Parser::getArgument(const std::string &dst, int start) {
 
 Location	Parser::getLocation(std::vector<std::string> temp, int i) {
 	Location newLoc;
+	newLoc._autoindex = 0;
+	newLoc._head = 0;
+	newLoc._get = 0;
+	newLoc._post = 0;
+	newLoc._put = 0;
 	newLoc._locationName = getArgument(temp[i], ft_strchr(temp[i], '/'));
 	i++;
 	while (temp[i].find("server:", 0, 7) == std::string::npos && temp[i].find("location:", 0, 9) == std::string::npos && i < (temp.size() - 1)) {
@@ -25,6 +30,9 @@ Location	Parser::getLocation(std::vector<std::string> temp, int i) {
 		}
 		else if (temp[i].find("index:", 0, 6) != std::string::npos) {
 			newLoc._file = getArgument(temp[i], ft_strchr(temp[i], ':'));
+		}
+		else if (temp[i].find("autoindex:", 0, 10) != std::string::npos) {
+			newLoc._autoindex = 1;
 		}
 		else if (temp[i].find("allow_methods:", 0, 14) != std::string::npos) {
 			if (temp[i].find("GET", 0, 3) != std::string::npos) {
@@ -36,8 +44,8 @@ Location	Parser::getLocation(std::vector<std::string> temp, int i) {
 			if (temp[i].find("POST", 0, 4) != std::string::npos) {
 				newLoc._post = 1;
 			}
-			if (temp[i].find("DELETE", 0, 6) != std::string::npos) {
-				newLoc._delete = 1;
+			if (temp[i].find("HEAD", 0, 4) != std::string::npos) {
+				newLoc._head = 1;
 			}
 		}
 		i++;
@@ -95,12 +103,10 @@ std::vector<Setting> Parser::startParsing(const char *config_file) {
 		}
 	}
 	else {
-		// кидаем исключение об ошибке чтения, пока заглушка
 		std::cout << "Reading error" << std::endl;
 	}
 	fd.close();
-	while (_isOneMoreServer == 1) {
+	while (_isOneMoreServer == 1)
 		temp_config.push_back(get_config(temp));
-	}
 	return (temp_config);
 }

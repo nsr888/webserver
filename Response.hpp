@@ -13,7 +13,17 @@
 # include <fcntl.h>
 # include <cstdlib>
 # include <unistd.h>
+<<<<<<< Updated upstream
 # include "Request.hpp"
+=======
+# include "utils.hpp"
+# include "Request.hpp"
+# include "ProcessMethod.hpp"
+# include "Parser.hpp"
+# include <fstream>  
+# include <dirent.h>
+
+>>>>>>> Stashed changes
 extern "C" {
     char *ft_itoa(int n);
 }

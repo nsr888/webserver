@@ -10,7 +10,8 @@ struct Location {
     int                                     _get;
     int                                     _put;
     int                                     _post;
-    int                                     _delete;
+    int                                     _head;
+    int                                     _autoindex;
 };
 
 class Setting {
@@ -35,7 +36,10 @@ private:
     std::vector<std::string>                _faviconLocation;
     int                                     _maxBodySizeMB;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     int                                     _isLastServer;
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     std::vector<Location>                   _location;
@@ -102,7 +106,12 @@ public:
     int                 getLocationPut(int i) { return _location[i]._put; }
     int                 getLocationPost(int i) { return _location[i]._post; }
     int                 getLocationGet(int i) { return _location[i]._get; }
+<<<<<<< Updated upstream
     int                 getLocationDelete(int i) { return _location[i]._delete; }
+=======
+    int                 getLocationHead(int i) { return _location[i]._head; }
+    int                 getLocationAutoindex(int i) { return _location[i]._autoindex; }
+>>>>>>> Stashed changes
 
 >>>>>>> Stashed changes
 };
