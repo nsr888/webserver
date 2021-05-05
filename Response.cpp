@@ -237,14 +237,19 @@ std::string	Response::generateErrorMsg()
 void		Response::check_path(Request &request)
 {
     (void)(request);
-    /* method getArgument set as static */
-	/* t_start_line temp = request.getStartLine(); */
-	/* setPath(Parser::getArgument(temp.request_target, ft_strchr(temp.request_target, '/'))); */
-	
+	t_start_line temp = request.getStartLine();
+	setPath(Parser::getArgument(temp.request_target, ft_strchr(temp.request_target, '/')));
+	const char *path = getPath().c_str();
+	std::ifstream ifs;
+	DIR* dir = opendir(path);
+	ifs.open (path, std::ifstream::in);
+	if(!ifs && !dir) {
+		setCode(404);
+	}
+	ifs.close();
+	closedir(dir);
 
-	setPath("./files/index.html");
-
-
+	// setPath("./files/index.html");
 	/* Проверка пути
 	путь получаем так: request.getStartLine().request_target
 	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config

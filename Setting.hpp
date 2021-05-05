@@ -10,7 +10,8 @@ struct Location {
     int                                     _get;
     int                                     _put;
     int                                     _post;
-    int                                     _delete;
+    int                                     _head;
+    int                                     _autoindex;
 };
 
 class Setting {
@@ -23,8 +24,6 @@ private:
     std::vector<std::string>                _indexLocation;
     std::vector<std::string>                _faviconLocation;
     int                                     _maxBodySizeMB;
-    /* error: private field '_isLastServer' is not used [-Werror,-Wunused-private-field] */
-    /* int                                     _isLastServer; */
     std::vector<Location>                   _location;
 
 public:
@@ -51,8 +50,8 @@ public:
     int                 getLocationPut(int i) { return _location[i]._put; }
     int                 getLocationPost(int i) { return _location[i]._post; }
     int                 getLocationGet(int i) { return _location[i]._get; }
-    int                 getLocationDelete(int i) { return _location[i]._delete; }
-    size_t              getLocatinSize() { return _location.size(); }
+    int                 getLocationHead(int i) { return _location[i]._head; }
+    int                 getLocationAutoindex(int i) { return _location[i]._autoindex; }
 
 };
 

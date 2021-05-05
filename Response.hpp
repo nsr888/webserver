@@ -19,6 +19,8 @@
 # include "Request.hpp"
 # include "ProcessMethod.hpp"
 # include "Parser.hpp"
+# include <fstream>  
+# include <dirent.h>
 
 extern "C" {
     char *ft_itoa(int n);
