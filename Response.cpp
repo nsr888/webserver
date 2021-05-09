@@ -166,7 +166,7 @@ void		Response::generateResponseMsg(Request &request)
 	std::string error_msg;
 	std::string headers;
 
-    std::cout << "port from config: " << _config.getPort() << std::endl;
+    /* std::cout << "port from config: " << _config.getPort() << std::endl; */
 
     /* std::cout << "check_syntax" << std::endl; */
 	check_syntax(request);
