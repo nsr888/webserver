@@ -61,7 +61,8 @@ void Client::readRequest() {
             _client_state = st_generate_response; 
             return;
         }
-        if (_request.getStartLine().method == "GET")
+        if (_request.getStartLine().method == "GET" || 
+                _request.getStartLine().method == "HEAD")
         {
             /* std::cout << "\nGET header parsed\n"; */
             _client_state = st_generate_response; 
