@@ -52,6 +52,7 @@ public:
     int                 getLocationGet(int i) { return _location[i]._get; }
     int                 getLocationHead(int i) { return _location[i]._head; }
     int                 getLocationAutoindex(int i) { return _location[i]._autoindex; }
+    int                 getLocationSize() { return _location.size(); }
 
 };
 

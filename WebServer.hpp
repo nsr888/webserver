@@ -14,6 +14,7 @@
 # include <iostream>
 # include "Client.hpp"
 # include "Setting.hpp"
+# include <cstring>  // for linux
 
 class WebServer {
  public:

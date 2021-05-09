@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "utils.hpp"
+#include <cstring> // for linux
 
 namespace utils {
     std::vector<char> read_file(std::string filename) {
@@ -110,11 +111,11 @@ std::string	ft_strtrim(const std::string &s1, const std::string& set)
 	size_t	end;
 	size_t	index = 0;
 
-	while (s1[index] && ft_strchr(set, s1[index]) != -1)
+	while (s1[index] && utils::ft_strchr(set, s1[index]) != -1)
 		index++;
 	start = index;
 	end = s1.length();
-	while (end && ft_strchr(set, s1[end]) != -1)
+	while (end && utils::ft_strchr(set, s1[end]) != -1)
 		--end;
 	return s1.substr(start, end + 1);
 }

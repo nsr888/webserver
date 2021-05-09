@@ -22,9 +22,8 @@ namespace utils {
     bool                in_array(const std::string &value, const std::vector<std::string> &array);
     size_t              get_current_time_in_ms(void);
     void				ft_usleep(int ms);
+    std::string			ft_strtrim(const std::string &s1, const std::string& set);
+    int					ft_strchr(const std::string& str, int ch);
 }
-
-std::string				ft_strtrim(const std::string &s1, const std::string& set);
-int						ft_strchr(const std::string& str, int ch);
 
 #endif

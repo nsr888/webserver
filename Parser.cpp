@@ -12,7 +12,7 @@ Parser::Parser() {
 }
 
 std::string Parser::getArgument(const std::string &dst, int start) { 
-	return ft_strtrim(dst.substr(start + 1, dst.length()), " \t"); 
+	return utils::ft_strtrim(dst.substr(start + 1, dst.length()), " \t"); 
 }
 
 Location	Parser::getLocation(std::vector<std::string> temp, int i) {
@@ -22,17 +22,17 @@ Location	Parser::getLocation(std::vector<std::string> temp, int i) {
 	newLoc._get = 0;
 	newLoc._post = 0;
 	newLoc._put = 0;
-	newLoc._locationName = getArgument(temp[i], ft_strchr(temp[i], '/'));
+	newLoc._locationName = getArgument(temp[i], utils::ft_strchr(temp[i], '/'));
 	i++;
 	while (temp[i].find("server:", 0, 7) == std::string::npos && 
             temp[i].find("location:", 0, 9) == std::string::npos && 
             static_cast<size_t>(i) < (temp.size() - 1)) 
     {
 		if (temp[i].find("root:", 0, 5) != std::string::npos) {
-			newLoc._path = getArgument(temp[i], ft_strchr(temp[i], ':'));
+			newLoc._path = getArgument(temp[i], utils::ft_strchr(temp[i], ':'));
 		}
 		else if (temp[i].find("index:", 0, 6) != std::string::npos) {
-			newLoc._file = getArgument(temp[i], ft_strchr(temp[i], ':'));
+			newLoc._file = getArgument(temp[i], utils::ft_strchr(temp[i], ':'));
 		}
 		else if (temp[i].find("autoindex:", 0, 10) != std::string::npos) {
 			newLoc._autoindex = 1;
@@ -65,16 +65,16 @@ Setting Parser::get_config(std::vector<std::string> temp) {
 	i++;
 	while(temp[i].find("server:") == std::string::npos && i < (size -1)) {
 		if(temp[i].find("host:", 0, 5) != std::string::npos) {
-			new_config.setHost(getArgument(temp[i], ft_strchr(temp[i], ':')));
+			new_config.setHost(getArgument(temp[i], utils::ft_strchr(temp[i], ':')));
 		}
 		else if (temp[i].find("port:", 0, 5) != std::string::npos) {
-			new_config.setPort(ft_atoi(getArgument(temp[i], ft_strchr(temp[i], ':')).c_str()));
+			new_config.setPort(ft_atoi(getArgument(temp[i], utils::ft_strchr(temp[i], ':')).c_str()));
 		}
 		else if (temp[i].find("server_name:", 0, 12) != std::string::npos) {
-			new_config.setServerName(getArgument(temp[i], ft_strchr(temp[i], ':')));
+			new_config.setServerName(getArgument(temp[i], utils::ft_strchr(temp[i], ':')));
 		}
 		else if (temp[i].find("MaxBodySize:", 0, 12) != std::string::npos) {
-			new_config.setMaxBodySize(ft_atoi(getArgument(temp[i], ft_strchr(temp[i], ':')).c_str()));
+			new_config.setMaxBodySize(ft_atoi(getArgument(temp[i], utils::ft_strchr(temp[i], ':')).c_str()));
 		}
 		else if (temp[i].find("location:", 0, 9) != std::string::npos) {
 			new_config.pushNewLocation(getLocation(temp, i));

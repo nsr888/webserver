@@ -5,6 +5,8 @@
 # include <vector>
 # include <map>
 # include "utils.hpp"
+# include <cstring>  // for linux
+# include <algorithm> // for linux
 
 extern "C" {
     int                 ft_atoi(const char *str);

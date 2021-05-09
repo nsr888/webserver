@@ -50,24 +50,14 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 		else
 			_response->setCode(405);
 	}
-	if (method == "DELETE")
+	if (method == "HEAD")
 	{
 		if (i == -1)
-			processDeleteRequest();
-		else if (_config->getLocationDelete(i))
-			processDeleteRequest();
+			processHeadRequest();
+		else if (_config->getLocationHead(i))
+			processHeadRequest();
 		else
 			_response->setCode(405);
-	}
-	if (method == "OPTIONS")
-	{
-		processOptionsRequest();
-		/* Нужна ли проверка на авторизацию метода? Если да, то добавить в конфиг*/
-	}
-	if (method == "TRACE")
-	{
-		processTraceRequest();
-		/* Нужна ли проверка на авторизацию метода? Если да, то добавить в конфиг*/
 	}
 }
 
@@ -114,21 +104,6 @@ void	ProcessMethod::processPutRequest()
 	}
 }
 
-void	ProcessMethod::processDeleteRequest()
-{
-	
-}
-
-void	ProcessMethod::processOptionsRequest()
-{
-	
-}
-
-void	ProcessMethod::processTraceRequest()
-{
-	
-}
-
 std::string ProcessMethod::readPath(std::string path)
 {
 	int 		fd = open(path.c_str(), O_RDONLY);;
@@ -149,12 +124,12 @@ std::string ProcessMethod::generateAutoindex(std::string path)
 {
 	std::string 	autoindex;
 	DIR*			directory = opendir(path.c_str());
-	struct dirent*	entry = nullptr;
+	struct dirent*	entry = 0;
 
 	if (directory)
 	{
 		autoindex.append("<html><head><title>Index of </title></head><body><h1>Index of </h1><br><hr><a href=\"../\">../</a><br>");
-		while ((entry = readdir(directory)) != nullptr) 
+		while ((entry = readdir(directory)) != 0) 
 			autoindex.append("<a href=\"" + std::string(entry->d_name) + "\">" + std::string(entry->d_name) + "</a><br>");
 		autoindex.append("</body></html>");
 	}
@@ -163,7 +138,7 @@ std::string ProcessMethod::generateAutoindex(std::string path)
 
 int	ProcessMethod::numberInLocation()
 {
-	size_t 		len = _config->getLocatinSize();
+	size_t 		len = _config->getLocationSize();
 	std::string path = _response->getPath();
 
 	for (size_t i = 0; i < len; i++)

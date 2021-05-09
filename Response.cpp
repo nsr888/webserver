@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "utils.hpp"
 
 Response::Response()
     : _code_list()
@@ -151,8 +152,9 @@ int	Response::getHeaderSize() const
 std::string	Response::toString(int nbr)
 {
 	char *ch_code = ft_itoa(nbr);
-    if (!ch_code)
+    if (!ch_code) {
         throw std::runtime_error(std::string("ft_itoa: ") + strerror(errno));
+	}
 	std::string status_code(ch_code);
 	delete ch_code;
 
@@ -238,7 +240,8 @@ void		Response::check_path(Request &request)
 {
     (void)(request);
 	t_start_line temp = request.getStartLine();
-	setPath(Parser::getArgument(temp.request_target, ft_strchr(temp.request_target, '/')));
+	setPath(Parser::getArgument(temp.request_target, utils::ft_strchr(temp.request_target, '/')));
+	std::cout << Parser::getArgument(temp.request_target, utils::ft_strchr(temp.request_target, '/')) << std::endl;
 	const char *path = getPath().c_str();
 	std::ifstream ifs;
 	DIR* dir = opendir(path);
