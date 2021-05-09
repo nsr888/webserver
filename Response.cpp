@@ -238,6 +238,7 @@ void		Response::check_path(Request &request)
 {
     (void)(request);
 	t_start_line temp = request.getStartLine();
+
 	setPath(Parser::getArgument(temp.request_target, ft_strchr(temp.request_target, '/')));
 	const char *path = getPath().c_str();
 	std::ifstream ifs;

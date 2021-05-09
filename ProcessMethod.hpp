@@ -29,13 +29,10 @@ public:
 	void			secretary_Request(Request &request, Response &respone, Setting &config, const std::string &method);
 	void			generateBody();
 	
-	void			processGetRequest();
-	void			processHeadRequest();
+	void			processGetRequest(int i);
+	void			processHeadRequest(int i);
 	void			processPostRequest();
 	void			processPutRequest();
-	void			processDeleteRequest();
-	void			processOptionsRequest();
-	void			processTraceRequest();
 
 	void			isLocationHasIndex();
 	void			isListingAllowed();

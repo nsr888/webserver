@@ -21,23 +21,27 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 	if (method == "GET")
 	{
 		if (i == -1)
-			processGetRequest();
+			processGetRequest(-1);
 		else if (_config->getLocationGet(i))
-			processGetRequest();
+			processGetRequest(i);
 		else
 			_response->setCode(405);
 	}
 	if (method == "HEAD")
 	{
-		processHeadRequest();
-		/* Нужна ли проверка на авторизацию метода? Если да, то добавить в конфиг*/
+		if (i == -1)
+			processHeadRequest(-1);
+		else if (_config->getLocationGet(i))
+			processHeadRequest(i);
+		else
+			_response->setCode(405);
 	}
 	if (method == "POST")
 	{
 		if (i == -1)
-			processPostRequest();
+			processPutRequest();
 		else if (_config->getLocationPost(i))
-			processPostRequest();
+			processPutRequest();
 		else
 			_response->setCode(405);
 	}
@@ -50,42 +54,31 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 		else
 			_response->setCode(405);
 	}
-	if (method == "DELETE")
-	{
-		if (i == -1)
-			processDeleteRequest();
-		else if (_config->getLocationDelete(i))
-			processDeleteRequest();
-		else
-			_response->setCode(405);
-	}
-	if (method == "OPTIONS")
-	{
-		processOptionsRequest();
-		/* Нужна ли проверка на авторизацию метода? Если да, то добавить в конфиг*/
-	}
-	if (method == "TRACE")
-	{
-		processTraceRequest();
-		/* Нужна ли проверка на авторизацию метода? Если да, то добавить в конфиг*/
-	}
 }
 
-void	ProcessMethod::processGetRequest()
+void	ProcessMethod::processGetRequest(int i)
 {
+	bool autoindex = true;
+
+	if (i != -1 && _config->getLocationAutoindex(i) == 0)
+		autoindex = false;
 	_response->setCode(200);
 	if (S_ISLNK(_stat.st_mode) || S_ISREG(_stat.st_mode))
 		_response->setBody(readPath(_response->getPath()));
-	else if (S_ISDIR(_stat.st_mode) /*&&  _config.getAutoindex() */)
+	else if (S_ISDIR(_stat.st_mode) && autoindex == true)
 		_response->setBody(generateAutoindex(_response->getPath()));
 	else
 		_response->setCode(404);
 }
 
-void	ProcessMethod::processHeadRequest()
+void	ProcessMethod::processHeadRequest(int i)
 {
+	bool autoindex = true;
+
+	if (i != -1 && _config->getLocationAutoindex(i) == 0)
+		autoindex = false;
 	_response->setCode(200);
-	if (S_ISDIR(_stat.st_mode) /*&&  !_config.getAutoindex() */)
+	if (S_ISDIR(_stat.st_mode) && autoindex == false)
 		_response->setCode(404);
 }
 
@@ -112,21 +105,6 @@ void	ProcessMethod::processPutRequest()
 			_response->setCode(201);
 		close(fd);
 	}
-}
-
-void	ProcessMethod::processDeleteRequest()
-{
-	
-}
-
-void	ProcessMethod::processOptionsRequest()
-{
-	
-}
-
-void	ProcessMethod::processTraceRequest()
-{
-	
 }
 
 std::string ProcessMethod::readPath(std::string path)
@@ -163,7 +141,7 @@ std::string ProcessMethod::generateAutoindex(std::string path)
 
 int	ProcessMethod::numberInLocation()
 {
-	size_t 		len = _config->getLocatinSize();
+	size_t 		len = _config->getLocationSize();
 	std::string path = _response->getPath();
 
 	for (size_t i = 0; i < len; i++)
