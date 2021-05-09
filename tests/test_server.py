@@ -8,7 +8,7 @@ https://pytest-docs-ru.readthedocs.io/ru/latest/fixture.html
 import urllib.parse
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.fixture(scope="session")
 def connection():
     _connection = http.client.HTTPConnection("localhost", port=8080,  timeout=10)
     yield _connection

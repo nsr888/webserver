@@ -2,7 +2,7 @@ NAME = webserv
 SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp Response.cpp \
 	  Setting.cpp Parser.cpp utils.cpp ProcessMethod.cpp
 OBJ = $(SRC:%.cpp=%.o)
-CXX = clang++
+CXX = gcc
 CXXFLAGS = -Wall -Wextra -Werror -g -O2 -std=c++98 -pedantic
 INC = -I.
 
@@ -11,7 +11,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	cd libft && make
 	cd libgnl && make
-	$(CXX) $(CXXFLAGS) $(INC) $(OBJ) -Llibft -lft -Llibgnl -lgnl -o $(NAME)
+	$(CXX) $(CXXFLAGS) $(INC) $(OBJ) -Llibft -lft -Llibgnl -lgnl -lstdc++ -o $(NAME)
 
 %.o: %.cpp %.hpp
 	$(CXX) $(CXXFLAGS) -Ilibft -Ignl -c $< -o $@

@@ -43,17 +43,16 @@ public:
 	std::string& 		getHost() { return _host; }
 	int	                getPort() { return _port; }
 	std::string& 		getServerName() { return _server_name; }
-	int	                getMaxBodySize() { return _maxBodySizeMB; }
-	std::string&        getLocationPath(int i) { return _location[i]._path; }
-	std::string&        getLocationName(int i) { return _location[i]._locationName; }
-	std::string&        getLocationFile(int i) { return _location[i]._file; }
-	int                 getLocationPut(int i) { return _location[i]._put; }
-	int                 getLocationPost(int i) { return _location[i]._post; }
-	int                 getLocationGet(int i) { return _location[i]._get; }
-	int                 getLocationHead(int i) { return _location[i]._head; }
-	int                 getLocationAutoindex(int i) { return _location[i]._autoindex; }
-	size_t              getLocationSize() {return _location.size(); }
-
+    int	                getMaxBodySize() { return _maxBodySizeMB; }
+    std::string&        getLocationPath(int i) { return _location[i]._path; }
+    std::string&        getLocationName(int i) { return _location[i]._locationName; }
+    std::string&        getLocationFile(int i) { return _location[i]._file; }
+    int                 getLocationPut(int i) { return _location[i]._put; }
+    int                 getLocationPost(int i) { return _location[i]._post; }
+    int                 getLocationGet(int i) { return _location[i]._get; }
+    int                 getLocationHead(int i) { return _location[i]._head; }
+    int                 getLocationAutoindex(int i) { return _location[i]._autoindex; }
+    int                 getLocationSize() { return _location.size(); }
 };
 
 #endif

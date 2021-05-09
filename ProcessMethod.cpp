@@ -54,6 +54,15 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 		else
 			_response->setCode(405);
 	}
+	if (method == "HEAD")
+	{
+		if (i == -1)
+			processHeadRequest();
+		else if (_config->getLocationHead(i))
+			processHeadRequest();
+		else
+			_response->setCode(405);
+	}
 }
 
 void	ProcessMethod::processGetRequest(int i)
@@ -90,6 +99,7 @@ void	ProcessMethod::processPostRequest()
 void	ProcessMethod::processPutRequest()
 {
 	int fd = 0;
+	size_t check = 0;
 	std::string request_body(_request->getBody().begin(),_request->getBody().end());
 	
 	if (S_ISDIR(_stat.st_mode))
@@ -98,8 +108,13 @@ void	ProcessMethod::processPutRequest()
 		_response->setCode(500);
 	else
 	{
-		write(fd, request_body.c_str(), request_body.length());
-		if (_stat_num != -1)
+		check = write(fd, request_body.c_str(), request_body.length());
+		if (check != request_body.length()) {
+			_response->setCode(200);
+			std::cout << "Write error" << std::endl;
+			close(fd);
+		}
+		else if (_stat_num != -1)
 			_response->setCode(200);
 		else
 			_response->setCode(201);
@@ -127,12 +142,12 @@ std::string ProcessMethod::generateAutoindex(std::string path)
 {
 	std::string 	autoindex;
 	DIR*			directory = opendir(path.c_str());
-	struct dirent*	entry = nullptr;
+	struct dirent*	entry = 0;
 
 	if (directory)
 	{
 		autoindex.append("<html><head><title>Index of </title></head><body><h1>Index of </h1><br><hr><a href=\"../\">../</a><br>");
-		while ((entry = readdir(directory)) != nullptr) 
+		while ((entry = readdir(directory)) != 0) 
 			autoindex.append("<a href=\"" + std::string(entry->d_name) + "\">" + std::string(entry->d_name) + "</a><br>");
 		autoindex.append("</body></html>");
 	}

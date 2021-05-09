@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "utils.hpp"
 
 Response::Response()
     : _code_list()
@@ -151,8 +152,9 @@ int	Response::getHeaderSize() const
 std::string	Response::toString(int nbr)
 {
 	char *ch_code = ft_itoa(nbr);
-    if (!ch_code)
+    if (!ch_code) {
         throw std::runtime_error(std::string("ft_itoa: ") + strerror(errno));
+	}
 	std::string status_code(ch_code);
 	delete ch_code;
 
@@ -236,30 +238,30 @@ std::string	Response::generateErrorMsg()
 
 void		Response::check_path(Request &request)
 {
-    (void)(request);
 	t_start_line temp = request.getStartLine();
-
-	setPath(Parser::getArgument(temp.request_target, ft_strchr(temp.request_target, '/')));
-	const char *path = getPath().c_str();
-	std::ifstream ifs;
-	DIR* dir = opendir(path);
-	ifs.open (path, std::ifstream::in);
-	if(!ifs && !dir) {
-		setCode(404);
+	size_t limit = 1;
+	if (temp.request_target.size() <= limit) {
+		if (temp.request_target == "/") {
+			setPath(temp.request_target);
+		}
+		else {
+			setCode(404);
+		}
 	}
-	ifs.close();
-	closedir(dir);
-
-	// setPath("./files/index.html");
-	/* Проверка пути
-	путь получаем так: request.getStartLine().request_target
-	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
-	
-	после проверки записать путь setPath(std::string path);
-
-	если не найден путь
-	
-	setCode(404);*/
+	else {
+		setPath(Parser::getArgument(temp.request_target, utils::ft_strchr(temp.request_target, '/')));
+		const char *path = getPath().c_str();
+		std::ifstream ifs;
+		DIR* dir = opendir(path);
+		ifs.open (path, std::ifstream::in);
+		if(!ifs && !dir) {
+			setCode(404);
+		}
+		ifs.close();
+		if(dir) {
+			closedir(dir);
+		}
+	}
 }
 
 void		Response::check_error(const std::string &error_msg)
