@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ksinistr <ksinistr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: resther <resther@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/22 14:48:11 by ksinistr          #+#    #+#             */
-/*   Updated: 2020/06/01 14:56:44 by ksinistr         ###   ########.fr       */
+/*   Updated: 2021/05/09 17:03:09 by resther          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	*ft_memcpy(void *dst, const void *src, size_t n)
+void	*ft_memcpy2(void *dst, const void *src, size_t n)
 {
 	size_t		i;
 
@@ -26,7 +26,7 @@ void	*ft_memcpy(void *dst, const void *src, size_t n)
 	return (dst);
 }
 
-size_t	ft_strlen(const char *s)
+size_t	ft_strlen2(const char *s)
 {
 	size_t	i;
 
@@ -68,7 +68,7 @@ void	*ft_memmove(void *dst, const void *src, size_t len)
 	return (dst);
 }
 
-void	*ft_calloc(size_t count, size_t size)
+void	*ft_calloc2(size_t count, size_t size)
 {
 	void	*ret;
 	size_t	i;

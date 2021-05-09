@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ksinistr <ksinistr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: resther <resther@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/22 14:48:23 by ksinistr          #+#    #+#             */
-/*   Updated: 2020/09/08 10:35:25 by ksinistr         ###   ########.fr       */
+/*   Updated: 2021/05/09 17:03:50 by resther          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int		fill_buf(int fd, char *buf, size_t *buf_size)
 	if (buf_readed <= 0)
 		return (buf_readed);
 	buf[buf_readed] = '\0';
-	*buf_size = ft_strlen(buf);
+	*buf_size = ft_strlen2(buf);
 	return (buf_readed);
 }
 
@@ -40,14 +40,14 @@ int		fill_line(size_t *n_index, char *buf, size_t buf_size, char **line)
 
 	tmp = NULL;
 	*n_index = 0;
-	line_len = ft_strlen(*line);
+	line_len = ft_strlen2(*line);
 	while (buf[*n_index] != '\n' && *n_index < buf_size)
 		(*n_index)++;
 	new_line_size = line_len + *n_index + 1;
-	if (!(tmp = (char *)ft_calloc(new_line_size, sizeof(char))))
+	if (!(tmp = (char *)ft_calloc2(new_line_size, sizeof(char))))
 		return (-1);
-	ft_memcpy(tmp, *line, line_len);
-	ft_memcpy(&tmp[line_len], buf, *n_index);
+	ft_memcpy2(tmp, *line, line_len);
+	ft_memcpy2(&tmp[line_len], buf, *n_index);
 	free(*line);
 	*line = tmp;
 	return (1);
@@ -61,7 +61,7 @@ int		read_line(int fd, char **line, char *buf, size_t buf_size)
 	n_index = 0;
 	while (n_index == buf_size)
 	{
-		buf_size = ft_strlen(buf);
+		buf_size = ft_strlen2(buf);
 		if (n_index == buf_size || buf_readed <= 0)
 		{
 			buf_readed = fill_buf(fd, buf, &buf_size);
