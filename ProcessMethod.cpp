@@ -54,15 +54,15 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 		else
 			_response->setCode(405);
 	}
-	if (method == "HEAD")
-	{
-		if (i == -1)
-			processHeadRequest();
-		else if (_config->getLocationHead(i))
-			processHeadRequest();
-		else
-			_response->setCode(405);
-	}
+	/* if (method == "HEAD") */
+	/* { */
+	/* 	if (i == -1) */
+	/* 		processHeadRequest(); */
+	/* 	else if (_config->getLocationHead(i)) */
+	/* 		processHeadRequest(); */
+	/* 	else */
+	/* 		_response->setCode(405); */
+	/* } */
 }
 
 void	ProcessMethod::processGetRequest(int i)
