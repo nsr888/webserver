@@ -21,23 +21,27 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 	if (method == "GET")
 	{
 		if (i == -1)
-			processGetRequest();
+			processGetRequest(-1);
 		else if (_config->getLocationGet(i))
-			processGetRequest();
+			processGetRequest(i);
 		else
 			_response->setCode(405);
 	}
 	if (method == "HEAD")
 	{
-		processHeadRequest();
-		/* Нужна ли проверка на авторизацию метода? Если да, то добавить в конфиг*/
+		if (i == -1)
+			processHeadRequest(-1);
+		else if (_config->getLocationGet(i))
+			processHeadRequest(i);
+		else
+			_response->setCode(405);
 	}
 	if (method == "POST")
 	{
 		if (i == -1)
-			processPostRequest();
+			processPutRequest();
 		else if (_config->getLocationPost(i))
-			processPostRequest();
+			processPutRequest();
 		else
 			_response->setCode(405);
 	}
@@ -61,21 +65,29 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 	}
 }
 
-void	ProcessMethod::processGetRequest()
+void	ProcessMethod::processGetRequest(int i)
 {
+	bool autoindex = true;
+
+	if (i != -1 && _config->getLocationAutoindex(i) == 0)
+		autoindex = false;
 	_response->setCode(200);
 	if (S_ISLNK(_stat.st_mode) || S_ISREG(_stat.st_mode))
 		_response->setBody(readPath(_response->getPath()));
-	else if (S_ISDIR(_stat.st_mode) /*&&  _config.getAutoindex() */)
+	else if (S_ISDIR(_stat.st_mode) && autoindex == true)
 		_response->setBody(generateAutoindex(_response->getPath()));
 	else
 		_response->setCode(404);
 }
 
-void	ProcessMethod::processHeadRequest()
+void	ProcessMethod::processHeadRequest(int i)
 {
+	bool autoindex = true;
+
+	if (i != -1 && _config->getLocationAutoindex(i) == 0)
+		autoindex = false;
 	_response->setCode(200);
-	if (S_ISDIR(_stat.st_mode) /*&&  !_config.getAutoindex() */)
+	if (S_ISDIR(_stat.st_mode) && autoindex == false)
 		_response->setCode(404);
 }
 

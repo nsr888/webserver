@@ -238,7 +238,6 @@ std::string	Response::generateErrorMsg()
 
 void		Response::check_path(Request &request)
 {
-    (void)(request);
 	t_start_line temp = request.getStartLine();
 	size_t limit = 1;
 	if (temp.request_target.size() <= limit) {
@@ -263,17 +262,6 @@ void		Response::check_path(Request &request)
 			closedir(dir);
 		}
 	}
-
-	// setPath("./files/index.html");
-	/* Проверка пути
-	путь получаем так: request.getStartLine().request_target
-	нужно подумать от куда брать инфу о редиректах, возможно сюда нужно передавать setting или config
-	
-	после проверки записать путь setPath(std::string path);
-
-	если не найден путь
-	
-	setCode(404);*/
 }
 
 void		Response::check_error(const std::string &error_msg)
