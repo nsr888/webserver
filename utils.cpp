@@ -43,7 +43,7 @@ namespace utils {
 
         offset = 0;
         m = 0;
-        if ((fd = open(filename.c_str(), O_TRUNC | O_WRONLY | O_CREAT)) < 0)
+        if ((fd = open(filename.c_str(), O_TRUNC | O_WRONLY | O_CREAT, 0644)) < 0)
             throw std::runtime_error(std::string("open: ") + strerror(errno));
         std::vector<char>::iterator it = buf.begin();
         while (it != buf.end())

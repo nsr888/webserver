@@ -240,17 +240,29 @@ void		Response::check_path(Request &request)
 {
     (void)(request);
 	t_start_line temp = request.getStartLine();
-	setPath(Parser::getArgument(temp.request_target, utils::ft_strchr(temp.request_target, '/')));
-	std::cout << Parser::getArgument(temp.request_target, utils::ft_strchr(temp.request_target, '/')) << std::endl;
-	const char *path = getPath().c_str();
-	std::ifstream ifs;
-	DIR* dir = opendir(path);
-	ifs.open (path, std::ifstream::in);
-	if(!ifs && !dir) {
-		setCode(404);
+	size_t limit = 1;
+	if (temp.request_target.size() <= limit) {
+		if (temp.request_target == "/") {
+			setPath(temp.request_target);
+		}
+		else {
+			setCode(404);
+		}
 	}
-	ifs.close();
-	closedir(dir);
+	else {
+		setPath(Parser::getArgument(temp.request_target, utils::ft_strchr(temp.request_target, '/')));
+		const char *path = getPath().c_str();
+		std::ifstream ifs;
+		DIR* dir = opendir(path);
+		ifs.open (path, std::ifstream::in);
+		if(!ifs && !dir) {
+			setCode(404);
+		}
+		ifs.close();
+		if(dir) {
+			closedir(dir);
+		}
+	}
 
 	// setPath("./files/index.html");
 	/* Проверка пути
