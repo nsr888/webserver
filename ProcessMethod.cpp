@@ -30,20 +30,27 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 	if (method == "HEAD")
 	{
 		if (i == -1)
+        {
 			processHeadRequest(-1);
+        }
 		else if (_config->getLocationGet(i))
+        {
 			processHeadRequest(i);
+        }
 		else
+        {
 			_response->setCode(405);
+        }
 	}
 	if (method == "POST")
 	{
-		if (i == -1)
-			processPutRequest();
-		else if (_config->getLocationPost(i))
-			processPutRequest();
-		else
-			_response->setCode(405);
+        processPostRequest(i);
+		/* if (i == -1) */
+		/* 	processPostRequest(-1); */
+		/* else if (_config->getLocationPost(i)) */
+		/* 	processPostRequest(i); */
+		/* else */
+		/* 	_response->setCode(405); */
 	}
 	if (method == "PUT")
 	{
@@ -91,9 +98,83 @@ void	ProcessMethod::processHeadRequest(int i)
 		_response->setCode(404);
 }
 
-void	ProcessMethod::processPostRequest()
+void	ProcessMethod::processPostRequest(int i)
 {
-	
+    /* if (i == -1) */
+    /* { */
+		/* _response->setCode(404); */
+    /*     return; */
+    /* } */
+    if (_request->getHeader()["Content-Length"] == "0")
+    {
+        _response->setCode(405);
+        return;
+    }
+    if (1 == 1)
+    {
+        /* if exist cgi process to cgi */
+        std::vector<char*> envVector;
+        envVector.push_back(const_cast<char*>("REDIRECT_STATUS=200"));
+        envVector.push_back(const_cast<char*>("GATEWAY_INTERFACE=CGI/1.1"));
+        envVector.push_back(const_cast<char*>("SERVER_PROTOCOL=HTTP/1.1"));
+        envVector.push_back(const_cast<char*>("REQUEST_METHOD=POST"));
+        envVector.push_back(const_cast<char*>("SCRIPT_FILENAME=/Users/anasyrov/Documents/21/webserver/webserver/files/test.php"));
+        envVector.push_back(const_cast<char*>("SCRIPT_NAME=test.php"));
+        envVector.push_back(const_cast<char*>("CONTENT_TYPE=application/x-www-form-urlencoded"));
+        std::string content_length = "CONTENT_LENGTH=" + _request->getHeader()["Content-Length"];
+        envVector.push_back(const_cast<char*>(content_length.c_str()));
+        envVector.push_back(0);
+        char **env = envVector.data();
+
+        /* https://stackoverflow.com/a/39395978 */
+        int child_to_parent[2];
+        int parent_to_child[2];
+
+        pipe(child_to_parent);
+        pipe(parent_to_child);
+
+        pid_t pid = fork();
+
+        if (pid == 0) {
+            /* In child process */
+            dup2(child_to_parent[1], STDOUT_FILENO);
+            close(child_to_parent[0]);
+
+            dup2(parent_to_child[0], STDIN_FILENO);
+            close(parent_to_child[1]);
+
+            execve("/usr/local/bin/php-cgi", 0, &env[0]);
+        } else {
+            /* In parent process */
+            close(child_to_parent[1]);
+            close(parent_to_child[0]);
+
+            std::vector<char> body = _request->getBody();
+            /* std::cout << "body: " << &body[0] << std::endl; */
+            write(parent_to_child[1], &body[0], body.size());
+            int status;
+            if (waitpid(pid, &status, 0) < 0)
+                throw std::runtime_error(std::string("waitpid") + strerror(errno));
+            char                line[5];
+            int                 m;
+            std::vector<char>   buf;
+            while ((m = read(child_to_parent[0], line, 5)) > 0)
+            {
+                if (m == -1)
+                    throw std::runtime_error(std::string("write: ") + strerror(errno));
+                buf.insert(buf.end(), line, line + m);
+            }
+            /* Request::parseHeaderFields(&_response->getHeader(), buf.begin(), buf); */
+            /* Request::deleteHeaderInBuf(&buf); */
+            _response->setBody(std::string(buf.begin(), buf.end()));
+            _response->setCode(200);
+        }
+    }
+    else
+    {
+        /* if didnt exist cgi, then processGetRequest */
+        processGetRequest(i);
+    }
 }
 
 void	ProcessMethod::processPutRequest()
@@ -102,6 +183,11 @@ void	ProcessMethod::processPutRequest()
 	size_t check = 0;
 	std::string request_body(_request->getBody().begin(),_request->getBody().end());
 	
+    if (_request->getHeader()["Content-Length"] == "0")
+    {
+		_response->setCode(405);
+        return;
+    }
 	if (S_ISDIR(_stat.st_mode))
 		_response->setCode(404);
 	if ((fd = open(_response->getPath().c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666)) < 0)

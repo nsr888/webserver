@@ -9,6 +9,7 @@
 # include <sys/stat.h>
 # include <unistd.h>
 # include <dirent.h>
+# include <unistd.h>
 
 class Response;
 
@@ -31,7 +32,7 @@ public:
 	
 	void			processGetRequest(int i);
 	void			processHeadRequest(int i);
-	void			processPostRequest();
+	void			processPostRequest(int i);
 	void			processPutRequest();
 
 	void			isLocationHasIndex();
