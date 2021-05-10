@@ -10,7 +10,6 @@
 #include "EventLoop.hpp"
 
 int main(int argc, char** argv) {
-    // инициализация конфига парсером
     const char *config_file = "config/default.conf"; // конфиг по умолчанию
     if (argc != 1) {
         config_file = argv[1]; // если при запуске дают другой конфиг берём его
@@ -18,19 +17,9 @@ int main(int argc, char** argv) {
     std::vector<Setting> config;
     Parser parser;
     config = parser.startParsing(config_file);
-    size_t i = 0;
 
-    while (i < 4) { //проверка парсинга конфига, выводит все 4 пути из дефолтного конфига
-		std::cout << config[0].getLocationPath(i) << std::endl;
-		i++;
-	}
-
-    // i = 0;
-    // std::cout << std::endl;
-    // while (i < 4) { //проверка парсинга второго конфига, выводит все 4 пути из второго конфига мультисервера
-	// 	std::cout << config[1].getLocationPath(i) << std::endl;
-	// 	i++;
-	// }
+    //проверка парсинга конфига, выводит все параметры всех конфигов
+    parser.showConfig(config);
 
     EventLoop *loop = new EventLoop(config);
 
