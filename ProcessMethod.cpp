@@ -237,7 +237,7 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     envVector.push_back(const_cast<char*>("REDIRECT_STATUS=200"));
     std::string server_name = "SERVER_NAME=" + _config->getServerName();
     envVector.push_back(const_cast<char*>(server_name.c_str()));
-    std::string server_port = "SERVER_PORT=" + std::to_string(_config->getPort());
+    std::string server_port = "SERVER_PORT=" + std::string(ft_itoa(_config->getPort()));
     envVector.push_back(const_cast<char*>(server_port.c_str()));
     envVector.push_back(const_cast<char*>("SERVER_PROTOCOL=HTTP/1.1"));
     /* envVector.push_back(const_cast<char*>("SERVER_SOFTWARE=")); */
@@ -269,7 +269,8 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
         dup2(parent_to_child[0], STDIN_FILENO);
         close(parent_to_child[1]);
 
-        execve(exec_prog.c_str(), 0, &env[0]);
+        char *arg[] = { const_cast<char*>(exec_prog.c_str()), 0 };
+        execve(exec_prog.c_str(), &arg[0], &env[0]);
     } else {
         /* In parent process */
         close(child_to_parent[1]);
@@ -277,11 +278,11 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
 
         std::vector<char> body = _request->getBody();
         /* std::cout << "body: " << &body[0] << std::endl; */
-		size_t writen = 0;      // без отслеживания результата функции write ругается
-        writen = write(parent_to_child[1], &body[0], body.size());
+        if (write(parent_to_child[1], &body[0], body.size()) < 0)
+            throw std::runtime_error(std::string("execCGI write: ") + strerror(errno));
         int status;
         if (waitpid(pid, &status, 0) < 0)
-            throw std::runtime_error(std::string("waitpid") + strerror(errno));
+            throw std::runtime_error(std::string("execCGI waitpid") + strerror(errno));
         char                line[5];
         int                 m;
         std::vector<char>   buf;

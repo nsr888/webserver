@@ -13,6 +13,10 @@
 # include <sys/wait.h>
 # include <cstring>  // for linux
 
+extern "C" {
+    char *ft_itoa(int n);
+}
+
 class Response;
 
 class ProcessMethod
