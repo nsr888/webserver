@@ -22,6 +22,7 @@ private:
 	std::string		_method;
 	struct stat		_stat;
 	int				_stat_num;
+    void            _execCGI(void);
 
 public:
 	ProcessMethod();

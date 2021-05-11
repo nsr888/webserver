@@ -1,5 +1,12 @@
 #include "ProcessMethod.hpp"
 
+const std::string yel("\033[0;33m");
+const std::string red("\033[0;31m");
+const std::string grn("\033[0;32m");
+const std::string blu("\033[0;34m");
+const std::string gra("\033[0;30m");
+const std::string res("\033[0m");
+
 ProcessMethod::ProcessMethod()
 {
 }
@@ -112,63 +119,7 @@ void	ProcessMethod::processPostRequest(int i)
     }
     if (1 == 1)
     {
-        /* if exist cgi process to cgi */
-        std::vector<char*> envVector;
-        envVector.push_back(const_cast<char*>("REDIRECT_STATUS=200"));
-        envVector.push_back(const_cast<char*>("GATEWAY_INTERFACE=CGI/1.1"));
-        envVector.push_back(const_cast<char*>("SERVER_PROTOCOL=HTTP/1.1"));
-        envVector.push_back(const_cast<char*>("REQUEST_METHOD=POST"));
-        envVector.push_back(const_cast<char*>("SCRIPT_FILENAME=/Users/anasyrov/Documents/21/webserver/webserver/files/test.php"));
-        envVector.push_back(const_cast<char*>("SCRIPT_NAME=test.php"));
-        envVector.push_back(const_cast<char*>("CONTENT_TYPE=application/x-www-form-urlencoded"));
-        std::string content_length = "CONTENT_LENGTH=" + _request->getHeader()["Content-Length"];
-        envVector.push_back(const_cast<char*>(content_length.c_str()));
-        envVector.push_back(0);
-        char **env = envVector.data();
-
-        /* https://stackoverflow.com/a/39395978 */
-        int child_to_parent[2];
-        int parent_to_child[2];
-
-        pipe(child_to_parent);
-        pipe(parent_to_child);
-
-        pid_t pid = fork();
-
-        if (pid == 0) {
-            /* In child process */
-            dup2(child_to_parent[1], STDOUT_FILENO);
-            close(child_to_parent[0]);
-
-            dup2(parent_to_child[0], STDIN_FILENO);
-            close(parent_to_child[1]);
-
-            execve("/usr/local/bin/php-cgi", 0, &env[0]);
-        } else {
-            /* In parent process */
-            close(child_to_parent[1]);
-            close(parent_to_child[0]);
-
-            std::vector<char> body = _request->getBody();
-            /* std::cout << "body: " << &body[0] << std::endl; */
-            write(parent_to_child[1], &body[0], body.size());
-            int status;
-            if (waitpid(pid, &status, 0) < 0)
-                throw std::runtime_error(std::string("waitpid") + strerror(errno));
-            char                line[5];
-            int                 m;
-            std::vector<char>   buf;
-            while ((m = read(child_to_parent[0], line, 5)) > 0)
-            {
-                if (m == -1)
-                    throw std::runtime_error(std::string("write: ") + strerror(errno));
-                buf.insert(buf.end(), line, line + m);
-            }
-            /* Request::parseHeaderFields(&_response->getHeader(), buf.begin(), buf); */
-            /* Request::deleteHeaderInBuf(&buf); */
-            _response->setBody(std::string(buf.begin(), buf.end()));
-            _response->setCode(200);
-        }
+        _execCGI();
     }
     else
     {
@@ -251,4 +202,90 @@ int	ProcessMethod::numberInLocation()
 			return (i);
 	}
 	return (-1);
+}
+
+void ProcessMethod::_execCGI()
+{
+    /* if exist cgi process to cgi */
+    std::vector<char*> envVector;
+    /* envVector.push_back(const_cast<char*>("AUTH_TYPE=")); */
+    std::string content_length = "CONTENT_LENGTH=" + _request->getHeader()["Content-Length"];
+    envVector.push_back(const_cast<char*>(content_length.c_str()));
+    envVector.push_back(const_cast<char*>("CONTENT_TYPE=application/x-www-form-urlencoded"));
+    envVector.push_back(const_cast<char*>("GATEWAY_INTERFACE=CGI/1.1"));
+    /* envVector.push_back(const_cast<char*>("PATH_INFO=")); */
+    /* envVector.push_back(const_cast<char*>("PATH_TRANSLATED=")); */
+    /* envVector.push_back(const_cast<char*>("QUERY_STRING=")); */
+    /* envVector.push_back(const_cast<char*>("REMOTE_ADDR=")); */
+    /* envVector.push_back(const_cast<char*>("REMOTE_IDENT=")); */
+    /* envVector.push_back(const_cast<char*>("REMOTE_USER=")); */
+    std::string request_method = "REQUEST_METHOD=" + _request->getStartLine().method;
+    envVector.push_back(const_cast<char*>(request_method.c_str()));
+    /* envVector.push_back(const_cast<char*>("REQUEST_URI=")); */
+    envVector.push_back(const_cast<char*>("SCRIPT_NAME=test.php"));
+    envVector.push_back(const_cast<char*>("REDIRECT_STATUS=200"));
+    std::string server_name = "SERVER_NAME=" + _config->getServerName();
+    envVector.push_back(const_cast<char*>(server_name.c_str()));
+    std::string server_port = "SERVER_PORT=" + std::to_string(_config->getPort());
+    envVector.push_back(const_cast<char*>(server_port.c_str()));
+    envVector.push_back(const_cast<char*>("SERVER_PROTOCOL=HTTP/1.1"));
+    /* envVector.push_back(const_cast<char*>("SERVER_SOFTWARE=")); */
+    envVector.push_back(const_cast<char*>("SCRIPT_FILENAME=/Users/anasyrov/Documents/21/webserver/webserver/files/test.php"));
+    envVector.push_back(0);
+    std::cout << gra << "------" << " CGI envirements start " << "------" << res << std::endl;
+    for (size_t i = 0; envVector[i] != 0; ++i)
+        std::cout << envVector[i] << std::endl;
+    std::cout << gra << "------" << " CGI envirements end " << "------" << res << std::endl;
+    char **env = envVector.data();
+
+    /* https://stackoverflow.com/a/39395978 */
+    int child_to_parent[2];
+    int parent_to_child[2];
+
+    pipe(child_to_parent);
+    pipe(parent_to_child);
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        /* In child process */
+        dup2(child_to_parent[1], STDOUT_FILENO);
+        close(child_to_parent[0]);
+
+        dup2(parent_to_child[0], STDIN_FILENO);
+        close(parent_to_child[1]);
+
+        execve("/usr/local/bin/php-cgi", 0, &env[0]);
+    } else {
+        /* In parent process */
+        close(child_to_parent[1]);
+        close(parent_to_child[0]);
+
+        std::vector<char> body = _request->getBody();
+        /* std::cout << "body: " << &body[0] << std::endl; */
+        write(parent_to_child[1], &body[0], body.size());
+        int status;
+        if (waitpid(pid, &status, 0) < 0)
+            throw std::runtime_error(std::string("waitpid") + strerror(errno));
+        char                line[5];
+        int                 m;
+        std::vector<char>   buf;
+        while ((m = read(child_to_parent[0], line, 5)) > 0)
+        {
+            if (m == -1)
+                throw std::runtime_error(std::string("write: ") + strerror(errno));
+            buf.insert(buf.end(), line, line + m);
+        }
+        if (Request::bufContains(&buf, "\r\n\r\n"))
+        {
+            std::vector<char> headers_buf_from_cgi;
+            headers_buf_from_cgi = Request::deleteHeaderInBuf(&buf);
+            std::map<std::string, std::string> header_map;
+            header_map = utils::parseBufToHeaderMap(_response->getHeader(),
+                    headers_buf_from_cgi);
+            _response->setHeader(header_map);
+        }
+        _response->setBody(std::string(buf.begin(), buf.end()));
+        _response->setCode(200);
+    }
 }
