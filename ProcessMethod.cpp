@@ -119,7 +119,16 @@ void	ProcessMethod::processPostRequest(int i)
     }
     if (1 == 1)
     {
-        _execCGI();
+        std::string exec_prog;
+        for (int i = 0; i < _config->getCGISize(); ++i)
+        {
+            if (_config->getCGIType(i) == "php")
+               exec_prog = _config->getCGIPath(i); 
+        }
+        if (exec_prog != "")
+            _execCGI(exec_prog);
+        else
+            processGetRequest(i);
     }
     else
     {
@@ -204,7 +213,7 @@ int	ProcessMethod::numberInLocation()
 	return (-1);
 }
 
-void ProcessMethod::_execCGI()
+void ProcessMethod::_execCGI(const std::string & exec_prog)
 {
     /* if exist cgi process to cgi */
     std::vector<char*> envVector;
@@ -255,7 +264,7 @@ void ProcessMethod::_execCGI()
         dup2(parent_to_child[0], STDIN_FILENO);
         close(parent_to_child[1]);
 
-        execve("/usr/local/bin/php-cgi", 0, &env[0]);
+        execve(exec_prog.c_str(), 0, &env[0]);
     } else {
         /* In parent process */
         close(child_to_parent[1]);
