@@ -2,7 +2,8 @@ NAME = webserv
 SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp Response.cpp \
 	  Setting.cpp Parser.cpp utils.cpp ProcessMethod.cpp
 OBJ = $(SRC:%.cpp=%.o)
-CXX = gcc
+# CXX = g++-10
+CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -g -O2 -std=c++98 -pedantic
 INC = -I.
 
@@ -31,7 +32,7 @@ re: fclean all
 # python unit tests with pytest
 test: $(NAME)
 	@./$(NAME) & echo $$! > ./tests/webserver.PID
-	@cd ./tests/ && python3 -m pytest --tb=line
+	@cd ./tests/ && python3 -m pytest --tb=line || true
 	@if [ -a ./tests/webserver.PID ]; then \
 		kill -TERM $$(cat ./tests/webserver.PID) || true; \
 	fi;
@@ -39,7 +40,7 @@ test: $(NAME)
 
 # python unit tests with pytest (default) 'long' tracebacks
 test_long: $(NAME)
-	@./$(NAME) & echo $$! > ./tests/webserver.PID
+	@./$(NAME) & echo $$! > ./tests/webserver.PID || true
 	@cd ./tests/ && python3 -m pytest --durations=0
 	@if [ -a ./tests/webserver.PID ]; then \
 		kill -TERM $$(cat ./tests/webserver.PID) || true; \
