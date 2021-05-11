@@ -41,14 +41,17 @@ void    Request::_printBuf(std::string msg) {
     std::cout << yel << "\n----- end " << msg << " -------" << res << std::endl;
 }
 
-void    Request::_deleteHeaderInBuf() {
+std::vector<char>    Request::deleteHeaderInBuf(std::vector<char> * buf) {
     const char *crlf = "\r\n\r\n";
-    std::vector<char>::iterator it = std::search(_buf.begin(), _buf.end(), crlf, crlf + std::strlen(crlf));
-    if (it != _buf.end())
+    std::vector<char> deleted_headers;
+    std::vector<char>::iterator it = std::search(buf->begin(), buf->end(), crlf, crlf + std::strlen(crlf));
+    if (it != buf->end())
     {
-        it = it + 4;
-        _buf.erase(_buf.begin(), it);
+        deleted_headers.insert(deleted_headers.end(), buf->begin(), it);
+        buf->erase(buf->begin(), it + 4);
     }
+    deleted_headers.push_back(0);
+    return deleted_headers;
 }
 
 bool Request::_parseHeader() {
@@ -104,7 +107,7 @@ bool Request::_parseHeader() {
 		head = tail;
     }
     /* _printBuf("print raw buf, before delete header"); */
-    _deleteHeaderInBuf();
+    deleteHeaderInBuf(&this->_buf);
     _request_state = st_body_feed;
     return true;
 }
@@ -148,17 +151,18 @@ std::vector<char> Request::getBody(void) const {
 	return _body;
 }
 
-std::vector<char>::iterator Request::_bufFind(std::string str) {
-    /* find specified string in _buf */
+std::vector<char>::iterator Request::bufFind(
+        std::vector<char> * buf, std::string str) {
+    /* find specified string in buf */
     const char *crlf = str.c_str();
     std::vector<char>::iterator it;
-    it = std::search(_buf.begin(), _buf.end(), crlf, crlf + std::strlen(crlf));
+    it = std::search(buf->begin(), buf->end(), crlf, crlf + std::strlen(crlf));
     return it;
 }
 
-bool Request::_bufContains(std::string str) {
+bool Request::bufContains(std::vector<char> * buf, std::string str) {
     /* indicates whether the _buf contains the specified string */
-    if (_bufFind(str) != _buf.end())
+    if (bufFind(buf, str) != buf->end())
         return true;
     return false;
 }
@@ -166,7 +170,7 @@ bool Request::_bufContains(std::string str) {
 bool    Request::isHeaderParsed()
 {
     /* indicates whether the _buf contains the end of header symbols */
-    if (_request_state == st_header_feed && _bufContains("\r\n\r\n"))
+    if (_request_state == st_header_feed && bufContains(&this->_buf, "\r\n\r\n"))
         return(_parseHeader());
     return false;
 }
@@ -205,16 +209,16 @@ bool    Request::_parseChunk()
     {
         if (_chunk_state == ch_header_feed)
         {
-            if (_bufContains("\r\n"))
+            if (bufContains(&this->_buf, "\r\n"))
             {
                 /* _printBuf("_buf, before chunk header parse"); */ 
-                std::string str(_buf.begin(), _bufFind("\r\n"));
-                if (_bufContains(";"))
-                    str = std::string(_buf.begin(), _bufFind(";"));
+                std::string str(_buf.begin(), bufFind(&this->_buf, "\r\n"));
+                if (bufContains(&this->_buf, ";"))
+                    str = std::string(_buf.begin(), bufFind(&this->_buf, ";"));
                 _chunk_size = static_cast<size_t>(ft_atoi(str.c_str()));
                 /* std::cout << "_chunk_size: " << _chunk_size << std::endl; */
-                _buf.erase(_buf.begin(), _bufFind("\r\n") + 2);
-                /* _buf.assign(_bufFind("\r\n") + 2, _buf.end()); */
+                _buf.erase(_buf.begin(), bufFind(&this->_buf, "\r\n") + 2);
+                /* _buf.assign(bufFind(&this->_buf, "\r\n") + 2, _buf.end()); */
                 _chunk_state = ch_body_feed;
             }
             else

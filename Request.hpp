@@ -60,6 +60,10 @@ public:
     std::string &                       getHeaderField(const std::string & key);
     size_t                              getHeaderFieldAsNumber(const std::string & key);
 
+    static std::vector<char>            deleteHeaderInBuf(std::vector<char> * buf);
+    static bool                         bufContains(std::vector<char> * buf, std::string str);
+    static std::vector<char>::iterator  bufFind(std::vector<char> * buf, std::string str);
+
 private:
     request_states                      _request_state;
     t_start_line                        _start_line;
@@ -70,12 +74,9 @@ private:
     chunk_states                        _chunk_state;
     size_t                              _chunk_size;
 
-    bool                                _bufContains(std::string str);
-    std::vector<char>::iterator         _bufFind(std::string str);
     bool                                _parseHeader();
     bool                                _parseChunk();
     void                                _setBody();
-    void                                _deleteHeaderInBuf();
     void                                _printBuf(std::string msg);
 };
 
