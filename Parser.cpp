@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <fstream> 
+#include <set>
 
 Parser::Parser() {
 	_isOneMoreServer = 1;
@@ -169,5 +170,42 @@ std::vector<Setting> Parser::startParsing(const char *config_file) {
 	while (_isOneMoreServer == 1)
 		temp_config.push_back(get_config(temp));
 	return (temp_config);
+}
+
+int			Parser::checkConfig(std::vector<Setting> config) {
+	size_t i = 0;
+	if (config.size() > 1) {
+		std::set<int> ports;
+		i = 0;
+		while (i < config.size()) {
+			ports.insert(config[i].getPort());
+			i++;
+		}
+		if (config.size() != ports.size()) {
+			std::cout << "Config error: config has few servers with the same port" << std::endl;
+			return (0);
+		}
+	}
+	i = 0;
+	while (i < config.size()) {
+		if (!config[i].getPort()) {
+			std::cout << "Config error: config not contain port number" << std::endl;
+			return (0);
+		}
+		if (config[i].getHost().empty()) {
+			std::cout << "Config error: config not contain host address" << std::endl;
+			return (0);
+		}
+		if (config[i].getServerName().empty()) {
+			std::cout << "Config error: config not contain server name" << std::endl;
+			return (0);
+		}
+		if (config[i].getLocationPath(0).empty()) {
+			std::cout << "Config error: config not contain location path" << std::endl;
+			return (0);
+		}
+		i++;
+	}
+	return (1);
 }
 

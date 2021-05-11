@@ -1,4 +1,5 @@
 #include "ProcessMethod.hpp"
+#include <string>
 
 const std::string yel("\033[0;33m");
 const std::string red("\033[0;31m");
@@ -111,7 +112,8 @@ void	ProcessMethod::processPostRequest(int i)
     /* { */
 		/* _response->setCode(404); */
     /*     return; */
-    /* } */
+    /* } */#include <sys/types.h>
+#include <sys/wait.h>
     if (_request->getHeader()["Content-Length"] == "0")
     {
         _response->setCode(405);
@@ -251,8 +253,11 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     int child_to_parent[2];
     int parent_to_child[2];
 
-    pipe(child_to_parent);
-    pipe(parent_to_child);
+	
+    if (pipe(child_to_parent) == -1 || pipe(parent_to_child) == -1) {
+		std::cout << "Error: pipe error" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
     pid_t pid = fork();
 
@@ -272,7 +277,8 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
 
         std::vector<char> body = _request->getBody();
         /* std::cout << "body: " << &body[0] << std::endl; */
-        write(parent_to_child[1], &body[0], body.size());
+		size_t writen = 0;      // без отслеживания результата функции write ругается
+        writen = write(parent_to_child[1], &body[0], body.size());
         int status;
         if (waitpid(pid, &status, 0) < 0)
             throw std::runtime_error(std::string("waitpid") + strerror(errno));

@@ -10,6 +10,8 @@
 # include <unistd.h>
 # include <dirent.h>
 # include <unistd.h>
+# include <sys/wait.h>
+# include <cstring>  // for linux
 
 class Response;
 

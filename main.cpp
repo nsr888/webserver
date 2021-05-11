@@ -10,16 +10,17 @@
 #include "EventLoop.hpp"
 
 int main(int argc, char** argv) {
-    const char *config_file = "config/default.conf"; // конфиг по умолчанию
+    const char *config_file = "config/default.conf"; // Конфиг по умолчанию
     if (argc != 1) {
-        config_file = argv[1]; // если при запуске дают другой конфиг берём его
+        config_file = argv[1];                       // Если при запуске дают другой конфиг берём его
     }
     std::vector<Setting> config;
     Parser parser;
-    config = parser.startParsing(config_file);
-
-    //проверка парсинга конфига, выводит все параметры всех конфигов
-    parser.showConfig(config);
+    config = parser.startParsing(config_file);       // Парсим конфиг
+    parser.showConfig(config);                       // Выводит все параметры всех конфигов
+    if (!parser.checkConfig(config)) {               // Проверка конфига на валидность
+        exit(EXIT_FAILURE);
+    }
 
     EventLoop *loop = new EventLoop(config);
 

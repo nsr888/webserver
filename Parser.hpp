@@ -19,6 +19,7 @@ private:
 	int		_isOneMoreServer;
 	size_t	_stringReaded;
 
+
 public:
 	
 	Parser(void);
@@ -30,6 +31,7 @@ public:
 	std::string 			getArgumentCGI(const std::string &dst, int start);
 	Location				getLocation(std::vector<std::string> temp, int i);
 	void					showConfig(std::vector<Setting> config);
+	int						checkConfig(std::vector<Setting> config);
 	
 	~Parser() {};
 };
