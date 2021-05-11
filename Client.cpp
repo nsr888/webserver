@@ -110,9 +110,9 @@ void Client::sendResponse() {
 }
 
 void Client::generateResponse() {
-    std::cout << yel << "\n------ start parsed request -------\n" << res;
+    std::cout << yel << "\n------ Request (parsed) Start -------\n" << res;
     std::cout << _request << std::endl;
-    std::cout << yel << "------ end parsed request -------" << res << std::endl;
+    std::cout << yel << "------ Request (parsed) End -------" << res << std::endl;
     /* if (_request.getStartLine().method == "POST" && */
     /*     _request.isHeaderContains("Content-Length") && */
     /*     _request.getHeaderFieldAsNumber("Content-Length") == 0) */
@@ -150,7 +150,7 @@ void Client::generateResponse() {
     _response.assign(_response_struct.getBuf().begin(), _response_struct.getBuf().end());
 
     _client_state = st_send_response;
-    std::cout << red << "\n------ start response (first 400 symbols) -------\n" << res;
+    std::cout << red << "\n------ Response Start (first 400 symbols) -------\n" << res;
     std::cout << std::string(_response.begin(), _response.end()).substr(0, 400) << std::endl;
-    std::cout << red << "------ end response (first 400 symbols) -------\n" << res;
+    std::cout << red << "------ Response End (first 400 symbols) -------\n" << res;
 }
