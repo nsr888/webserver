@@ -58,7 +58,7 @@ def test_wrong_target_request(connection):
 
 
 def test_post_request(connection):
-    params = urllib.parse.urlencode({'@key1': 'val', '@key2': 'va2'})
+    params = urllib.parse.urlencode({'key1': 'val', 'key2': 'va2'})
     headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
     connection.request("POST", "/", params, headers)
     resp = connection.getresponse()
@@ -78,7 +78,7 @@ def test_post_wrong_length_request(connection):
 
 
 def test_post_wrong_target_request(connection):
-    params = urllib.parse.urlencode({'@key1': 'val', '@key2': 'va2'})
+    params = urllib.parse.urlencode({'key1': 'val', 'key2': 'va2'})
     headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
     connection.request("POST", "/onhuneothunheo", params, headers)
     resp = connection.getresponse()
@@ -106,7 +106,7 @@ def test_post_chunked_request(connection):
     connection.putrequest('POST', '/')
     connection.putheader('Transfer-Encoding', 'chunked')
     connection.endheaders()
-    params = urllib.parse.urlencode({'@key1': 'val', '@key2': 'va2'})
+    params = urllib.parse.urlencode({'key1': 'val', 'key2': 'va2'})
     connection.send(chunk_data(params, 3).encode('utf-8'))
     resp = connection.getresponse()
     body = resp.read()
@@ -140,7 +140,7 @@ def test_head_request(connection):
 
 
 def test_put_request(connection):
-    params = urllib.parse.urlencode({'@key1': 'val', '@key2': 'va2'})
+    params = urllib.parse.urlencode({'key1': 'val', 'key2': 'va2'})
     headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
     connection.request("POST", "/test.txt", params, headers)
     resp = connection.getresponse()
