@@ -132,4 +132,34 @@ namespace utils {
             return (index);
         return (-1);
     }
+
+    std::map<std::string, std::string>
+    parseBufToHeaderMap(const std::map<std::string, std::string> & header,
+            const std::vector<char> & buf)
+    {
+        // All headers in map (key - value)
+        std::vector<char>::const_iterator head = buf.begin();
+        std::vector<char>::const_iterator tail = head;
+        std::map<std::string, std::string> header_new = header;
+
+        while (head != buf.end() && *head != '\r')
+        {
+            while (tail != buf.end() && *tail != '\r')
+                ++tail;
+            std::vector<char>::const_iterator separator = head;
+            while (separator != buf.end() && separator != tail && *separator != ':')
+                ++separator;
+            if (separator == tail)
+                break;
+            std::string key(head, separator);
+            std::vector<char>::const_iterator value = ++separator;
+            while (value != tail && (*value == ' ' || *value == ':'))
+                ++value;
+            header_new[key] = std::string(value, tail);
+            while (tail != buf.end() && (*tail == '\r' || *tail == '\n'))
+                ++tail;
+            head = tail;
+        }
+        return header_new;
+    }
 }

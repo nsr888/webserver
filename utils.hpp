@@ -3,6 +3,7 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <string>
+# include <map>
 # include <vector>
 # include <cerrno>
 # include <iostream>
@@ -24,6 +25,9 @@ namespace utils {
     void				ft_usleep(int ms);
     std::string			ft_strtrim(const std::string &s1, const std::string& set);
     int					ft_strchr(const std::string& str, int ch);
+    std::map<std::string, std::string>  parseBufToHeaderMap(
+                            const std::map<std::string, std::string> & header,
+                            const std::vector<char> & buf);
 }
 
 #endif
