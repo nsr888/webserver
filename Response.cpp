@@ -124,9 +124,9 @@ std::string Response::getPath(void) const
 	return _real_path;
 }
 
-std::string & Response::getBody(void) 
+void Response::setBody(std::string & body) 
 {
-	return _body;
+	_body = body;
 }
 
 std::string Response::getBody(void) const 
@@ -137,6 +137,11 @@ std::string Response::getBody(void) const
 std::map<std::string, std::string> Response::getHeader() const 
 {
     return _header;
+}
+
+void Response::setHeader(std::map<std::string, std::string> & map)
+{
+    _header = map;
 }
 
 int	Response::getBodySize() const
@@ -170,11 +175,11 @@ void		Response::generateResponseMsg(Request &request)
 
     /* std::cout << "check_syntax" << std::endl; */
 	check_syntax(request);
-    if (_code == 0)
-    {
-        /* std::cout << "check_path" << std::endl; */
-        check_path(request);
-    }
+    /* if (_code == 0) */
+    /* { */
+    /*     std::cout << "check_path" << std::endl; */
+    /*     check_path(request); */
+    /* } */
     if (_code == 0)
     {
         /* std::cout << "check_method" << std::endl; */

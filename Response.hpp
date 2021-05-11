@@ -60,7 +60,6 @@ public:
     std::vector<char>                   getBuf(void) const;
     std::vector<char> &                 getBuf(void);
     std::string                   		getBody(void) const;
-    std::string &                 		getBody(void);
 	std::string                   		getPath(void) const;
 	std::string	&						getPath(void);
     std::map<std::string, std::string>  getHeader() const;
@@ -87,6 +86,8 @@ public:
 	std::string							toString(int nbr);
 	std::string 						get_time();
     void                                clear();	
+    void                                setHeader(std::map<std::string, std::string> & map);
+    void                                setBody(std::string & body);
 };
 
 #endif
