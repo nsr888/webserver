@@ -78,6 +78,7 @@ CGI	Parser::getCGI(std::vector<std::string> temp, int i) {
 
 Setting Parser::get_config(std::vector<std::string> temp) {
 	Setting	new_config;
+	new_config.setPort(0);
 	size_t size = temp.size();
 	size_t i = _stringReaded;
 	while(temp[i].find("server:") == std::string::npos)
@@ -198,10 +199,6 @@ int			Parser::checkConfig(std::vector<Setting> config) {
 		}
 		if (config[i].getServerName().empty()) {
 			std::cout << "Config error: config not contain server name" << std::endl;
-			return (0);
-		}
-		if (config[i].getLocationPath(0).empty()) {
-			std::cout << "Config error: config not contain location path" << std::endl;
 			return (0);
 		}
 		i++;

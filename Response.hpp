@@ -45,6 +45,7 @@ private:
 	size_t								_header_size;
 	std::string							_real_path;
     Setting                             _config;
+	int									_locationRespond;
 
 	void 								initCodeList();
 
