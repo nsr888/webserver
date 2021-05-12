@@ -217,9 +217,9 @@ int	ProcessMethod::numberInLocation()
 
 void ProcessMethod::_execCGI(const std::string & exec_prog)
 {
-    /* if exist cgi process to cgi */
+    /* https://stackoverflow.com/a/47716623 */
     std::vector<char*> envVector;
-    /* envVector.push_back(const_cast<char*>("AUTH_TYPE=")); */
+    envVector.push_back(const_cast<char*>("AUTH_TYPE="));
     std::string content_length = "CONTENT_LENGTH=" + _request->getHeader()["Content-Length"];
     envVector.push_back(const_cast<char*>(content_length.c_str()));
     envVector.push_back(const_cast<char*>("CONTENT_TYPE=application/x-www-form-urlencoded"));
@@ -227,7 +227,8 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     /* envVector.push_back(const_cast<char*>("PATH_INFO=")); */
     /* envVector.push_back(const_cast<char*>("PATH_TRANSLATED=")); */
     /* envVector.push_back(const_cast<char*>("QUERY_STRING=")); */
-    /* envVector.push_back(const_cast<char*>("REMOTE_ADDR=")); */
+    std::string remote_addr = "REMOTE_ADDR=" + std::string(_config->getHost());
+    envVector.push_back(const_cast<char*>(remote_addr.c_str()));
     /* envVector.push_back(const_cast<char*>("REMOTE_IDENT=")); */
     /* envVector.push_back(const_cast<char*>("REMOTE_USER=")); */
     std::string request_method = "REQUEST_METHOD=" + _request->getStartLine().method;
@@ -240,7 +241,7 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     std::string server_port = "SERVER_PORT=" + std::string(ft_itoa(_config->getPort()));
     envVector.push_back(const_cast<char*>(server_port.c_str()));
     envVector.push_back(const_cast<char*>("SERVER_PROTOCOL=HTTP/1.1"));
-    /* envVector.push_back(const_cast<char*>("SERVER_SOFTWARE=")); */
+    envVector.push_back(const_cast<char*>("SERVER_SOFTWARE=1.0"));
     envVector.push_back(const_cast<char*>("SCRIPT_FILENAME=/Users/anasyrov/Documents/21/webserver/webserver/files/test.php"));
     envVector.push_back(0);
     std::cout << gra << "------" << " CGI envirements start " << "------" << res << std::endl;
