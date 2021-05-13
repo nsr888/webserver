@@ -29,6 +29,33 @@ fclean: clean
 
 re: fclean all
 
+# test with arthur config
+ta: $(NAME)
+	@./$(NAME) config/default.conf & echo $$! > ./tests/webserver.PID
+	@cd ./tests/ && python3 -m pytest --tb=line || true
+	@if [ -a ./tests/webserver.PID ]; then \
+		kill -TERM $$(cat ./tests/webserver.PID) || true; \
+	fi;
+	@rm -rf ./tests/webserver.PID
+
+# test with igor config
+ti: $(NAME)
+	@./$(NAME) config/defaultIgor.conf & echo $$! > ./tests/webserver.PID
+	@cd ./tests/ && python3 -m pytest --tb=line || true
+	@if [ -a ./tests/webserver.PID ]; then \
+		kill -TERM $$(cat ./tests/webserver.PID) || true; \
+	fi;
+	@rm -rf ./tests/webserver.PID
+
+# test with igor config
+td: $(NAME)
+	@./$(NAME) config/defaultDenis.conf & echo $$! > ./tests/webserver.PID
+	@cd ./tests/ && python3 -m pytest --tb=line || true
+	@if [ -a ./tests/webserver.PID ]; then \
+		kill -TERM $$(cat ./tests/webserver.PID) || true; \
+	fi;
+	@rm -rf ./tests/webserver.PID
+
 # python unit tests with pytest
 test: $(NAME)
 	@./$(NAME) & echo $$! > ./tests/webserver.PID
