@@ -238,7 +238,9 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     envVector.push_back(const_cast<char*>("REDIRECT_STATUS=200"));
     std::string server_name = "SERVER_NAME=" + _config->getServerName();
     envVector.push_back(const_cast<char*>(server_name.c_str()));
-    std::string server_port = "SERVER_PORT=" + std::string(ft_itoa(_config->getPort()));
+    char *port = ft_itoa(_config->getPort());
+    std::string server_port = "SERVER_PORT=" + std::string(port);
+    free(port);
     envVector.push_back(const_cast<char*>(server_port.c_str()));
     envVector.push_back(const_cast<char*>("SERVER_PROTOCOL=HTTP/1.1"));
     envVector.push_back(const_cast<char*>("SERVER_SOFTWARE=1.0"));
