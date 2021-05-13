@@ -289,6 +289,8 @@ std::vector<std::string>	Response::slashSplit(std::string forsplit) {
 
 void	Response::check_path(Request &request)
 {
+	if (_config.getDebugLevel() == 2)
+		std::cout << "check join" << std::endl;
 	t_start_line temp = request.getStartLine();
 	size_t limit = 1;
 	int i = 0;
@@ -299,7 +301,9 @@ void	Response::check_path(Request &request)
 				if (_config.getLocationName(i) == "/") {
 					setPath(_config.getLocationPath(i));
 					_locationRespond = i;
-					std::cout << _config.getLocationPath(i) << std::endl;
+					if (!_config.getLocationFile(i).empty()) {
+						setPath(_config.getLocationPath(i) + "/" + _config.getLocationFile(i));
+					}
 				}
 				i++;
 			}
@@ -313,6 +317,9 @@ void	Response::check_path(Request &request)
 			if (_config.getLocationName(i) == temp.request_target) {
 				setPath(_config.getLocationPath(i));
 				_locationRespond = i;
+				if (!_config.getLocationFile(i).empty()) {
+					setPath(_config.getLocationPath(i) + "/" + _config.getLocationFile(i));
+				}
 			}
 			i++;
 		}
@@ -328,6 +335,9 @@ void	Response::check_path(Request &request)
 				if (!pathForSet.empty()) {
 					setPath(pathForSet);
 					_locationRespond = i;
+					if (!_config.getLocationFile(i).empty()) {
+						setPath(_config.getLocationPath(i) + "/" + _config.getLocationFile(i));
+					}
 					break;
 				}
 				i++;
@@ -336,10 +346,8 @@ void	Response::check_path(Request &request)
 		if (_locationRespond == -1) {
 			setCode(404);
 		}
-		std::cout << "Path is " << getPath() << std::endl;
-		std::cout << "Location is " << _locationRespond << std::endl;
-		// const char *path = getPath().c_str();
-		// std::ifstream ifs;
+		// const char *path = getPath().c_str();          	// проверка на существование файла или директории
+		// std::ifstream ifs;								// непонятно надо это тут или нет =)
 		// DIR* dir = opendir(path);
 		// ifs.open (path, std::ifstream::in);
 		// if(!ifs && !dir) {
@@ -349,6 +357,11 @@ void	Response::check_path(Request &request)
 		// if(dir) {
 		// 	closedir(dir);
 		// }
+	}
+	if (_config.getDebugLevel()) {
+		std::cout << "setPath is " << getPath() << std::endl;
+		if (_config.getDebugLevel() == 2)
+			std::cout << "Location in config for response is " << _locationRespond << std::endl;
 	}
 }
 

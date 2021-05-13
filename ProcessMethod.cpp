@@ -231,7 +231,7 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     envVector.push_back(const_cast<char*>(server_port.c_str()));
     envVector.push_back(const_cast<char*>("SERVER_PROTOCOL=HTTP/1.1"));
     envVector.push_back(const_cast<char*>("SERVER_SOFTWARE=1.0"));
-    std::string script_filename = "SCRIPT_FILENAME=" + _response->getPath() + "test.php"; 
+    std::string script_filename = "SCRIPT_FILENAME=" + _response->getPath(); 
     envVector.push_back(const_cast<char*>(script_filename.c_str()));
     envVector.push_back(0);
     std::cout << gra << "------" << " CGI envirements start " << "------" << res << std::endl;
