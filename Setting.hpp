@@ -28,6 +28,7 @@ private:
 	int							_port;
 	std::vector<Location>		_location;
 	std::vector<CGI>			_CGI;
+	int							_debug;
 	
 
 public:
@@ -40,6 +41,7 @@ public:
 	void						setHost(std::string host);
 	void						setPort(int port);
 	void						setServerName(std::string server_name);
+	void						setDebugLevel(int debug);
 	void						setMaxBodySize(int BodySize);
 	void						pushNewLocation(Location temp);
 	void						pushNewCGI(CGI temp);
@@ -48,7 +50,8 @@ public:
 	std::string& 				getHost() { return _host; }
 	int							getPort() { return _port; }
 	std::string& 				getServerName() { return _server_name; }
-    int							getMaxBodySize(int i) { return _location[i]._maxBodySizeMB; }
+	int							getDebugLevel() { return _debug; }
+
     std::string&				getLocationPath(int i) { return _location[i]._path; }
     std::string&				getLocationName(int i) { return _location[i]._locationName; }
     std::string&				getLocationFile(int i) { return _location[i]._file; }
@@ -59,6 +62,8 @@ public:
     int							getLocationAutoindex(int i) { return _location[i]._autoindex; }
     int							getLocationSize() { return _location.size(); }
 	int							getLocationMaxBodySize(int i) { return _location[i]._maxBodySizeMB; }
+
+	
 	std::string&				getCGIType(int i) { return _CGI[i]._fileType; }
 	std::string&				getCGIPath(int i) { return _CGI[i]._path; }
 	int							getCGISize() { return _CGI.size(); }

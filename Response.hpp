@@ -94,6 +94,9 @@ public:
     void                                clear();	
     void                                setHeader(std::map<std::string, std::string> & map);
     void                                setBody(std::string & body);
+	std::vector<std::string>			slashSplit(std::string forsplit);
+	std::string							pathCompare(std::vector<std::string> requesty,std::vector<std::string> locationy);
+	
 };
 
 #endif
