@@ -49,7 +49,6 @@ public:
 	void			generateCGI();
 	std::string		readPath(std::string path);
 	std::string		generateAutoindex(std::string path);
-	int				numberInLocation();
 
 };
 
