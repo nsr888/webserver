@@ -12,25 +12,30 @@ Setting & Setting::operator=(const Setting & other) {
     _port = other._port;
     _location = other._location;
     _CGI = other._CGI;
+    _debug = other._debug;
     return *this;
 }
 
-void Setting::setHost(std::string host) {
+void    Setting::setHost(std::string host) {
 	_host = host;
 }
 
-void Setting::setPort(int port) {
+void    Setting::setPort(int port) {
 	_port = port;
 }
 
-void Setting::setServerName(std::string server_name) {
+void    Setting::setServerName(std::string server_name) {
 	_server_name = server_name;
 }
 
-void Setting::pushNewLocation(Location temp) {
+void    Setting::pushNewLocation(Location temp) {
 	_location.push_back(temp);
 }
 
-void Setting::pushNewCGI(CGI temp) {
+void    Setting::pushNewCGI(CGI temp) {
 	_CGI.push_back(temp);
+}
+
+void    Setting::setDebugLevel(int debug) {
+    _debug = debug;
 }

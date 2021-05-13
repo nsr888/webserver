@@ -81,6 +81,7 @@ Setting Parser::get_config(std::vector<std::string> temp) {
 	new_config.setPort(0);
 	size_t size = temp.size();
 	size_t i = _stringReaded;
+	new_config.setDebugLevel(0);
 	while(temp[i].find("server:") == std::string::npos)
 		i++;
 	i++;
@@ -93,6 +94,9 @@ Setting Parser::get_config(std::vector<std::string> temp) {
 		}
 		else if (temp[i].find("server_name:", 0, 12) != std::string::npos) {
 			new_config.setServerName(getArgument(temp[i], utils::ft_strchr(temp[i], ':')));
+		}
+		else if (temp[i].find("debug_level:", 0, 12) != std::string::npos) {
+			new_config.setDebugLevel(ft_atoi(getArgument(temp[i], utils::ft_strchr(temp[i], ':')).c_str()));
 		}
 		else if (temp[i].find("location:", 0, 9) != std::string::npos) {
 			new_config.pushNewLocation(getLocation(temp, i));
@@ -122,7 +126,8 @@ void	Parser::showConfig(std::vector<Setting> config) {
         std::cout << "Config #" << (r + 1) << std::endl << std::endl;
         std::cout << "Host: " << config[r].getHost() << std::endl;
         std::cout << "Port: " << config[r].getPort() << std::endl;
-        std::cout << "Server name: " << config[r].getServerName() << std::endl << std::endl;
+        std::cout << "Server name: " << config[r].getServerName() << std::endl;
+		std::cout << "Debug level: " << config[r].getDebugLevel() << std::endl << std::endl;
 
         k = 0;
         while(k < config[r].getCGISize()) {

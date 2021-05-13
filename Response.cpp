@@ -171,32 +171,32 @@ void		Response::generateResponseMsg(Request &request)
 	std::string error_msg;
 	std::string headers;
 
-    std::cout << "port from config: " << _config.getPort() << std::endl;
+    // std::cout << "port from config: " << _config.getPort() << std::endl;
 
-    std::cout << "check_syntax" << std::endl;
+    // std::cout << "check_syntax" << std::endl;
 	check_syntax(request);
      if (_code == 0) 
      {
-         std::cout << "check_path" << std::endl;
+        //  std::cout << "check_path" << std::endl;
          check_path(request);
     }
     if (_code == 0)
     {
-        std::cout << "check_method" << std::endl;
+        // std::cout << "check_method" << std::endl;
         check_method(request);
     }
 
-    std::cout << "generateErrorMsg" << std::endl;
+    // std::cout << "generateErrorMsg" << std::endl;
 	error_msg = generateErrorMsg();
 
 	//_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
 	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
 
-    std::cout << "check_error" << std::endl;
+    // std::cout << "check_error" << std::endl;
 	check_error(error_msg);
-    std::cout << "addHeader" << std::endl;
+    // std::cout << "addHeader" << std::endl;
 	addHeader(request, headers);
-    std::cout << "append CRLF" << std::endl;
+    // std::cout << "append CRLF" << std::endl;
 	headers.append(CRLF);
 
 	std::string::iterator beg = headers.begin();
@@ -207,7 +207,7 @@ void		Response::generateResponseMsg(Request &request)
 		_buf.push_back(*beg);
 		++beg;
 	}
-    std::cout << "addBody" << std::endl;
+    // std::cout << "addBody" << std::endl;
 	addBody(error_msg);
 }
 
@@ -241,12 +241,57 @@ std::string	Response::generateErrorMsg()
 
 }
 
-void		Response::check_path(Request &request)
+std::string	Response::pathCompare(std::vector<std::string> requesty,std::vector<std::string> locationy) {
+	int i = 0;
+	int match = 0;
+	while (i < static_cast<int>(locationy.size())) {
+		if (requesty[0] == locationy[i]) {
+			match = 1;
+			break;
+		}
+		i++;
+	}
+	if (match == 1) {
+		std::string ret;
+		int r = 0;
+		while (i >= r) {
+			ret = ret + "/" + locationy[r];
+			r++;
+		}
+		r = 1;
+		while (r < static_cast<int>(requesty.size())) {
+			ret = ret + "/" + requesty[r];
+			r++;
+		}
+		return (ret);
+	}
+	else {
+		return ("");
+	}
+}
+
+std::vector<std::string>	Response::slashSplit(std::string forsplit) {
+	std::vector<std::string> temp;
+	forsplit = utils::ft_strtrim(forsplit, "/");
+	if (forsplit.find("/") == std::string::npos) {
+		temp.push_back(forsplit);
+		return (temp);
+	}
+	while(forsplit.find("/") != std::string::npos) {
+		temp.push_back(forsplit.substr(0,forsplit.find("/")));
+		forsplit = forsplit.substr(forsplit.find("/"), (forsplit.size() - forsplit.find("/")));
+		forsplit = utils::ft_strtrim(forsplit, "/");
+	}
+	temp.push_back(forsplit);
+	return (temp);
+}
+
+void	Response::check_path(Request &request)
 {
-	std::cout << "Check_path join" << std::endl;
 	t_start_line temp = request.getStartLine();
 	size_t limit = 1;
 	int i = 0;
+	_locationRespond = -1;
 	if (temp.request_target.size() <= limit) {
 		if (temp.request_target == "/") {
 			while (i < _config.getLocationSize()) {
@@ -267,10 +312,31 @@ void		Response::check_path(Request &request)
 			if (_config.getLocationName(i) == temp.request_target) {
 				setPath(_config.getLocationPath(i));
 				_locationRespond = i;
-				std::cout << _config.getLocationPath(i) << std::endl;
 			}
 			i++;
 		}
+		if (_locationRespond == -1) {
+			std::vector<std::string>	requesty;
+			std::vector<std::string>	locationy;
+			std::string					pathForSet;
+			i = 0;
+			requesty = slashSplit(temp.request_target);
+			while(i < _config.getLocationSize()) {
+				locationy = slashSplit(_config.getLocationPath(i));
+				pathForSet = pathCompare(requesty, locationy);
+				if (!pathForSet.empty()) {
+					setPath(pathForSet);
+					_locationRespond = i;
+					break;
+				}
+				i++;
+			}
+		}
+		if (_locationRespond == -1) {
+			setCode(404);
+		}
+		std::cout << "Path is " << getPath() << std::endl;
+		std::cout << "Location is " << _locationRespond << std::endl;
 		// const char *path = getPath().c_str();
 		// std::ifstream ifs;
 		// DIR* dir = opendir(path);
