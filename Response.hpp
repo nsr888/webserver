@@ -46,6 +46,7 @@ private:
 	std::string							_real_path;
     Setting                             _config;
 	int									_locationRespond;
+	std::pair<std::string, std::string>	_target_file;
 
 	void 								initCodeList();
 
@@ -66,11 +67,15 @@ public:
     std::map<std::string, std::string>  getHeader() const;
 	int									getBodySize() const;
 	int									getHeaderSize() const;
+	std::pair<std::string, std::string> getTargetFile() const;
+	int									getLocationRespond();
+
 
 	void								setBody(const std::string &body);
 	void								setBodySize(size_t len);
 	void								setCode(int code);
-	std::string 						setContentType();
+	void 								setContentType(std::string type);
+	void								setTargetFile();
 	void								setPath(std::string path);
 
 	void								check_path(Request &request);

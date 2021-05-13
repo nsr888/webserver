@@ -73,6 +73,9 @@
 		"concepts": "cpp",
 		"ranges": "cpp",
 		"iomanip": "cpp",
-		"stack": "cpp"
+		"stack": "cpp",
+		"set": "cpp",
+		"__functional_base_03": "cpp",
+		"filesystem": "cpp"
 	}
 }
