@@ -179,6 +179,7 @@ void		Response::generateResponseMsg(Request &request)
      {
         //  std::cout << "check_path" << std::endl;
          check_path(request);
+		 setTargetFile();
     }
     if (_code == 0)
     {
@@ -356,7 +357,7 @@ void		Response::check_error(const std::string &error_msg)
 	if (_code >= 400)
 	{
 		_body_size = error_msg.length();
-		_header["Content-Type"] = "text/html;charset=utf-8";
+		setContentType("html");
 	}
 }
 
@@ -494,7 +495,7 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_header["Server"] = _config.getServerName(); /* Из конфига? */
 	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
 	_header["Content-Length"] = toString(_body_size);
-	_header["Content-Type"] = setContentType();
+	setContentType(_target_file.second);
 	_header["Content-Language"] = "en-US, ru-RU";
 	_header["Content-Location"] = request.getStartLine().request_target;
 
@@ -514,28 +515,48 @@ void		Response::addHeader(Request &request, std::string &headers)
 	}
 }
 
-std::string Response::setContentType() 
+std::pair<std::string, std::string>  Response::getTargetFile() const
 {
-	std::string type;
+	return (_target_file);
+}
+
+void Response::setTargetFile()
+{
+	std::string name;
 	size_t dot_pos;
+	size_t slash_pos;
 
 	dot_pos = _real_path.rfind('.');
+	slash_pos = _real_path.rfind('/');
 	if (dot_pos != std::string::npos)
-		type = _real_path.substr(dot_pos + 1);
+	{
+		_target_file.first = _real_path.substr(slash_pos + 1, dot_pos - slash_pos - 1);
+		_target_file.second = _real_path.substr(dot_pos + 1);
+	}
+
+}
+
+int	Response::getLocationRespond()
+{
+	return (_locationRespond);
+}
+
+void Response::setContentType(std::string type) 
+{
 	if (type == "txt")
-		return("text/plain;charset=utf-8");
+		_header["Content-Type"] = "text/plain;charset=utf-8";
 	else if (type == "html")
-		return("text/html;charset=utf-8");
+		_header["Content-Type"] = "text/html;charset=utf-8";
 	else if (type == "jpg")
-		return("image/jpeg;");
+		_header["Content-Type"] = "image/jpeg;";
 	else if (type == "gif")
-		return("image/gif;");
+		_header["Content-Type"] = "image/gif;";
 	else if (type == "png")
-		return("image/png;");
+		_header["Content-Type"] = "image/png;";
 	else if (type == "ico")
-		return ("image/vnd.microsoft.icon;");
+		_header["Content-Type"] = "image/vnd.microsoft.icon;";
 	else
-		return("Content-Type: application/octet-stream");
+		_header["Content-Type"] = "Content-Type: application/octet-stream";
 }
 
 void		Response::addBody(const std::string &error_msg)

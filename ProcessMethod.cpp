@@ -24,7 +24,7 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 	_method = method;
 	_stat_num = stat(_response->getPath().c_str(), &_stat);
 
-	int i = numberInLocation();
+	int i = _response->getLocationRespond();
 
 	if (method == "GET")
 	{
@@ -200,19 +200,6 @@ std::string ProcessMethod::generateAutoindex(std::string path)
 		autoindex.append("</body></html>");
 	}
 	return (autoindex);
-}
-
-int	ProcessMethod::numberInLocation()
-{
-	size_t 		len = _config->getLocationSize();
-	std::string path = _response->getPath();
-
-	for (size_t i = 0; i < len; i++)
-	{
-		if (_config->getLocationPath(i) == path)
-			return (i);
-	}
-	return (-1);
 }
 
 void ProcessMethod::_execCGI(const std::string & exec_prog)

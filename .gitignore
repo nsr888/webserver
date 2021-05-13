@@ -2,6 +2,7 @@
 __pycache__
 webserver.PID
 *.o
+<<<<<<< HEAD
 *.out
 *.dSYM
 *.a
