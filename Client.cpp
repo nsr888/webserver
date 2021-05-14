@@ -3,13 +3,6 @@
 #include <exception>
 #include <ostream>
 
-const std::string yel("\033[0;33m");
-const std::string red("\033[0;31m");
-const std::string grn("\033[0;32m");
-const std::string blu("\033[0;34m");
-const std::string gra("\033[0;30m");
-const std::string res("\033[0m");
-
 Client::Client(const Client & other) { *this = other; }
 
 Client::Client(int fd, Setting & config)
@@ -55,7 +48,8 @@ void Client::readRequest() {
     _request.push_back(buf_read);
     if (_request.isHeaderParsed())
     {
-        /* std::cout << "\nheader parsed with method: " << _request.getStartLine().method << std::endl; */
+        if (_config.getDebugLevel() > 2)
+            std::cout << utils::PASS << "header parsed with method: " << _request.getStartLine().method << std::endl;
         if (!_request.isHeaderValid())
         {
             _client_state = st_generate_response; 
@@ -64,19 +58,23 @@ void Client::readRequest() {
         if (_request.getStartLine().method == "GET" || 
                 _request.getStartLine().method == "HEAD")
         {
-            /* std::cout << "\nGET header parsed\n"; */
+            if (_config.getDebugLevel() > 2)
+                std::cout << utils::PASS << "GET header parsed\n";
             _client_state = st_generate_response; 
         }
-        else if (_request.getStartLine().method == "POST" && 
-                _request.isBodyParsed())
+        else if ((_request.getStartLine().method == "POST" || 
+                   _request.getStartLine().method == "PUT") 
+                    && _request.isBodyParsed())
         {
-            /* std::cout << "\nPOST header and body parsed\n"; */
+            if (_config.getDebugLevel() > 2)
+                std::cout << utils::PASS << "POST header and body parsed\n";
             _client_state = st_generate_response; 
         }
     }
     else if (_request.isBodyParsed())
     {
-        /* std::cout << "\nbody parsed\n"; */
+        if (_config.getDebugLevel() > 2)
+            std::cout << utils::PASS << "Body parsed\n";
         _client_state = st_generate_response; 
     }
 }
@@ -84,7 +82,8 @@ void Client::readRequest() {
 void Client::closeConnection() {
     while (close(_fd) == EINTR)
         ;
-    /* std::cout << "Connection " << _fd << " closed" << std::endl; */
+    if (_config.getDebugLevel() > 2)
+        std::cout << utils::PASS << "Connection " << _fd << " closed" << std::endl;
 }
 
 void Client::sendResponse() {
@@ -112,9 +111,9 @@ void Client::sendResponse() {
 void Client::generateResponse() {
     if (_config.getDebugLevel() > 0)
     {
-        std::cout << yel << "\n------ Request (parsed) Start -------\n" << res;
+        std::cout << utils::YEL << "\n------ Request (parsed) Start -------\n" << utils::RES;
         std::cout << _request << std::endl;
-        std::cout << yel << "------ Request (parsed) End -------" << res << std::endl;
+        std::cout << utils::YEL << "------ Request (parsed) End -------" << utils::RES << std::endl;
     }
     /* if (_request.getStartLine().method == "POST" && */
     /*     _request.isHeaderContains("Content-Length") && */
@@ -155,8 +154,8 @@ void Client::generateResponse() {
     _client_state = st_send_response;
     if (_config.getDebugLevel() > 0)
     {
-        std::cout << red << "\n------ Response Start (first 400 symbols) -------\n" << res;
+        std::cout << utils::RED << "\n------ Response Start (first 400 symbols) -------\n" << utils::RES;
         std::cout << std::string(_response.begin(), _response.end()).substr(0, 400) << std::endl;
-        std::cout << red << "------ Response End (first 400 symbols) -------\n" << res;
+        std::cout << utils::RED << "------ Response End (first 400 symbols) -------\n" << utils::RES;
     }
 }
