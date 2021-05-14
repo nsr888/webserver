@@ -52,13 +52,12 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 	}
 	if (method == "POST")
 	{
-        processPostRequest(i);
-		/* if (i == -1) */
-		/* 	processPostRequest(-1); */
-		/* else if (_config->getLocationPost(i)) */
-		/* 	processPostRequest(i); */
-		/* else */
-		/* 	_response->setCode(405); */
+		if (i == -1)
+			processPostRequest(-1);
+		else if (_config->getLocationPost(i))
+			processPostRequest(i);
+		else
+			_response->setCode(405);
 	}
 	if (method == "PUT")
 	{
