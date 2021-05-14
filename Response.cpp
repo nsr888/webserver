@@ -171,29 +171,26 @@ void		Response::generateResponseMsg(Request &request)
 	std::string error_msg;
 	std::string headers;
 
-    // std::cout << "port from config: " << _config.getPort() << std::endl;
-
-    // std::cout << "check_syntax" << std::endl;
+    if (_config.getDebugLevel() > 1)
+    {
+        std::cout << utils::PASS << "generateResponseMsg" << std::endl;
+    }
 	check_syntax(request);
-     if (_code == 0) 
-     {
-        //  std::cout << "check_path" << std::endl;
+    if (_code == 0) 
+    {
          check_path(request);
 		 setTargetFile();
     }
     if (_code == 0)
     {
-        // std::cout << "check_method" << std::endl;
         check_method(request);
     }
 
-    // std::cout << "generateErrorMsg" << std::endl;
 	error_msg = generateErrorMsg();
 
 	//_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
 	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
 
-    // std::cout << "check_error" << std::endl;
 	check_error(error_msg);
     // std::cout << "addHeader" << std::endl;
 	addHeader(request, headers);
@@ -214,6 +211,10 @@ void		Response::generateResponseMsg(Request &request)
 
 std::string	Response::generateErrorMsg()
 {
+    if (_config.getDebugLevel() > 1)
+    {
+        std::cout << utils::PASS << "generateErrorMsg" << std::endl;
+    }
 	std::string error;
 	std::string	error_path = "./files/error.html";
 
@@ -289,8 +290,8 @@ std::vector<std::string>	Response::slashSplit(std::string forsplit) {
 
 void	Response::check_path(Request &request)
 {
-	if (_config.getDebugLevel() == 2)
-		std::cout << "check join" << std::endl;
+	if (_config.getDebugLevel() > 1)
+		std::cout << utils::PASS << "check path" << std::endl;
 	t_start_line temp = request.getStartLine();
 	size_t limit = 1;
 	int i = 0;
@@ -359,14 +360,18 @@ void	Response::check_path(Request &request)
 		// }
 	}
 	if (_config.getDebugLevel()) {
-		std::cout << "setPath is " << getPath() << std::endl;
-		if (_config.getDebugLevel() == 2)
-			std::cout << "Location in config for response is " << _locationRespond << std::endl;
+		std::cout << utils::PASS << "setPath is " << getPath() << std::endl;
+		if (_config.getDebugLevel() > 1)
+			std::cout << utils::PASS << "Location in config for response is " << _locationRespond << std::endl;
 	}
 }
 
 void		Response::check_error(const std::string &error_msg)
 {
+    if (_config.getDebugLevel() > 1)
+    {
+        std::cout << utils::PASS << "check_error" << std::endl;
+    }
 	if (_code >= 400)
 	{
 		_body_size = error_msg.length();
@@ -376,6 +381,8 @@ void		Response::check_error(const std::string &error_msg)
 
 void		Response::check_syntax(Request &request)
 {
+    if (_config.getDebugLevel() > 1)
+        std::cout << utils::PASS << "check_syntax" << std::endl;
     if (!request.isMethodValid())
     {
         setCode(400); 
@@ -400,6 +407,8 @@ void		Response::check_syntax(Request &request)
 
 void		Response::check_method(Request &request)
 {
+    if (_config.getDebugLevel() > 1)
+        std::cout << utils::PASS << "check_method" << std::endl;
     std::string method = request.getStartLine().method;
 	ProcessMethod process;
 

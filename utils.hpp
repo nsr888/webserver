@@ -28,6 +28,19 @@ namespace utils {
     std::map<std::string, std::string>  parseBufToHeaderMap(
                             const std::map<std::string, std::string> & header,
                             const std::vector<char> & buf);
+
+    const char YEL[] = "\033[0;33m";
+    const char RED[] = "\033[0;31m";
+    const char GRN[] = "\033[0;32m";
+    const char BLU[] = "\033[0;34m";
+    const char MAG[] = "\033[0;35m";
+    const char CYN[] = "\033[0;36m";
+    const char WHT[] = "\033[0;37m";
+    const char GRA[] = "\033[0;30m";
+    const char RES[] = "\033[0m";
+    const char OK[] = "[\033[0;32mOK\033[0m] ";
+    const char PASS[] = "[\033[0;30mpass\033[0m] ";
+
 }
 
 #endif

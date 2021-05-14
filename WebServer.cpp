@@ -1,12 +1,5 @@
 #include "WebServer.hpp"
 
-const std::string yel("\033[0;33m");
-const std::string red("\033[0;31m");
-const std::string grn("\033[0;32m");
-const std::string blu("\033[0;34m");
-const std::string gra("\033[0;30m");
-const std::string res("\033[0m");
-
 WebServer::WebServer(const WebServer & other) { *this = other; }
 
 WebServer::WebServer(void) { }
@@ -59,6 +52,6 @@ void WebServer::initServer() {
     if (bind(_ls, (struct sockaddr *)&_addr, sizeof(_addr)) < 0)
         throw std::runtime_error(std::string("bind: ") + strerror(errno));
     listen(_ls, 5);
-    std::cout << grn << "Webserver started " << res << "(port "
-        << _config.getPort() << ", listen socket: " << _ls << ")" << std::endl;
+    std::cout << "\033[0;32m" << "Webserver started " << "\033[0m";
+    std::cout << "(port " << _config.getPort() << ", listen socket: " << _ls << ")" << std::endl;
 }

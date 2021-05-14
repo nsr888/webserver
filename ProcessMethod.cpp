@@ -1,13 +1,6 @@
 #include "ProcessMethod.hpp"
 #include <string>
 
-const std::string yel("\033[0;33m");
-const std::string red("\033[0;31m");
-const std::string grn("\033[0;32m");
-const std::string blu("\033[0;34m");
-const std::string gra("\033[0;30m");
-const std::string res("\033[0m");
-
 ProcessMethod::ProcessMethod()
 {
 }
@@ -233,10 +226,13 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     std::string script_filename = "SCRIPT_FILENAME=" + _response->getPath(); 
     envVector.push_back(const_cast<char*>(script_filename.c_str()));
     envVector.push_back(0);
-    std::cout << gra << "------" << " CGI envirements start " << "------" << res << std::endl;
-    for (size_t i = 0; envVector[i] != 0; ++i)
-        std::cout << envVector[i] << std::endl;
-    std::cout << gra << "------" << " CGI envirements end " << "------" << res << std::endl;
+	if (_config->getDebugLevel() > 1)
+    {
+        std::cout << utils::GRA << "------" << " CGI envirements start " << "------" << utils::RES << std::endl;
+        for (size_t i = 0; envVector[i] != 0; ++i)
+            std::cout << "  " << envVector[i] << std::endl;
+        std::cout << utils::GRA << "------" << " CGI envirements end " << "------" << utils::RES << std::endl;
+    }
     char **env = envVector.data();
 
     /* https://stackoverflow.com/a/39395978 */

@@ -1,13 +1,6 @@
 #include "EventLoop.hpp"
 #include <iostream>
 
-const std::string yel("\033[0;33m");
-const std::string red("\033[0;31m");
-const std::string grn("\033[0;32m");
-const std::string blu("\033[0;34m");
-const std::string gra("\033[0;30m");
-const std::string res("\033[0m");
-
 EventLoop::EventLoop(const EventLoop & other) { 
     *this = other;
 }
@@ -147,7 +140,7 @@ void EventLoop::runLoop() {
         if (res == 0)
         {
             shutdown();
-            std::cout << grn << "Shutdown by timeout" << std::endl;
+            std::cout << "\033[0;32m" << "Shutdown by timeout" << "\033[0m" << std::endl;
             exit(EXIT_SUCCESS);
         }
         if (res < 1)
