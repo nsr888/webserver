@@ -24,6 +24,7 @@ clean:
 	cd libft && make $@
 	cd libgnl && make $@
 	rm -rf $(OBJ)
+	rm -rf $(DEPENDS)
 
 fclean: clean
 	cd libft && make $@
