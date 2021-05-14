@@ -81,6 +81,7 @@ public:
 	void								check_path(Request &request);
 	void								check_error(const std::string &error_msg);
 	void								check_syntax(Request &request);
+    void		                        check_auth(Request &request);
 	void								check_method(Request &request);
 	void								check_authentication(Request &request);
 	

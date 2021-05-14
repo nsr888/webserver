@@ -28,6 +28,8 @@ namespace utils {
     std::map<std::string, std::string>  parseBufToHeaderMap(
                             const std::map<std::string, std::string> & header,
                             const std::vector<char> & buf);
+    std::string         base64encode(std::vector<char> buf);
+    std::string         base64decode(const std::string & s);
 
     const char YEL[] = "\033[0;33m";
     const char RED[] = "\033[0;31m";
@@ -40,7 +42,6 @@ namespace utils {
     const char RES[] = "\033[0m";
     const char OK[] = "[\033[0;32mOK\033[0m] ";
     const char PASS[] = "[\033[0;30mpass\033[0m] ";
-
 }
 
 #endif

@@ -162,4 +162,66 @@ namespace utils {
         }
         return header_new;
     }
+    std::string base64encode(std::vector<char> buf) {
+        const char base64Keys[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+        std::string output;
+        char chr1, chr2, chr3;
+        int enc1, enc2, enc3, enc4;
+        size_t i = 0;
+
+        size_t buf_len = buf.size();
+        output.reserve(4 * buf_len / 3);
+        while (i < buf_len)
+        {
+            chr1 = (i < buf_len) ? buf[i++] : 0;
+            chr2 = (i < buf_len) ? buf[i++] : 0;
+            chr3 = (i < buf_len) ? buf[i++] : 0;
+
+            enc1 = chr1 >> 2;
+            enc2 = ((chr1 & 0x3) << 4) | (chr2 >> 4);
+            enc3 = ((chr2 & 0xF) << 2) | (chr3 >> 6);
+            enc4 = chr3 & 0x3F;
+
+            if (chr2 == 0)
+            {
+                enc3 = 64;
+                enc4 = 64;
+            }
+            else if (chr3 == 0)
+            {
+                enc4 = 64;
+            }
+            output += base64Keys[enc1];
+            output += base64Keys[enc2];
+            output += base64Keys[enc3];
+            output += base64Keys[enc4];
+        }
+        return output;
+    }
+    std::string base64decode(const std::string & s) {
+        const char base64Keys[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        std::string output;
+        output.clear();
+        output.reserve(3 * s.length() / 4);
+        std::vector<int> T(256, -1);
+        for (int i = 0; i < 64; ++i)
+        {
+            T[base64Keys[i]] = i;
+        }
+        int val = 0;
+        int valb = -8;
+        for (size_t i = 0; i < s.length(); ++i)
+        {
+            char c = s[i];
+            if (T[c] == -1) break;
+            val = (val << 6) + T[c];
+            valb += 6;
+            if (valb >= 0)
+            {
+                output += char((val >> valb) & 0xFF);
+                valb -= 8;
+            }
+        }
+        return output;
+    }
 }
