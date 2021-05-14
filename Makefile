@@ -2,6 +2,7 @@ NAME = webserv
 SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp Response.cpp \
 	  Setting.cpp Parser.cpp utils.cpp ProcessMethod.cpp
 OBJ = $(SRC:%.cpp=%.o)
+DEPENDS := $(patsubst %.cpp,%.d,$(SRC))
 # CXX = g++-10
 CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -g -O2 -std=c++98 -pedantic
@@ -14,8 +15,10 @@ $(NAME): $(OBJ)
 	cd libgnl && make
 	$(CXX) $(CXXFLAGS) $(INC) $(OBJ) -Llibft -lft -Llibgnl -lgnl -lstdc++ -o $(NAME)
 
-%.o: %.cpp %.hpp
-	$(CXX) $(CXXFLAGS) -Ilibft -Ignl -c $< -o $@
+-include $(DEPENDS)
+
+%.o: %.cpp %.hpp Makefile
+	$(CXX) $(CXXFLAGS) -MMD -MP -Ilibft -Ignl -c $< -o $@
 	
 clean:
 	cd libft && make $@
@@ -83,4 +86,4 @@ echo: $(NAME)
 	fi;
 	@rm -rf ./tests/webserver.PID
 
-.PONY: all fclean clean re test echo
+.PONY: all fclean clean re test echo ta ti td
