@@ -9,11 +9,11 @@ ProcessMethod::~ProcessMethod()
 {
 }
 
-void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setting &config, const std::string &method)
+void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setting * config, const std::string &method)
 {
 	_response = &respone;
 	_request = &request;
-	_config = &config;
+	_config = config;
 	_method = method;
 	_stat_num = stat(_response->getPath().c_str(), &_stat);
 

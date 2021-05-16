@@ -34,7 +34,7 @@ public:
 	ProcessMethod();
 	~ProcessMethod();
 
-	void			secretary_Request(Request &request, Response &respone, Setting &config, const std::string &method);
+	void			secretary_Request(Request &request, Response &respone, Setting * config, const std::string &method);
 	void			generateBody();
 	
 	void			processGetRequest(int i);

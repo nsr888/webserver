@@ -14,7 +14,7 @@ Response::Response()
     , _config()
 { }
 
-Response::Response(const Setting & config)
+Response::Response(Setting * config)
     : _code_list()
     , _code(0)
     , _start_line()
@@ -171,7 +171,7 @@ void		Response::generateResponseMsg(Request &request)
 	std::string error_msg;
 	std::string headers;
 
-    if (_config.getDebugLevel() > 1)
+    if (_config->getDebugLevel() > 1)
     {
         std::cout << utils::PASS << "generateResponseMsg" << std::endl;
     }
@@ -215,7 +215,7 @@ void		Response::generateResponseMsg(Request &request)
 
 std::string	Response::generateErrorMsg()
 {
-    if (_config.getDebugLevel() > 1)
+    if (_config->getDebugLevel() > 1)
     {
         std::cout << utils::PASS << "generateErrorMsg" << std::endl;
     }
@@ -241,7 +241,7 @@ std::string	Response::generateErrorMsg()
 				getMessage(_code) + "</title><style>h1, "
 												 "p {text-align: center;}</style></head><body><h1>" +
 				toString(_code) + " " + getMessage(_code) +
-				"</h1><hr><p>" + _config.getServerName() + "</p></body></html>");
+				"</h1><hr><p>" + _config->getServerName() + "</p></body></html>");
 	}
 	return (error);
 
@@ -294,7 +294,7 @@ std::vector<std::string>	Response::slashSplit(std::string forsplit) {
 
 void	Response::check_path(Request &request)
 {
-	if (_config.getDebugLevel() > 1)
+	if (_config->getDebugLevel() > 1)
 		std::cout << utils::PASS << "check path" << std::endl;
 	t_start_line temp = request.getStartLine();
 	size_t limit = 1;
@@ -302,12 +302,12 @@ void	Response::check_path(Request &request)
 	_locationRespond = -1;
 	if (temp.request_target.size() <= limit) {
 		if (temp.request_target == "/") {
-			while (i < _config.getLocationSize()) {
-				if (_config.getLocationName(i) == "/") {
-					setPath(_config.getLocationPath(i));
+			while (i < _config->getLocationSize()) {
+				if (_config->getLocationName(i) == "/") {
+					setPath(_config->getLocationPath(i));
 					_locationRespond = i;
-					if (!_config.getLocationFile(i).empty()) {
-						setPath(_config.getLocationPath(i) + "/" + _config.getLocationFile(i));
+					if (!_config->getLocationFile(i).empty()) {
+						setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
 					}
 				}
 				i++;
@@ -318,12 +318,12 @@ void	Response::check_path(Request &request)
 		}
 	}
 	else {
-		while (i < _config.getLocationSize()) {
-			if (_config.getLocationName(i) == temp.request_target) {
-				setPath(_config.getLocationPath(i));
+		while (i < _config->getLocationSize()) {
+			if (_config->getLocationName(i) == temp.request_target) {
+				setPath(_config->getLocationPath(i));
 				_locationRespond = i;
-				if (!_config.getLocationFile(i).empty()) {
-					setPath(_config.getLocationPath(i) + "/" + _config.getLocationFile(i));
+				if (!_config->getLocationFile(i).empty()) {
+					setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
 				}
 			}
 			i++;
@@ -334,14 +334,14 @@ void	Response::check_path(Request &request)
 			std::string					pathForSet;
 			i = 0;
 			requesty = slashSplit(temp.request_target);
-			while(i < _config.getLocationSize()) {
-				locationy = slashSplit(_config.getLocationPath(i));
+			while(i < _config->getLocationSize()) {
+				locationy = slashSplit(_config->getLocationPath(i));
 				pathForSet = pathCompare(requesty, locationy);
 				if (!pathForSet.empty()) {
 					setPath(pathForSet);
 					_locationRespond = i;
-					if (!_config.getLocationFile(i).empty()) {
-						setPath(_config.getLocationPath(i) + "/" + _config.getLocationFile(i));
+					if (!_config->getLocationFile(i).empty()) {
+						setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
 					}
 					break;
 				}
@@ -363,16 +363,16 @@ void	Response::check_path(Request &request)
 		// 	closedir(dir);
 		// }
 	}
-	if (_config.getDebugLevel()) {
+	if (_config->getDebugLevel() > 1) {
 		std::cout << utils::PASS << "setPath is " << getPath() << std::endl;
-		if (_config.getDebugLevel() > 1)
+		if (_config->getDebugLevel() > 2)
 			std::cout << utils::PASS << "Location in config for response is " << _locationRespond << std::endl;
 	}
 }
 
 void		Response::check_error(const std::string &error_msg)
 {
-    if (_config.getDebugLevel() > 1)
+    if (_config->getDebugLevel() > 1)
     {
         std::cout << utils::PASS << "check_error" << std::endl;
     }
@@ -385,7 +385,7 @@ void		Response::check_error(const std::string &error_msg)
 
 void		Response::check_syntax(Request &request)
 {
-    if (_config.getDebugLevel() > 1)
+    if (_config->getDebugLevel() > 1)
         std::cout << utils::PASS << "check_syntax" << std::endl;
     if (!request.isMethodValid())
     {
@@ -416,7 +416,7 @@ void		Response::check_auth(Request &request)
     size_t len = getTargetFile().first.length() + getTargetFile().second.length();
     std::string path_to_htpasswd(path.begin(), path.end() - len - 1);
     path_to_htpasswd += ".htpasswd";
-    if (_config.getDebugLevel() > 2)
+    if (_config->getDebugLevel() > 2)
     {
         std::cout << ".htpasswd: " << path_to_htpasswd << std::endl;
     }
@@ -425,7 +425,7 @@ void		Response::check_auth(Request &request)
         std::map<std::string, std::string> header = request.getHeader();
         if (header.find("Authorization") == header.end())
         {
-            if (_config.getDebugLevel() > 2)
+            if (_config->getDebugLevel() > 2)
             {
                 std::cout << "Authorization not found" << std::endl;
             }
@@ -437,7 +437,7 @@ void		Response::check_auth(Request &request)
             std::vector<char> htpasswd(utils::read_file(path_to_htpasswd));
             std::string htpasswd_str(htpasswd.begin(), htpasswd.end());
             std::string auth_line = header["Authorization"].substr(6);
-            if (_config.getDebugLevel() > 2)
+            if (_config->getDebugLevel() > 2)
             {
                 std::cout << "Authorization found" << std::endl;
                 std::cout << "htpasswd_str: " << htpasswd_str << std::endl;
@@ -453,7 +453,7 @@ void		Response::check_auth(Request &request)
 
 void		Response::check_method(Request &request)
 {
-    if (_config.getDebugLevel() > 1)
+    if (_config->getDebugLevel() > 1)
         std::cout << utils::PASS << "check_method" << std::endl;
     std::string method = request.getStartLine().method;
 	ProcessMethod process;
@@ -560,7 +560,7 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
-	_header["Server"] = _config.getServerName(); /* Из конфига? */
+	_header["Server"] = _config->getServerName(); /* Из конфига? */
 	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
 	_header["Content-Length"] = toString(_body_size);
 	setContentType(_target_file.second);

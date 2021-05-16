@@ -44,7 +44,7 @@ private:
 	size_t								_body_size;
 	size_t								_header_size;
 	std::string							_real_path;
-    Setting                             _config;
+    Setting*                            _config;
 	int									_locationRespond;
 	std::pair<std::string, std::string>	_target_file;
 
@@ -52,7 +52,7 @@ private:
 
 public:
 	Response();
-	explicit Response(const Setting & config);
+	explicit Response(Setting * config);
 	~Response();
     Response(const Response & other);
     Response & operator=(const Response & other);
