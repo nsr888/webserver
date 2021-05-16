@@ -106,7 +106,7 @@ void Client::sendResponse() {
         _response.clear();
         _response_struct.clear();
         /* _time_last_response = utils::get_current_time_in_ms(); */
-        /* utils::ft_usleep(3); */
+        utils::ft_usleep(3);
     }
     else
     {
