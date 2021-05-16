@@ -1,4 +1,5 @@
 #include "EventLoop.hpp"
+#include "utils.hpp"
 #include <iostream>
 
 EventLoop::EventLoop(const EventLoop & other) { 
@@ -46,6 +47,11 @@ void EventLoop::_prepairSelect() {
     for (std::vector<WebServer>::iterator it_server = _webservers.begin();
             it_server != _webservers.end();++it_server)
     {
+        if (it_server->getConfig().getDebugLevel() > 3)
+        {
+            std::cout << "prepairSelect" << std::endl;
+        }
+
         FD_SET(it_server->getLs(), &_readfds);
         std::vector<Client>::iterator it = it_server->getClients().begin();
         while (it != it_server->getClients().end())
@@ -69,14 +75,21 @@ void EventLoop::_acceptConnection() {
         sockaddr_in addr = it->getAddr();
         if (FD_ISSET(ls, &_readfds))
         {
+            if (it->getConfig().getDebugLevel() > 3)
+            {
+                std::cout << "acceptConnection" << std::endl;
+            }
             int sd;
             socklen_t len = sizeof(addr);
             sd = accept(ls, (struct sockaddr*) &addr, &len);
             if (sd == -1)
                 throw std::runtime_error(std::string("accept: ") + strerror(errno));
             fcntl(sd, F_SETFL, O_NONBLOCK);
-            /* std::cout << "Append client fd " << sd << std::endl; */
-            it->appendClient(Client(sd, it->getConfig()));
+            if (it->getConfig().getDebugLevel() > 3)
+            {
+                std::cout << "Append client fd " << sd << std::endl;
+            }
+            it->appendClient(Client(sd, &it->getConfig()));
             /* std::cout << "Clients size " << it->getClients().size() << std::endl; */
         }
         ++it;
@@ -87,23 +100,28 @@ void EventLoop::_processClients() {
     for (std::vector<WebServer>::iterator it_server = _webservers.begin();
             it_server != _webservers.end();++it_server)
     {
+        if (it_server->getConfig().getDebugLevel() > 3)
+        {
+            std::cout << "processClients" << std::endl;
+        }
         std::vector<Client>::iterator it = it_server->getClients().begin();
         while (it != it_server->getClients().end())
         {
             if (FD_ISSET(it->getFd(), &_readfds))
             {
-                /* std::cout << "readRequest" << std::endl; */
+                if (it_server->getConfig().getDebugLevel() > 3)
+                {
+                    std::cout << "readRequest" << std::endl;
+                }
                 it->readRequest();
                 if (it->getState() == st_generate_response)
                 {
-                    /* std::cout << "generateResponse" << std::endl; */
+                    if (it_server->getConfig().getDebugLevel() > 3)
+                    {
+                        std::cout << "generateResponse" << std::endl;
+                    }
                     it->generateResponse();
                 }
-                /* if (it->getState() == st_send_response) */
-                /* { */
-                /*     /1* std::cout << "sendResponse after readRequest" << std::endl; *1/ */
-                /*     it->sendResponse(); */
-                /* } */
                 if (it->getState() == st_close_connection)
                 {
                     it->closeConnection();
@@ -113,8 +131,17 @@ void EventLoop::_processClients() {
             }
             if (FD_ISSET(it->getFd(), &_writefds))
             {
-                /* std::cout << "sendResponse at the end" << std::endl; */
+                if (it_server->getConfig().getDebugLevel() > 3)
+                {
+                    std::cout << "sendResponse at the end" << std::endl;
+                }
                 it->sendResponse();
+                if (it->getState() == st_close_connection)
+                {
+                    it->closeConnection();
+                    it = it_server->getClients().erase(it);
+                    continue;
+                }
             }
             ++it;
         }
