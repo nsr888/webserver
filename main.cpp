@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
     Parser parser;
     config = parser.startParsing(config_file);					// Парсим конфиг
 
-    std::cout << config[0].getDebugLevel() << std::endl;
-    if (config[0].getDebugLevel()) {
+    if (config[0].getDebugLevel() > 1) {
+        std::cout << "debug_level: " << config[0].getDebugLevel() << std::endl;
         parser.showConfig(config);	                            // Выводит все параметры всех конфигов
     }
     if (!parser.checkConfig(config)) {							// Проверка конфига на валидность
