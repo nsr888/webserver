@@ -31,17 +31,11 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 	if (method == "HEAD")
 	{
 		if (i == -1)
-        {
 			processHeadRequest(-1);
-        }
-		else if (_config->getLocationGet(i))
-        {
+		else if (_config->getLocationHead(i))
 			processHeadRequest(i);
-        }
 		else
-        {
 			_response->setCode(405);
-        }
 	}
 	if (method == "POST")
 	{
@@ -61,15 +55,6 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 		else
 			_response->setCode(405);
 	}
-	/* if (method == "HEAD") */
-	/* { */
-	/* 	if (i == -1) */
-	/* 		processHeadRequest(); */
-	/* 	else if (_config->getLocationHead(i)) */
-	/* 		processHeadRequest(); */
-	/* 	else */
-	/* 		_response->setCode(405); */
-	/* } */
 }
 
 void	ProcessMethod::processGetRequest(int i)
