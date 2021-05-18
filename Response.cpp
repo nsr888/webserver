@@ -413,6 +413,7 @@ void		Response::set_Allow_to_Header()
 
 void		Response::check_error(const std::string &error_msg, Request &request)
 {
+    (void)(request);
     if (_config->getDebugLevel() > 1)
         utils::log("Response.cpp", "check_error");
     if (_code >= 400)
