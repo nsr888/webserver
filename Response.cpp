@@ -183,6 +183,10 @@ void		Response::generateResponseMsg(Request &request)
     {
          check_auth(request);
     }
+	if (_code == 0)
+	{
+		check_accept(request);
+	}
     if (_code == 0)
     {
         check_method(request);
@@ -193,7 +197,7 @@ void		Response::generateResponseMsg(Request &request)
 	//_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
 	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
 
-	check_error(error_msg);
+	check_error(error_msg, request);
 	addHeader(request, headers);
 	headers.append(CRLF);
 
@@ -392,12 +396,31 @@ void	Response::check_path(Request &request)
 	}
 }
 
-void		Response::check_error(const std::string &error_msg)
+void		Response::set_Allow_to_Header()
+{
+	std::string tmp;
+
+	if (_config->getLocationGet(_locationRespond))
+		tmp += "GET, ";
+	if (_config->getLocationHead(_locationRespond))
+		tmp += "HEAD, ";
+	if (_config->getLocationPost(_locationRespond))
+		tmp += "POST, ";
+	if (_config->getLocationPut(_locationRespond))
+		tmp += "PUT, ";
+	_header["Allow"] = tmp.substr(0, tmp.rfind(","));
+}
+
+void		Response::check_error(const std::string &error_msg, Request &request)
 {
     if (_config->getDebugLevel() > 1)
         utils::log("Response.cpp", "check_error");
     if (_code >= 400)
     {
+		if (_code == 405 || _code == 501)
+			set_Allow_to_Header();
+		if (_code == 201)
+			_header["Location"] = getPath();
 		_body_size = error_msg.length();
 		setContentType("html");
 	}
@@ -474,14 +497,18 @@ void		Response::check_method(Request &request)
 	process.secretary_Request(request, *this, _config, method);
 }
 
-void		Response::check_authentication(Request &request)
+void		Response::check_accept(Request &request)
 {
-    (void)(request);
-	/* Проверка на аутентификацию, если нужна
+	if (_config->getDebugLevel() > 1)
+        utils::log("Response.cpp", "check_accept");
 	
-	setCode(401);
-	
-	P.S надо понять от куда в этом случае будет браться body для сообщения (скорее всего после этого должен измениться путь)*/
+	if (request.getHeader().count("Accept-Language"))
+		if (request.getHeader()["Accept-Language"].find("ru") == std::string::npos && request.getHeader()["Accept-Language"].find("en") == std::string::npos)
+			setCode(406);
+
+	if (request.getHeader().count("Accept-Charset"))
+		if (request.getHeader()["Accept-Charset"].find("utf-8") == std::string::npos)
+			setCode(406);
 }
 
 void		Response::setCode(int code)
@@ -570,7 +597,7 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
-	_header["Server"] = _config->getServerName(); /* Из конфига? */
+	_header["Server"] = _config->getServerName();
 	_header["Content-Length"] = toString(_body_size);
 	setContentType(_target_file.second);
 	_header["Content-Language"] = "en-US, ru-RU";
@@ -633,7 +660,7 @@ void Response::setContentType(std::string type)
 	else if (type == "ico")
 		_header["Content-Type"] = "image/vnd.microsoft.icon;";
 	else
-		_header["Content-Type"] = "Content-Type: application/octet-stream";
+		_header["Content-Type"] = "application/octet-stream";
 }
 
 void		Response::addBody(const std::string &error_msg)
