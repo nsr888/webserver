@@ -436,12 +436,13 @@ void		Response::check_auth(Request &request)
     size_t len = getTargetFile().first.length() + getTargetFile().second.length();
     std::string path_to_htpasswd(path.begin(), path.end() - len - 1);
     path_to_htpasswd += ".htpasswd";
+    /* utils::log("Response.cpp", "path_to_htpasswd: " + path_to_htpasswd); */
     if (utils::file_exists(path_to_htpasswd))
     {
         std::map<std::string, std::string> header = request.getHeader();
         if (header.find("Authorization") == header.end())
         {
-            if (_config->getDebugLevel() > 2)
+            if (_config->getDebugLevel() > 1)
                 utils::log("Response.cpp", "Authorization not found");
             setCode(401);
             _header["WWW-Authenticate"] = "Basic realm=\"simple\"";
@@ -451,7 +452,7 @@ void		Response::check_auth(Request &request)
             std::vector<char> htpasswd(utils::read_file(path_to_htpasswd));
             std::string htpasswd_str(htpasswd.begin(), htpasswd.end());
             std::string auth_line = header["Authorization"].substr(6);
-            if (_config->getDebugLevel() > 2)
+            if (_config->getDebugLevel() > 1)
                 utils::log("Response.cpp", "Authorization found, htpasswd_str: "
                         + htpasswd_str + ", auth_line decoded: "
                         + utils::base64decode(auth_line));
