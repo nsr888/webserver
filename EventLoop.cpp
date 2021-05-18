@@ -48,10 +48,7 @@ void EventLoop::_prepairSelect() {
             it_server != _webservers.end();++it_server)
     {
         if (it_server->getConfig().getDebugLevel() > 3)
-        {
-            std::cout << "prepairSelect" << std::endl;
-        }
-
+            utils::log("EventLoop.cpp", "prepairSelect");
         FD_SET(it_server->getLs(), &_readfds);
         std::vector<Client>::iterator it = it_server->getClients().begin();
         while (it != it_server->getClients().end())
@@ -76,9 +73,7 @@ void EventLoop::_acceptConnection() {
         if (FD_ISSET(ls, &_readfds))
         {
             if (it->getConfig().getDebugLevel() > 3)
-            {
-                std::cout << "acceptConnection" << std::endl;
-            }
+                utils::log("EventLoop.cpp", "acceptConnection");
             int sd;
             socklen_t len = sizeof(addr);
             sd = accept(ls, (struct sockaddr*) &addr, &len);
@@ -86,9 +81,8 @@ void EventLoop::_acceptConnection() {
                 throw std::runtime_error(std::string("accept: ") + strerror(errno));
             fcntl(sd, F_SETFL, O_NONBLOCK);
             if (it->getConfig().getDebugLevel() > 3)
-            {
-                std::cout << "Append client fd " << sd << std::endl;
-            }
+                utils::log("EventLoop.cpp", 
+                        "Append client with fd: " + utils::to_string(sd));
             it->appendClient(Client(sd, &it->getConfig()));
             /* std::cout << "Clients size " << it->getClients().size() << std::endl; */
         }
@@ -101,29 +95,27 @@ void EventLoop::_processClients() {
             it_server != _webservers.end();++it_server)
     {
         if (it_server->getConfig().getDebugLevel() > 3)
-        {
-            std::cout << "processClients" << std::endl;
-        }
+            utils::log("EventLoop.cpp", "processClients");
         std::vector<Client>::iterator it = it_server->getClients().begin();
         while (it != it_server->getClients().end())
         {
             if (FD_ISSET(it->getFd(), &_readfds))
             {
                 if (it_server->getConfig().getDebugLevel() > 3)
-                {
-                    std::cout << "readRequest" << std::endl;
-                }
+                    utils::log("EventLoop.cpp", "readRequest");
                 it->readRequest();
                 if (it->getState() == st_generate_response)
                 {
                     if (it_server->getConfig().getDebugLevel() > 3)
-                    {
-                        std::cout << "generateResponse" << std::endl;
-                    }
+                        utils::log("EventLoop.cpp", "generateResponse");
                     it->generateResponse();
                 }
                 if (it->getState() == st_close_connection)
                 {
+                    if (it_server->getConfig().getDebugLevel() > 3)
+                        utils::log("EventLoop.cpp", 
+                                "Connection " + 
+                                utils::to_string(it->getFd()) + " closed");
                     it->closeConnection();
                     it = it_server->getClients().erase(it);
                     continue;
@@ -132,12 +124,14 @@ void EventLoop::_processClients() {
             if (FD_ISSET(it->getFd(), &_writefds))
             {
                 if (it_server->getConfig().getDebugLevel() > 3)
-                {
-                    std::cout << "sendResponse at the end" << std::endl;
-                }
+                    utils::log("EventLoop.cpp", "sendResponse at the end");
                 it->sendResponse();
                 if (it->getState() == st_close_connection)
                 {
+                    if (it_server->getConfig().getDebugLevel() > 3)
+                        utils::log("EventLoop.cpp", 
+                                "Connection " + 
+                                utils::to_string(it->getFd()) + " closed");
                     it->closeConnection();
                     it = it_server->getClients().erase(it);
                     continue;

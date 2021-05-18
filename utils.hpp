@@ -12,7 +12,8 @@
 
 extern "C" {
     int                 get_next_line(int fd, char **line);
-    void	            *ft_calloc(size_t count, size_t size);
+    void*               ft_calloc(size_t count, size_t size);
+    char*               ft_itoa(int n);
 }
 
 namespace utils {
@@ -30,6 +31,8 @@ namespace utils {
                             const std::vector<char> & buf);
     std::string         base64encode(std::vector<char> buf);
     std::string         base64decode(const std::string & s);
+    std::string         to_string(int n);
+    void                log(const std::string & filename, const std::string & msg);
 
     const char YEL[] = "\033[0;33m";
     const char RED[] = "\033[0;31m";

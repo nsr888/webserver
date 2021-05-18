@@ -168,14 +168,12 @@ std::string	Response::toString(int nbr)
 
 void		Response::generateResponseMsg(Request &request)
 {
-	std::string error_msg;
-	std::string headers;
+    std::string error_msg;
+    std::string headers;
 
     if (_config->getDebugLevel() > 1)
-    {
-        std::cout << utils::PASS << "generateResponseMsg" << std::endl;
-    }
-	check_syntax(request);
+        utils::log("Response.cpp", "generateResponseMsg");
+    check_syntax(request);
     if (_code == 0) 
     {
          check_path(request);
@@ -196,9 +194,7 @@ void		Response::generateResponseMsg(Request &request)
 	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
 
 	check_error(error_msg);
-    // std::cout << "addHeader" << std::endl;
 	addHeader(request, headers);
-    // std::cout << "append CRLF" << std::endl;
 	headers.append(CRLF);
 
 	std::string::iterator beg = headers.begin();
@@ -209,7 +205,6 @@ void		Response::generateResponseMsg(Request &request)
 		_buf.push_back(*beg);
 		++beg;
 	}
-    // std::cout << "addBody" << std::endl;
     if (request.getStartLine().method != "HEAD")
         addBody(error_msg);
 }
@@ -217,11 +212,9 @@ void		Response::generateResponseMsg(Request &request)
 std::string	Response::generateErrorMsg()
 {
     if (_config->getDebugLevel() > 1)
-    {
-        std::cout << utils::PASS << "generateErrorMsg" << std::endl;
-    }
-	std::string error;
-	std::string	error_path = "./files/error.html";
+        utils::log("Response.cpp", "generateErrorMsg");
+    std::string error;
+    std::string	error_path = "./files/error.html";
 
 	if (_code == 404)
 	{
@@ -296,7 +289,7 @@ std::vector<std::string>	Response::slashSplit(std::string forsplit) {
 void	Response::check_path(Request &request)
 {
 	if (_config->getDebugLevel() > 1)
-		std::cout << utils::PASS << "check path" << std::endl;
+        utils::log("Response.cpp", "check_path");
 	t_start_line temp = request.getStartLine();
 	size_t limit = 1;
 	int i = 0;
@@ -367,20 +360,20 @@ void	Response::check_path(Request &request)
 		}
 	}
 	if (_config->getDebugLevel() > 1) {
-		std::cout << utils::PASS << "setPath is " << getPath() << std::endl;
+        utils::log("Response.cpp", "setPath is " + getPath());
 		if (_config->getDebugLevel() > 2)
-			std::cout << utils::PASS << "Location in config for response is " << _locationRespond << std::endl;
+            utils::log("Response.cpp", 
+                    "Location in config for response is " + 
+                    utils::to_string(_locationRespond));
 	}
 }
 
 void		Response::check_error(const std::string &error_msg)
 {
     if (_config->getDebugLevel() > 1)
+        utils::log("Response.cpp", "check_error");
+    if (_code >= 400)
     {
-        std::cout << utils::PASS << "check_error" << std::endl;
-    }
-	if (_code >= 400)
-	{
 		_body_size = error_msg.length();
 		setContentType("html");
 	}
@@ -389,7 +382,7 @@ void		Response::check_error(const std::string &error_msg)
 void		Response::check_syntax(Request &request)
 {
     if (_config->getDebugLevel() > 1)
-        std::cout << utils::PASS << "check_syntax" << std::endl;
+        utils::log("Response.cpp", "check_syntax");
     if (!request.isMethodValid())
     {
         setCode(400); 
@@ -419,19 +412,13 @@ void		Response::check_auth(Request &request)
     size_t len = getTargetFile().first.length() + getTargetFile().second.length();
     std::string path_to_htpasswd(path.begin(), path.end() - len - 1);
     path_to_htpasswd += ".htpasswd";
-    if (_config->getDebugLevel() > 2)
-    {
-        std::cout << ".htpasswd: " << path_to_htpasswd << std::endl;
-    }
     if (utils::file_exists(path_to_htpasswd))
     {
         std::map<std::string, std::string> header = request.getHeader();
         if (header.find("Authorization") == header.end())
         {
             if (_config->getDebugLevel() > 2)
-            {
-                std::cout << "Authorization not found" << std::endl;
-            }
+                utils::log("Response.cpp", "Authorization not found");
             setCode(401);
             _header["WWW-Authenticate"] = "Basic realm=\"simple\"";
         }
@@ -441,11 +428,9 @@ void		Response::check_auth(Request &request)
             std::string htpasswd_str(htpasswd.begin(), htpasswd.end());
             std::string auth_line = header["Authorization"].substr(6);
             if (_config->getDebugLevel() > 2)
-            {
-                std::cout << "Authorization found" << std::endl;
-                std::cout << "htpasswd_str: " << htpasswd_str << std::endl;
-                std::cout << "auth_line decoded: " << utils::base64decode(auth_line) << std::endl;
-            }
+                utils::log("Response.cpp", "Authorization found, htpasswd_str: "
+                        + htpasswd_str + ", auth_line decoded: "
+                        + utils::base64decode(auth_line));
             if (htpasswd_str != utils::base64decode(auth_line))
             {
                 setCode(401);
@@ -457,7 +442,7 @@ void		Response::check_auth(Request &request)
 void		Response::check_method(Request &request)
 {
     if (_config->getDebugLevel() > 1)
-        std::cout << utils::PASS << "check_method" << std::endl;
+        utils::log("Response.cpp", "check_method");
     std::string method = request.getStartLine().method;
 	ProcessMethod process;
 
@@ -554,17 +539,13 @@ std::string Response::get_time()
 
 void		Response::addHeader(Request &request, std::string &headers)
 {
-    (void)(request);
-	/* std::map < std::string, std::string >::const_iterator it = request.getHeader().find("Connection"); */
-
-    /* std::cout << "_code" << _code << std::endl; */
-
-	_start_line.http_version = HTTP;
+    if (_config->getDebugLevel() > 1)
+        utils::log("Response.cpp", "addHeader");
+    _start_line.http_version = HTTP;
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
 	_header["Server"] = _config->getServerName(); /* Из конфига? */
-	/* _header[it->first] = it->second; /1* Connection где-то есть где-то нет? *1/ */
 	_header["Content-Length"] = toString(_body_size);
 	setContentType(_target_file.second);
 	_header["Content-Language"] = "en-US, ru-RU";
@@ -632,8 +613,10 @@ void Response::setContentType(std::string type)
 
 void		Response::addBody(const std::string &error_msg)
 {	
-	if (_code < 400)
-	{
+    if (_config->getDebugLevel() > 1)
+        utils::log("Response.cpp", "addBody");
+    if (_code < 400)
+    {
 		/* std::cout << "проверка!" << _body << std::endl; */
 
 		std::string::iterator beg = _body.begin();

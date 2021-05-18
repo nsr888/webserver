@@ -224,4 +224,24 @@ namespace utils {
         }
         return output;
     }
+    std::string to_string(int n)
+    {
+        char * loc_num = ft_itoa(n);
+        std::string msg = std::string(loc_num);
+        free(loc_num);
+        return msg;
+    }
+    void log(const std::string & filename, const std::string & msg)
+    {
+        /* std::cout << "["; */
+        if (filename == "Response.cpp")
+            std::cout << CYN;
+        else if (filename == "ProcessMethod.cpp")
+            std::cout << MAG;
+        else if (filename == "Client.cpp")
+            std::cout << BLU;
+        else if (filename == "EventLoop.cpp")
+            std::cout << GRA;
+        std::cout << filename << ":" << RES << " " << msg << std::endl;
+    }
 }

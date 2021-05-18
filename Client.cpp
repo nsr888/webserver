@@ -49,7 +49,7 @@ void Client::readRequest() {
     if (_request.isHeaderParsed())
     {
         if (_config->getDebugLevel() > 2)
-            std::cout << utils::PASS << "header parsed with method: " << _request.getStartLine().method << std::endl;
+            utils::log("Client.cpp", "Header parsed with method " + _request.getStartLine().method);
         if (!_request.isHeaderValid())
         {
             _client_state = st_generate_response; 
@@ -59,7 +59,7 @@ void Client::readRequest() {
                 _request.getStartLine().method == "HEAD")
         {
             if (_config->getDebugLevel() > 2)
-                std::cout << utils::PASS << "GET header parsed\n";
+                utils::log("Client.cpp", "GET or HEAD header parsed");
             _client_state = st_generate_response; 
         }
         else if ((_request.getStartLine().method == "POST" || 
@@ -67,14 +67,14 @@ void Client::readRequest() {
                     && _request.isBodyParsed())
         {
             if (_config->getDebugLevel() > 2)
-                std::cout << utils::PASS << "POST header and body parsed\n";
+                utils::log("Client.cpp", "POST or PUT header and body parsed");
             _client_state = st_generate_response; 
         }
     }
     else if (_request.isBodyParsed())
     {
         if (_config->getDebugLevel() > 2)
-            std::cout << utils::PASS << "Body parsed\n";
+            utils::log("Client.cpp", "Body parsed");
         _client_state = st_generate_response; 
     }
 }
@@ -82,16 +82,14 @@ void Client::readRequest() {
 void Client::closeConnection() {
     while (close(_fd) == EINTR)
         ;
-    if (_config->getDebugLevel() > 2)
-        std::cout << utils::PASS << "Connection " << _fd << " closed" << std::endl;
 }
 
 void Client::sendResponse() {
     size_t bytes_sent = send(_fd, &_response[0], _response.size(), 0);
     if (bytes_sent == _response.size())
     {
-        /* std::cout << "Full response of "; */
-        /* std::cout << bytes_sent << " bytes was sent" << std::endl; */
+        if (_config->getDebugLevel() > 3)
+            utils::log("Client.cpp", "Full response was sent (" + utils::to_string(bytes_sent) + " bytes)");
         std::map<std::string, std::string> headers = _request.getHeader();
         if (headers.find("Connection") != headers.end() && 
                 headers["Connection"] == "close")
@@ -111,8 +109,8 @@ void Client::sendResponse() {
     else
     {
         _response.erase(_response.begin(), _response.begin() + bytes_sent);
-        /* std::cout << "Response sent only "; */
-        /* std::cout << bytes_sent << " bytes" << std::endl; */
+        if (_config->getDebugLevel() > 3)
+            utils::log("Client.cpp", "Partial response was sent (" + utils::to_string(bytes_sent) + " bytes)");
         _client_state = st_send_response;
     }
 }
