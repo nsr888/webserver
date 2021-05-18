@@ -301,11 +301,18 @@ void	Response::check_path(Request &request)
 	int i = 0;
 	_locationRespond = -1;
 	std::string tempo = utils::ft_strtrim(temp.request_target, "/");
-	if (temp.request_target.find("/", 0, 1) != std::string::npos && tempo.find("/", 0, 1) == std::string::npos &&
+	if (temp.request_target.find("http://localhost:", 0, 17) != std::string::npos) {
+		temp.request_target = utils::ft_strtrim(temp.request_target, "http://localhost:");
+		temp.request_target = utils::ft_strtrim(temp.request_target, toString(_config->getPort()));
+	}
+	else if (temp.request_target.find("/", 0, 1) != std::string::npos && tempo.find("/", 0, 1) == std::string::npos &&
 		tempo.find(".", 0, 1) != std::string::npos) {
 			setPath(_config->getLocationPath(i) + "/" + tempo);
 			_locationRespond = i;
 		}
+	else {
+		_locationRespond = -1;
+	}
 	if (temp.request_target.size() <= limit) {
 		if (temp.request_target == "/") {
 			while (i < _config->getLocationSize()) {
@@ -357,17 +364,6 @@ void	Response::check_path(Request &request)
 		if (_locationRespond == -1) {
 			setCode(404);
 		}
-		// const char *path = getPath().c_str();          	// проверка на существование файла или директории
-		// std::ifstream ifs;								// непонятно надо это тут или нет =)
-		// DIR* dir = opendir(path);
-		// ifs.open (path, std::ifstream::in);
-		// if(!ifs && !dir) {
-		// 	setCode(404);
-		// }
-		// ifs.close();
-		// if(dir) {
-		// 	closedir(dir);
-		// }
 	}
 	if (_config->getDebugLevel() > 1) {
 		std::cout << utils::PASS << "setPath is " << getPath() << std::endl;
