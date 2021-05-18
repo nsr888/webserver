@@ -300,6 +300,12 @@ void	Response::check_path(Request &request)
 	size_t limit = 1;
 	int i = 0;
 	_locationRespond = -1;
+	std::string tempo = utils::ft_strtrim(temp.request_target, "/");
+	if (temp.request_target.find("/", 0, 1) != std::string::npos && tempo.find("/", 0, 1) == std::string::npos &&
+		tempo.find(".", 0, 1) != std::string::npos) {
+			setPath(_config->getLocationPath(i) + "/" + tempo);
+			_locationRespond = i;
+		}
 	if (temp.request_target.size() <= limit) {
 		if (temp.request_target == "/") {
 			while (i < _config->getLocationSize()) {
