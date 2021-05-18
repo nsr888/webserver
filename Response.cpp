@@ -251,14 +251,26 @@ std::string	Response::generateErrorMsg()
 std::string	Response::pathCompare(std::vector<std::string> requesty,std::vector<std::string> locationy) {
 	int i = 0;
 	int match = 0;
+	int loc = 0;
 	while (i < static_cast<int>(locationy.size())) {
-		if (requesty[0] == locationy[i]) {
+		if (requesty[0] == utils::ft_strtrim(_config->getLocationName(i), "/")) {
 			match = 1;
+			loc = 1;
 			break;
 		}
 		i++;
 	}
-	if (match == 1) {
+	if (match == 0) {
+		i = 0;
+		while (i < static_cast<int>(locationy.size())) {
+			if (requesty[0] == locationy[i]) {
+				match = 1;
+				break;
+			}
+		i++;
+		}
+	}
+	if (match == 1 && loc == 0) {
 		std::string ret;
 		int r = 0;
 		while (i >= r) {
@@ -269,6 +281,15 @@ std::string	Response::pathCompare(std::vector<std::string> requesty,std::vector<
 		while (r < static_cast<int>(requesty.size())) {
 			ret = ret + "/" + requesty[r];
 			r++;
+		}
+		return (ret);
+	}
+	if (match == 1 && loc == 1) {
+		std::string ret;
+		ret = _config->getLocationPath(i);
+		_locationRespond = i;
+		if (!_config->getLocationFile(i).empty()) {
+			ret = ret + _config->getLocationFile(i);
 		}
 		return (ret);
 	}
@@ -305,6 +326,7 @@ void	Response::check_path(Request &request)
 	if (temp.request_target.find("http://localhost:", 0, 17) != std::string::npos) {
 		temp.request_target = utils::ft_strtrim(temp.request_target, "http://localhost:");
 		temp.request_target = utils::ft_strtrim(temp.request_target, toString(_config->getPort()));
+		std::cout << " temp.request_target " << temp.request_target << std::endl;
 	}
 	else if (temp.request_target.find("/", 0, 1) != std::string::npos && tempo.find("/", 0, 1) == std::string::npos &&
 		tempo.find(".", 0, 1) != std::string::npos) {
@@ -353,11 +375,13 @@ void	Response::check_path(Request &request)
 				pathForSet = pathCompare(requesty, locationy);
 				if (!pathForSet.empty()) {
 					setPath(pathForSet);
-					_locationRespond = i;
-					if (!_config->getLocationFile(i).empty()) {
-						setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
+					if (pathForSet.find(".", 0, 1) == std::string::npos) {
+						_locationRespond = i;
+						if (!_config->getLocationFile(i).empty()) {
+							setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
+						}
+						break;
 					}
-					break;
 				}
 				i++;
 			}
