@@ -42,7 +42,16 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 		if (i == -1)
 			processPostRequest(-1);
 		else if (_config->getLocationPost(i))
-			processPostRequest(i);
+        {
+            size_t max_body_size = _config->getLocationMaxBodySize(i);
+            if (max_body_size && _request->getBody().size() > max_body_size)
+            {
+                _response->setCode(413);
+                return;
+            }
+            else
+                processPostRequest(i);
+        }
 		else
 			_response->setCode(405);
 	}
