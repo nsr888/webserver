@@ -85,8 +85,14 @@ void Client::closeConnection() {
 }
 
 void Client::sendResponse() {
-    size_t bytes_sent = send(_fd, &_response[0], _response.size(), 0);
-    if (bytes_sent == _response.size())
+    int bytes_sent = send(_fd, &_response[0], _response.size(), 0);
+    if (bytes_sent < 0)
+    {
+        _client_state = st_send_response;
+        return ;
+    }
+    size_t bytes_sent2 = bytes_sent;
+    if (bytes_sent2 == _response.size())
     {
         if (_config->getDebugLevel() > 3)
             utils::log("Client.cpp", "Full response was sent (" + utils::to_string(bytes_sent) + " bytes)");
@@ -105,10 +111,6 @@ void Client::sendResponse() {
         _response_struct.clear();
         /* _time_last_response = utils::get_current_time_in_ms(); */
         utils::ft_usleep(3);
-    }
-    else if (bytes_sent < 0)
-    {
-        _client_state = st_send_response;
     }
     else
     {
