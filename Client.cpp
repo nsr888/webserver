@@ -106,6 +106,10 @@ void Client::sendResponse() {
         /* _time_last_response = utils::get_current_time_in_ms(); */
         utils::ft_usleep(3);
     }
+    else if (bytes_sent < 0)
+    {
+        _client_state = st_send_response;
+    }
     else
     {
         _response.erase(_response.begin(), _response.begin() + bytes_sent);
