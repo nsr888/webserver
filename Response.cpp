@@ -210,7 +210,8 @@ void		Response::generateResponseMsg(Request &request)
 		++beg;
 	}
     // std::cout << "addBody" << std::endl;
-	addBody(error_msg);
+    if (request.getStartLine().method != "HEAD")
+        addBody(error_msg);
 }
 
 std::string	Response::generateErrorMsg()
