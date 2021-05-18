@@ -8,3 +8,4 @@ webserver.PID
 *.a
 *.log
 *.d
+webserv
