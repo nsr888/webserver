@@ -79,11 +79,11 @@ public:
 	void								setPath(std::string path);
 
 	void								check_path(Request &request);
-	void								check_error(const std::string &error_msg);
+	void								check_error(const std::string &error_msg, Request &request);
 	void								check_syntax(Request &request);
     void		                        check_auth(Request &request);
 	void								check_method(Request &request);
-	void								check_authentication(Request &request);
+	void								check_accept(Request &request);
 	
 	void								generateResponseMsg(Request &request);
 	std::string							generateErrorMsg();
@@ -97,6 +97,7 @@ public:
     void                                setBody(std::string & body);
 	std::vector<std::string>			slashSplit(std::string forsplit);
 	std::string							pathCompare(std::vector<std::string> requesty,std::vector<std::string> locationy);
+	void								set_Allow_to_Header();
 	
 };
 
