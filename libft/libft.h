@@ -6,7 +6,7 @@
 /*   By: resther <resther@student.21-school.ru>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/29 16:29:08 by anasyrov          #+#    #+#             */
-/*   Updated: 2021/04/26 18:22:41 by resther          ###   ########.fr       */
+/*   Updated: 2021/05/22 07:16:01 by anasyrov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,10 +58,10 @@ typedef struct		s_list
 }					t_list;
 
 t_list				*ft_lstnew(void *content);
-void				ft_lstadd_front(t_list **lst, t_list *new);
+void				ft_lstadd_front(t_list **lst, t_list *nw);
 int					ft_lstsize(t_list *lst);
 t_list				*ft_lstlast(t_list *lst);
-void				ft_lstadd_back(t_list **lst, t_list *new);
+void				ft_lstadd_back(t_list **lst, t_list *nw);
 void				ft_lstdelone(t_list *lst, void (*del)(void *));
 void				ft_lstclear(t_list **lst, void (*del)(void *));
 void				ft_lstiter(t_list *lst, void (*f)(void *));
