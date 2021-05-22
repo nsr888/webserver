@@ -42,6 +42,7 @@ class Client {
     Response                    _response_struct;
     size_t                      _time_last_response;
     Setting*                    _config;
+    std::string                 _last_request_target;
 
     Client(void);
     friend bool operator< (Client const& lhs, Client const& rhs) {

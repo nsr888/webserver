@@ -23,6 +23,7 @@ class EventLoop {
     std::vector<WebServer>  _webservers;
     fd_set                  _readfds, _writefds;
     int                     _max_fd;
+    int                     _cnt;
 
     int                     _getMaxLs();
     void                    _prepairSelect();

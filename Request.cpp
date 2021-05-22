@@ -25,6 +25,9 @@ Request & Request::operator=(const Request & other)
     _start_line = other.getStartLine();
     _header = other.getHeader();
     _buf = other.getBuf();
+    _body = other._body;
+    _chunk_state = other._chunk_state;
+    _chunk_size = other._chunk_size;
 	return *this;
 }
 
@@ -151,8 +154,8 @@ std::vector<char> Request::getBody(void) const {
 	return _body;
 }
 
-std::vector<char>::iterator Request::bufFind(
-        std::vector<char> * buf, std::string str) {
+std::vector<char>::iterator
+Request::bufFind(std::vector<char> * buf,std::string str) {
     /* find specified string in buf */
     const char *crlf = str.c_str();
     std::vector<char>::iterator it;
@@ -209,14 +212,18 @@ bool    Request::_parseChunk()
     {
         if (_chunk_state == ch_header_feed)
         {
+            /* utils::log("Request.cpp", "ch_header_feed"); */
             if (bufContains(&this->_buf, "\r\n"))
             {
                 /* _printBuf("_buf, before chunk header parse"); */ 
                 std::string str(_buf.begin(), bufFind(&this->_buf, "\r\n"));
                 if (bufContains(&this->_buf, ";"))
                     str = std::string(_buf.begin(), bufFind(&this->_buf, ";"));
-                _chunk_size = static_cast<size_t>(ft_atoi(str.c_str()));
-                /* std::cout << "_chunk_size: " << _chunk_size << std::endl; */
+                if (str == "0" || str == "")
+                    _chunk_size = 0;
+                else
+                    _chunk_size = std::strtol(str.c_str(), 0, 16);
+                /* utils::log("Request.cpp", "chunk_size: " + utils::to_string(_chunk_size)); */
                 _buf.erase(_buf.begin(), bufFind(&this->_buf, "\r\n") + 2);
                 /* _buf.assign(bufFind(&this->_buf, "\r\n") + 2, _buf.end()); */
                 _chunk_state = ch_body_feed;
@@ -228,8 +235,10 @@ bool    Request::_parseChunk()
         }
         if (_chunk_state == ch_body_feed)
         {
+            /* utils::log("Request.cpp", "ch_body_feed"); */
             if (_chunk_size == 0)
             {
+                /* _printBuf("_buf, ch_body_feed, _chunk_size == 0"); */ 
                 char *body_size = ft_itoa(_body.size());
                 if (!body_size)
                     throw std::runtime_error(std::string("ft_itoa: ") + strerror(errno));
@@ -238,13 +247,14 @@ bool    Request::_parseChunk()
                 free(body_size);
                 return true;
             }
-            if (_buf.size() >= _chunk_size + 4)
+            if (_buf.size() >= _chunk_size + 2)
             {
+                /* _printBuf("_buf, ch_body_feed, _buf.size() >= _chunk_size + 2"); */ 
                 _body.insert(_body.end(), _buf.begin(), _buf.begin() + _chunk_size);
                 /* std::cout << "body is ready, _buf.size():" << _buf.size(); */
                 /* std::cout << ", _chunk_size: " << _chunk_size << std::endl; */
                 /* _printBuf("_buf, chunk body, before erase"); */
-                _buf.erase(_buf.begin(), _buf.begin() + _chunk_size + 4);
+                _buf.erase(_buf.begin(), _buf.begin() + _chunk_size + 2);
                 _chunk_state = ch_header_feed;
             }
             else
@@ -289,7 +299,10 @@ void Request::clear() {
     _request_state = st_header_feed;
     _start_line = t_start_line();
     _header.clear();
+    _buf.clear();
     _body.clear();
+    _chunk_state = ch_header_feed;
+    _chunk_size = 0;
 }
 
 std::ostream & operator<<(std::ostream & o, Request const & request) {
@@ -306,11 +319,12 @@ std::ostream & operator<<(std::ostream & o, Request const & request) {
     o << "\n";
     std::vector<char> v = request.getBody();
     std::vector<char>::iterator itv = v.begin();
-    while (itv != v.end())
-    {
-        o << *itv;
-        ++itv;
-    }
+    o << std::string(itv, v.end()).substr(0, 400) << std::endl;
+    /* while (itv != v.end()) */
+    /* { */
+    /*     o << *itv; */
+    /*     ++itv; */
+    /* } */
     o << std::endl;
     return o;
 }

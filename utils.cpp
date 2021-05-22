@@ -29,7 +29,7 @@ namespace utils {
         while ((m = read(fd, line, 5)) > 0)
         {
             if (m == -1)
-                throw std::runtime_error(std::string("write: ") + strerror(errno));
+                throw std::runtime_error(std::string("read: ") + strerror(errno));
             buf.insert(buf.end(), line, line + m);
         }
         close(fd);
@@ -50,19 +50,28 @@ namespace utils {
         {
             if(lseek(fd, 0, SEEK_CUR) == -1)
                 throw std::runtime_error(std::string("lseek: ") + strerror(errno));
-            if ((m = write(fd, &buf[offset], 1)) != 1)
-                throw std::runtime_error(std::string("write: ") + strerror(errno));
+            if ((m = write(fd, &buf[offset], buf.size())) < 0)
+                throw std::runtime_error(std::string("write_file_raw: ") + strerror(errno));
+            /* std::cout << "bytes writed :" << m << std::endl; */
             offset = offset + m;
-            ++it;
+            it = it + m;
         }
-        if (m == -1)
-            throw std::runtime_error(std::string("write: ") + strerror(errno));
         close(fd);
     }
 
     bool file_exists (std::string filename) {
       struct stat   buffer;   
       return (stat (filename.c_str(), &buffer) == 0);
+    }
+
+    int file_dir_exists (std::string filename) {
+        struct stat   info;   
+        if( stat(filename.c_str(), &info ) != 0 )
+            return 0;
+        else if( info.st_mode & S_IFDIR )
+            return 2;
+        else
+            return 1;
     }
 
     bool in_array(const std::string &value, const std::vector<std::string> &array)

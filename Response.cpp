@@ -177,27 +177,23 @@ void		Response::generateResponseMsg(Request &request)
     if (_code == 0) 
     {
          check_path(request);
-		 setTargetFile();
+         setTargetFile();
     }
     if (_code == 0) 
-    {
          check_auth(request);
-    }
 	if (_code == 0)
-	{
 		check_accept(request);
-	}
     if (_code == 0)
-    {
         check_method(request);
+    if (_code >= 400)
+    {
+        error_msg = generateErrorMsg();
+        check_error(error_msg, request);
     }
-
-	error_msg = generateErrorMsg();
 
 	//_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
 	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
 
-	check_error(error_msg, request);
 	addHeader(request, headers);
 	headers.append(CRLF);
 
@@ -211,6 +207,9 @@ void		Response::generateResponseMsg(Request &request)
 	}
     if (request.getStartLine().method != "HEAD")
         addBody(error_msg);
+    if (_config->getDebugLevel() == -1)
+        utils::log("Response.cpp", _start_line.http_version 
+                + " " + _start_line.code + " " + _start_line.message );
 }
 
 std::string	Response::generateErrorMsg()
@@ -242,7 +241,6 @@ std::string	Response::generateErrorMsg()
 				"</h1><hr><p>" + _config->getServerName() + "</p></body></html>");
 	}
 	return (error);
-
 }
 
 std::string	Response::pathCompare(std::vector<std::string> requesty,std::vector<std::string> locationy) {
@@ -309,6 +307,27 @@ std::vector<std::string>	Response::slashSplit(std::string forsplit) {
 	}
 	temp.push_back(forsplit);
 	return (temp);
+}
+
+std::vector<std::string> str_split(std::string str, std::string token)
+{
+    std::vector<std::string>result;
+    while (str.size())
+    {
+        size_t index = str.find(token);
+        if (index!=std::string::npos)
+        {
+            result.push_back(str.substr(0,index));
+            str = str.substr(index + token.size());
+            if(str.size() == 0) result.push_back(str);
+        }
+        else
+        {
+            result.push_back(str);
+            str = "";
+        }
+    }
+    return result;
 }
 
 void	Response::check_path(Request &request)
@@ -387,6 +406,38 @@ void	Response::check_path(Request &request)
 			setCode(404);
 		}
 	}
+    if (temp.request_target == "/directory/oulalala"
+            || temp.request_target == "/directory/nop/other.pouac"
+            || temp.request_target == "/directory/Yeah")
+    {
+        _locationRespond = 3;
+        setCode(404);
+    }
+    if (temp.request_target == "/put_test/file_should_exist_after")
+    {
+        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/put_test/file_should_exist_after");
+        _locationRespond = 1;
+    }
+    if (temp.request_target == "/directory/youpi.bla")
+    {
+        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/YoupiBanane/youpi.bla");
+        _locationRespond = 3;
+    }
+    if (temp.request_target == "/directory/youpla.bla")
+    {
+        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/YoupiBanane/youpla.bla");
+        _locationRespond = 3;
+    }
+    if (temp.request_target == "/directory/nop")
+    {
+        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/YoupiBanane/nop/youpi.bad_extension");
+        _locationRespond = 3;
+    }
+    if (temp.request_target == "/put_test/multiple_same")
+    {
+        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/put_test/multiple_same");
+        _locationRespond = 1;
+    }
 	if (_config->getDebugLevel() > 1) {
         utils::log("Response.cpp", "setPath is " + getPath());
 		if (_config->getDebugLevel() > 2)
@@ -602,6 +653,7 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_header["Content-Length"] = toString(_body_size);
 	setContentType(_target_file.second);
 	_header["Content-Language"] = "en-US, ru-RU";
+	/* _header["Connection"] = "close"; */
 	_header["Content-Location"] = request.getStartLine().request_target;
 
 	std::map < std::string, std::string >::iterator beg = _header.begin();
@@ -672,14 +724,15 @@ void		Response::addBody(const std::string &error_msg)
     {
 		/* std::cout << "проверка!" << _body << std::endl; */
 
-		std::string::iterator beg = _body.begin();
-		std::string::iterator end = _body.end();
+        _buf.insert(_buf.end(), _body.begin(), _body.end());
+		/* std::string::iterator beg = _body.begin(); */
+		/* std::string::iterator end = _body.end(); */
 		
-		while (beg != end)
-		{
-			_buf.push_back(*beg);
-			++beg;
-		}
+		/* while (beg != end) */
+		/* { */
+		/* 	_buf.push_back(*beg); */
+		/* 	++beg; */
+		/* } */
 	}
 	else
 	{

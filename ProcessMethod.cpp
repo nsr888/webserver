@@ -1,5 +1,13 @@
 #include "ProcessMethod.hpp"
+#include "Parser.hpp"
+#include "libft/libft.h"
+#include "utils.hpp"
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 #include <string>
+#include <unistd.h>
 
 ProcessMethod::ProcessMethod()
 {
@@ -39,21 +47,35 @@ void	ProcessMethod::secretary_Request(Request &request, Response &respone, Setti
 	}
 	if (method == "POST")
 	{
-		if (i == -1)
-			processPostRequest(-1);
-		else if (_config->getLocationPost(i))
+		if (!_config->getLocationPost(i))
         {
-            size_t max_body_size = _config->getLocationMaxBodySize(i);
-            if (max_body_size && _request->getBody().size() > max_body_size)
-            {
-                _response->setCode(413);
-                return;
-            }
-            else
-                processPostRequest(i);
+            _response->setCode(405);
+            return;
         }
-		else
-			_response->setCode(405);
+        /* if (_request->getHeader()["Content-Length"] == "0" */
+		    /* || !_config->getLocationPost(i)) */
+        /* { */
+        /*     _response->setCode(500); */
+        /*     return; */
+        /* } */
+		if (i == -1)
+        {
+			_response->setCode(404);
+            return;
+        }
+        size_t max_body_size = _config->getLocationMaxBodySize(i);
+        if (max_body_size && _request->getBody().size() > max_body_size)
+        {
+            _response->setCode(413);
+            return;
+        }
+        std::string exec_prog = getCGI();
+        if (exec_prog != "")
+        {
+            _execCGI(exec_prog);
+            return;
+        }
+        processGetRequest(i);
 	}
 	if (method == "PUT")
 	{
@@ -92,37 +114,15 @@ void	ProcessMethod::processHeadRequest(int i)
 		_response->setCode(404);
 }
 
-void	ProcessMethod::processPostRequest(int i)
+std::string	ProcessMethod::getCGI()
 {
-    /* if (i == -1) */
-    /* { */
-		/* _response->setCode(404); */
-    /*     return; */
-    /* } */#include <sys/types.h>
-#include <sys/wait.h>
-    if (_request->getHeader()["Content-Length"] == "0")
+    std::string exec_prog;
+    for (int i = 0; i < _config->getCGISize(); ++i)
     {
-        _response->setCode(405);
-        return;
+        if (_config->getCGIType(i) == _response->getTargetFile().second)
+           exec_prog = _config->getCGIPath(i); 
     }
-    if (1 == 1)
-    {
-        std::string exec_prog;
-        for (int i = 0; i < _config->getCGISize(); ++i)
-        {
-            if (_config->getCGIType(i) == "php")
-               exec_prog = _config->getCGIPath(i); 
-        }
-        if (exec_prog != "")
-            _execCGI(exec_prog);
-        else
-            processGetRequest(i);
-    }
-    else
-    {
-        /* if didnt exist cgi, then processGetRequest */
-        processGetRequest(i);
-    }
+    return exec_prog;
 }
 
 void	ProcessMethod::processPutRequest()
@@ -190,15 +190,17 @@ std::string ProcessMethod::generateAutoindex(std::string path)
 
 void ProcessMethod::_execCGI(const std::string & exec_prog)
 {
-    /* https://stackoverflow.com/a/47716623 */
     std::vector<char*> envVector;
-    envVector.push_back(const_cast<char*>("AUTH_TYPE="));
+    /* envVector.push_back(const_cast<char*>("AUTH_TYPE=")); */
     std::string content_length = "CONTENT_LENGTH=" + _request->getHeader()["Content-Length"];
     envVector.push_back(const_cast<char*>(content_length.c_str()));
     envVector.push_back(const_cast<char*>("CONTENT_TYPE=application/x-www-form-urlencoded"));
     envVector.push_back(const_cast<char*>("GATEWAY_INTERFACE=CGI/1.1"));
-    /* envVector.push_back(const_cast<char*>("PATH_INFO=")); */
-    /* envVector.push_back(const_cast<char*>("PATH_TRANSLATED=")); */
+    /* std::string path_info = "PATH_INFO=" + _response->getPath(); */
+    std::string path_info = "PATH_INFO=" + _request->getStartLine().request_target;
+    envVector.push_back(const_cast<char*>(path_info.c_str()));
+    std::string path_translated = "PATH_TRANSLATED=" + _response->getPath();
+    envVector.push_back(const_cast<char*>(path_translated.c_str()));
     /* envVector.push_back(const_cast<char*>("QUERY_STRING=")); */
     std::string remote_addr = "REMOTE_ADDR=" + std::string(_config->getHost());
     envVector.push_back(const_cast<char*>(remote_addr.c_str()));
@@ -206,8 +208,12 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     /* envVector.push_back(const_cast<char*>("REMOTE_USER=")); */
     std::string request_method = "REQUEST_METHOD=" + _request->getStartLine().method;
     envVector.push_back(const_cast<char*>(request_method.c_str()));
-    /* envVector.push_back(const_cast<char*>("REQUEST_URI=")); */
-    envVector.push_back(const_cast<char*>("SCRIPT_NAME=test.php"));
+    std::string request_uri = "REQUEST_URI=" + _request->getStartLine().request_target;
+    envVector.push_back(const_cast<char*>(request_uri.c_str()));
+    std::string script_name = "SCRIPT_NAME="
+        + _response->getTargetFile().first + "."
+        + _response->getTargetFile().second;
+    envVector.push_back(const_cast<char*>(script_name.c_str()));
     envVector.push_back(const_cast<char*>("REDIRECT_STATUS=200"));
     std::string server_name = "SERVER_NAME=" + _config->getServerName();
     envVector.push_back(const_cast<char*>(server_name.c_str()));
@@ -217,9 +223,27 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     envVector.push_back(const_cast<char*>(server_port.c_str()));
     envVector.push_back(const_cast<char*>("SERVER_PROTOCOL=HTTP/1.1"));
     envVector.push_back(const_cast<char*>("SERVER_SOFTWARE=1.0"));
-    std::string script_filename = "SCRIPT_FILENAME=" + _response->getPath(); 
-    envVector.push_back(const_cast<char*>(script_filename.c_str()));
+    /* std::string script_filename = "SCRIPT_FILENAME=" + _response->getPath(); */
+    /* envVector.push_back(const_cast<char*>(script_filename.c_str())); */
+
+    std::map<std::string, std::string> headers = _request->getHeader();
+    std::map<std::string, std::string>::iterator it = headers.begin();
+    std::string x_header_upper;
+    for(;it != headers.end(); ++it)
+    {
+        if ((it->first)[0] == 'X')
+        {
+            std::locale loc;
+            std::string x_header = "HTTP_" + it->first + "=" + it->second;
+            std::replace(x_header.begin(), x_header.end(), '-', '_');
+            for (size_t i = 0; i < x_header.length(); ++i)
+                x_header_upper += ft_toupper(x_header[i]);
+            envVector.push_back(const_cast<char*>(x_header_upper.c_str()));
+        }
+    }
     envVector.push_back(0);
+    char **env = envVector.data();
+
 	if (_config->getDebugLevel() > 1)
     {
         std::cout << utils::GRA << "------" << " CGI envirements start " << "------" << utils::RES << std::endl;
@@ -227,51 +251,114 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
             std::cout << "  " << envVector[i] << std::endl;
         std::cout << utils::GRA << "------" << " CGI envirements end " << "------" << utils::RES << std::endl;
     }
-    char **env = envVector.data();
 
-    /* https://stackoverflow.com/a/39395978 */
-    int child_to_parent[2];
-    int parent_to_child[2];
+    char request_body[] = "./tmp/request_body.XXXXXX";
+    mkstemp(request_body);
+    std::vector<char> body = _request->getBody();
+	if (_config->getDebugLevel() > 1)
+        utils::log("ProcessMethod.cpp", "body_size: " + utils::to_string(body.size()));
+        utils::write_file_raw(request_body, body);
 
-	
-    if (pipe(child_to_parent) == -1 || pipe(parent_to_child) == -1) {
-		std::cout << "Error: pipe error" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+        /* https://stackoverflow.com/a/39395978 */
+        int child_to_parent[2];
+        /* int parent_to_child[2]; */
+        if (pipe(child_to_parent) == -1)
+            throw std::runtime_error(std::string("_cgi pipe") +
+                                     std::strerror(errno));
+        /* if (fcntl(parent_to_child[1], F_SETFL, O_NONBLOCK) < 0) */
+        /*     throw std::runtime_error(std::string("execCGI fcntl: ") +
+         * strerror(errno)); */
+        /* if (fcntl(child_to_parent[0], F_SETFL, O_NONBLOCK) < 0) */
+        /*     throw std::runtime_error(std::string("execCGI fcntl: ") +
+         * strerror(errno)); */
 
-    pid_t pid = fork();
+        pid_t pid = fork();
 
-    if (pid == 0) {
-        /* In child process */
-        dup2(child_to_parent[1], STDOUT_FILENO);
-        close(child_to_parent[0]);
+        if (pid == 0)
+        {
+            /* In child process */
+            /* Output setup */
+            dup2(child_to_parent[1], STDOUT_FILENO);
+            close(child_to_parent[0]);
 
-        dup2(parent_to_child[0], STDIN_FILENO);
-        close(parent_to_child[1]);
+            /* Input setup */
+            /* dup2(parent_to_child[0], STDIN_FILENO); */
+            /* close(parent_to_child[1]); */
 
-        char *arg[] = { const_cast<char*>(exec_prog.c_str()), 0 };
-        execve(exec_prog.c_str(), &arg[0], &env[0]);
+            /* char *arg[] = { const_cast<char*>(exec_prog.c_str()), 0 }; */
+
+            /* EXECVE */
+
+            int fd2 = open(request_body, O_RDONLY);
+            if (fd2 < 0)
+                throw std::runtime_error(std::string("_execCGI open fd2: ") +
+                                         strerror(errno));
+            if (dup2(fd2, STDIN_FILENO) < 0)
+                throw std::runtime_error(std::string("_execCGI dup2 fd2: ") +
+                                         strerror(errno));
+            close(fd2);
+
+            /* std::cerr << "execve" << std::endl; */
+            char *arg[] = {const_cast<char *>(_response->getPath().c_str()), 0};
+            int execve_ret = execve(exec_prog.c_str(), &arg[0], &env[0]);
+            /* close(parent_to_child[0]); */
+            if (execve_ret < 0)
+            {
+                std::cerr << "EXIT_FAILURE" << std::endl;
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                std::cerr << "EXIT_FAILURE" << std::endl;
+                exit(EXIT_SUCCESS);
+            }
     } else {
         /* In parent process */
         close(child_to_parent[1]);
-        close(parent_to_child[0]);
+        /* close(parent_to_child[0]); */
 
-        std::vector<char> body = _request->getBody();
-        /* std::cout << "body: " << &body[0] << std::endl; */
-        if (write(parent_to_child[1], &body[0], body.size()) < 0)
-            throw std::runtime_error(std::string("execCGI write: ") + strerror(errno));
-        int status;
-        if (waitpid(pid, &status, 0) < 0)
-            throw std::runtime_error(std::string("execCGI waitpid") + strerror(errno));
-        char                line[5];
+        /* READ START */
+        if (_config->getDebugLevel() > 1)
+            utils::log("ProcessMethod.cpp", "read to parent start");
+        char                line[10000];
         int                 m;
         std::vector<char>   buf;
-        while ((m = read(child_to_parent[0], line, 5)) > 0)
+        while (1)
         {
+            m = read(child_to_parent[0], line, 10000);
             if (m == -1)
-                throw std::runtime_error(std::string("write: ") + strerror(errno));
+                continue;
+            else if (m == 0)
+                break;
             buf.insert(buf.end(), line, line + m);
         }
+
+        /* std::vector<char>::iterator it; */
+        /* it = find (buf.begin(), buf.end(), 4); */
+        /* if (it != buf.end()) */
+        /* { */
+        /*     std::cout << "Char 0x04 found in myvector \n"; */
+        /*     buf.erase(it, buf.end()); */
+        /* } */
+
+        if (_config->getDebugLevel() > 1)
+            utils::log("ProcessMethod.cpp", "read buf size: " + utils::to_string(buf.size()));
+        /* std::cout << std::string(buf.begin(), buf.end()) << std::endl; */
+        /* READ END */
+
+        /* WRITE CGI RESPONSE FOR 100000 */
+        /* if (_request->getHeaderField("Content-Length") == "100000") */
+        /* { */
+        /*     char cgi_response[] = "./tmp/cgi_response.XXXXXX"; */
+        /*     mkstemp(cgi_response); */
+        /*     utils::write_file_raw(cgi_response, buf); */
+        /* } */
+
+        while (waitpid(-1, 0, 0) != -1)
+            ;
+        /* int status; */
+        /* if (waitpid(pid, &status, 0) < 0) */
+        /*     throw std::runtime_error(std::string("execCGI waitpid") + strerror(errno)); */
         if (Request::bufContains(&buf, "\r\n\r\n"))
         {
             std::vector<char> headers_buf_from_cgi;
@@ -281,7 +368,10 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
                     headers_buf_from_cgi);
             _response->setHeader(header_map);
         }
-        _response->setBody(std::string(buf.begin(), buf.end()));
+        /* std::cout << "buf.size(): " << buf.size() << std::endl; */
+        _response->setBody(std::string(buf.begin(), buf.begin() + buf.size()));
         _response->setCode(200);
+        /* if (_request->getHeaderField("Content-Length") != "100000") */
+        unlink(request_body);
     }
 }

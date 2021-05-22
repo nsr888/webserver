@@ -42,7 +42,8 @@ void WebServer::initServer() {
     _ls = socket(AF_INET, SOCK_STREAM, 0);
     if (_ls < 0)
         throw std::runtime_error(std::string("socket: ") + strerror(errno));
-    fcntl(_ls, F_SETFL, O_NONBLOCK);
+    if (fcntl(_ls, F_SETFL, O_NONBLOCK) < 0)
+        throw std::runtime_error(std::string("fcntl: ") + strerror(errno));
     _addr.sin_family = AF_INET;
     _addr.sin_port = htons(_config.getPort());
     _addr.sin_addr.s_addr = INADDR_ANY;
@@ -51,10 +52,10 @@ void WebServer::initServer() {
         throw std::runtime_error(std::string("setsockopt (SO_REUSEADDR) failed: ") + strerror(errno));
     if (setsockopt(_ls, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(int)) == -1)
         throw std::runtime_error(std::string("setsockopt(SO_REUSEPORT) failed: ") + strerror(errno));
-    unlink("127.0.0.1");
     if (bind(_ls, (struct sockaddr *)&_addr, sizeof(_addr)) < 0)
         throw std::runtime_error(std::string("bind: ") + strerror(errno));
-    listen(_ls, 150);
+    if (listen(_ls, 150) < 0)
+        throw std::runtime_error(std::string("listen: ") + strerror(errno));
     std::cout << "\033[0;32m" << "Webserver started " << "\033[0m";
     std::cout << "(port " << _config.getPort() << ", listen socket: " << _ls << ")" << std::endl;
 }

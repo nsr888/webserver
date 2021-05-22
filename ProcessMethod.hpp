@@ -10,11 +10,14 @@
 # include <unistd.h>
 # include <dirent.h>
 # include <unistd.h>
-# include <sys/wait.h>
 # include <cstring>  // for linux
+# include <sys/types.h>
+# include <sys/wait.h>
+# include <algorithm>
 
 extern "C" {
-    char *ft_itoa(int n);
+    char    *ft_itoa(int n);
+    int		ft_toupper(int c);
 }
 
 class Response;
@@ -28,7 +31,10 @@ private:
 	std::string		_method;
 	struct stat		_stat;
 	int				_stat_num;
-    void            _execCGI(const std::string & exec_prog);
+    void                _execCGI(const std::string & exec_prog);
+    void                _cgiPrepareEnv(std::vector<char*> * envVector);
+    void                _cgiWritePipe(int parent_to_child);
+    std::vector<char>   _cgiReadPipe(int child_to_parent);
 
 public:
 	ProcessMethod();
@@ -39,7 +45,7 @@ public:
 	
 	void			processGetRequest(int i);
 	void			processHeadRequest(int i);
-	void			processPostRequest(int i);
+    std::string     getCGI();
 	void			processPutRequest();
 
 	void			isLocationHasIndex();

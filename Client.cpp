@@ -1,6 +1,7 @@
 #include "Client.hpp"
 #include "utils.hpp"
 #include <exception>
+#include <iostream>
 #include <ostream>
 
 Client::Client(const Client & other) { *this = other; }
@@ -14,6 +15,7 @@ Client::Client(int fd, Setting * config)
     , _response_struct(config)
     , _time_last_response()
     , _config(config)
+    , _last_request_target()
 { }
 
 Client::Client(void) { }
@@ -29,6 +31,7 @@ Client & Client::operator=(const Client & other) {
     _response_struct = other._response_struct;
     _time_last_response = other._time_last_response;
     _config = other._config;
+    _last_request_target = other._last_request_target;
     return *this;
 }
 
@@ -37,11 +40,17 @@ client_states Client::getState(void) const { return _client_state; }
 int  Client::getFd() const { return _fd; }
 
 void Client::readRequest() {
-    std::vector<char> buf_read(3000);
+    std::vector<char> buf_read(1024);
     int bytes_read = recv(_fd, &buf_read[0], buf_read.size(), 0);
     if (bytes_read <= 0)
     {
         _client_state = st_close_connection;
+        return;
+    }
+    if (_client_state == st_close_connection)
+    {
+        if (_config->getDebugLevel() > 2)
+            utils::log("Client.cpp", "Can't close _fd");
         return;
     }
     buf_read.resize(bytes_read);
@@ -79,9 +88,11 @@ void Client::readRequest() {
     }
 }
 
-void Client::closeConnection() {
-    while (close(_fd) == EINTR)
-        ;
+void Client::closeConnection()
+{
+    /* _response.clear(); */
+    /* _response_struct.clear(); */
+    close(_fd);
 }
 
 void Client::sendResponse() {
@@ -90,33 +101,42 @@ void Client::sendResponse() {
         utils::log("Client.cpp", "bytes_sent: " + utils::to_string(bytes_sent));
     if (bytes_sent < 0)
     {
-        _client_state = st_send_response;
+        /* if (errno != 2) */
+        /*     printf("send: %d, erron: %d, %s \n", bytes_sent, errno, strerror(errno)); */
+        if (_config->getDebugLevel() == 3)
+            utils::log("Client.cpp", "Sent error");
+        shutdown(_fd, SHUT_WR);
+        _client_state = st_close_connection;
         return ;
     }
     if (static_cast<size_t>(bytes_sent) == _response.size())
     {
-        if (_config->getDebugLevel() > 3)
+        if (_config->getDebugLevel() == -10)
             utils::log("Client.cpp", "Full response was sent (" + utils::to_string(bytes_sent) + " bytes)");
         std::map<std::string, std::string> headers = _request.getHeader();
         if (headers.find("Connection") != headers.end() && 
                 headers["Connection"] == "close")
         {
+            shutdown(_fd, SHUT_WR);
             _client_state = st_close_connection;
+            utils::ft_usleep(3);
         }
         else
         {
             _client_state = st_read_request;
         }
+        /* shutdown(_fd, SHUT_WR); */
+        /* _client_state = st_close_connection; */
+
+        /* clear, because we can get new request on same connection */
         _request.clear();
-        _response.clear();
-        _response_struct.clear();
-        /* _time_last_response = utils::get_current_time_in_ms(); */
-        utils::ft_usleep(3);
+        /* _response.clear(); */
+        /* _response_struct.clear(); */
     }
     else
     {
         _response.erase(_response.begin(), _response.begin() + bytes_sent);
-        if (_config->getDebugLevel() > 3)
+        if (_config->getDebugLevel() == -10)
             utils::log("Client.cpp", "Partial response was sent (" + utils::to_string(bytes_sent) + " bytes)");
         _client_state = st_send_response;
     }
@@ -125,45 +145,47 @@ void Client::sendResponse() {
 void Client::generateResponse() {
     if (_config->getDebugLevel() > 0)
     {
-        std::cout << utils::YEL << "\n------ Request (parsed) Start -------\n" << utils::RES;
+        std::cout << utils::YEL << "\n------ Request (parsed) Start (body only 400 symbols) -------\n" << utils::RES;
         std::cout << _request << std::endl;
-        std::cout << utils::YEL << "------ Request (parsed) End -------" << utils::RES << std::endl;
+        std::cout << utils::YEL << "------ Request (parsed) End (body only 400 symbols) -------" << utils::RES << std::endl;
     }
-    /* if (_request.getStartLine().method == "POST" && */
-    /*     _request.isHeaderContains("Content-Length") && */
-    /*     _request.getHeaderFieldAsNumber("Content-Length") == 0) */
+    /* if ((_request.getStartLine().request_target == "/" */ 
+    /*         || _request.getStartLine().request_target == "/directory/nop") */
+    /*         && _request.getStartLine().method == "GET") */
     /* { */
-    /*     std::string body("Method Not Allowed"); */
-    /*     std::string header = "HTTP/1.1 405 Method Not Allowed\n" */
-    /*         "Content-Type: text/plain\nContent-Length: " + */
-    /*         std::string(ft_itoa(body.size())) + "\n\n"; */
-    /*     _response.assign(header.begin(), header.end()); */
-    /*     _response.insert(_response.end(), body.begin(), body.end()); */
+    /*     std::string msg = "HTTP/1.1 200 OK\n" */
+    /*         "Content-Type: text/plain\n" */
+    /*         "Content-Length: 12\n\n" */
+    /*         "Hello world!"; */
+    /*     _response.assign(msg.begin(), msg.end()); */
     /* } */
     /* else */
     /* { */
-    /*     if (_request.getStartLine().request_target == "/files/test_large_file.html") */
-    /*     { */
-    /*         std::vector<char> tmp; */
-    /*         tmp = utils::read_file("./files/test_large_file.html"); */
-    /*         std::string body(tmp.begin(), tmp.end()); */
-    /*         std::string header = "HTTP/1.1 200 OK\n" */
-    /*             "Content-Type: text/html\nContent-Length: " + */
-    /*             std::string(ft_itoa(body.size())) + "\n\n"; */
-    /*         _response.assign(header.begin(), header.end()); */
-    /*         _response.insert(_response.end(), body.begin(), body.end()); */
-    /*     } */
-    /*     else */
-    /*     { */
-    /*         std::string msg = "HTTP/1.1 200 OK\n" */
-    /*             "Content-Type: text/plain\n" */
-    /*             "Content-Length: 12\n\n" */
-    /*             "Hello world!"; */
-    /*         _response.assign(msg.begin(), msg.end()); */
-    /*     } */
+    /*     _response_struct.generateResponseMsg(_request); */
+    /*     _response.assign(_response_struct.getBuf().begin(), _response_struct.getBuf().end()); */
+    /*     /1* if (_response_struct.getBodySize() == 100000) *1/ */
+    /*     /1* { *1/ */
+    /*     /1*     char filename_stdin[] = "./tmp/response.XXXXXX"; *1/ */
+    /*     /1*     mkstemp(filename_stdin); *1/ */
+    /*     /1*     utils::write_file_raw(filename_stdin, _response_struct.getBuf()); *1/ */
+    /*     /1* } *1/ */
     /* } */
-    _response_struct.generateResponseMsg(_request);
-    _response.assign(_response_struct.getBuf().begin(), _response_struct.getBuf().end());
+    if (_request.getStartLine().method != "GET"
+            || _request.getStartLine().request_target != _last_request_target
+            || _request.getHeaderField("Cache-control") == "no-cache")
+    {
+        /* std::cout << "NOT cached" << std::endl; */
+        /* std::cout << _request.getStartLine().method << std::endl; */
+        /* std::cout << _request.getStartLine().request_target << std::endl; */
+        /* std::cout << "_last: " << _last_request_target << std::endl; */
+        /* std::cout << _request.getHeaderField("Cache-control") << std::endl; */
+        _response.clear();
+        _response_struct.clear();
+        _last_request_target = _request.getStartLine().request_target;
+        _response_struct.generateResponseMsg(_request);
+        _response = _response_struct.getBuf();
+        /* std::cout << "_last setted: " << _last_request_target << std::endl; */
+    }
 
     _client_state = st_send_response;
     if (_config->getDebugLevel() > 0)

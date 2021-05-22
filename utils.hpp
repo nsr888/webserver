@@ -21,6 +21,7 @@ namespace utils {
     std::vector<char>   read_file_raw(std::string filename);
     void                write_file_raw(std::string filename, std::vector<char> buf);
     bool                file_exists (std::string filename);
+    int                 file_dir_exists (std::string filename);
     bool                in_array(const std::string &value, const std::vector<std::string> &array);
     size_t              get_current_time_in_ms(void);
     void				ft_usleep(int ms);
