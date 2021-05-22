@@ -240,6 +240,21 @@ namespace utils {
         free(loc_num);
         return msg;
     }
+    std::string get_current_time_fmt()
+    {
+        struct timeval tv;
+        time_t nowtime;
+        struct tm *nowtm;
+        char tmbuf[64];
+
+        gettimeofday(&tv, NULL);
+        nowtime = tv.tv_sec;
+        nowtm = localtime(&nowtime);
+        strftime(tmbuf, sizeof(tmbuf), "%Y-%m-%d %H:%M:%S", nowtm);
+        std::string str(tmbuf);
+        return str;
+    }
+
     void log(const std::string & filename, const std::string & msg)
     {
         /* std::cout << "["; */
@@ -251,6 +266,7 @@ namespace utils {
             std::cout << BLU;
         else if (filename == "EventLoop.cpp")
             std::cout << GRA;
+        std::cout << get_current_time_fmt() << " ";
         std::cout << filename << ":" << RES << " " << msg << std::endl;
     }
 }

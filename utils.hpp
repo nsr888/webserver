@@ -34,6 +34,7 @@ namespace utils {
     std::string         base64decode(const std::string & s);
     std::string         to_string(int n);
     void                log(const std::string & filename, const std::string & msg);
+    std::string         get_current_time_fmt();
 
     const char YEL[] = "\033[0;33m";
     const char RED[] = "\033[0;31m";
