@@ -50,10 +50,6 @@ void EventLoop::_prepairSelect() {
         if (it_server->getConfig().getDebugLevel() == -9)
             utils::log("EventLoop.cpp", "prepairSelect");
         FD_SET(it_server->getLs(), &_readfds);
-        /* utils::log("EventLoop.cpp", "ls: " */ 
-        /*         + utils::to_string(it_server->getLs())); */
-        /* utils::log("EventLoop.cpp", "getClients size: " */ 
-        /*         + utils::to_string(it_server->getClients().size())); */
         std::vector<Client>::iterator it = it_server->getClients().begin();
         while (it != it_server->getClients().end())
         {
@@ -90,7 +86,6 @@ void EventLoop::_acceptConnection() {
                 utils::log("EventLoop.cpp", 
                         "Append client with fd: " + utils::to_string(sd));
             it->appendClient(Client(sd, &it->getConfig()));
-            /* std::cout << "Clients size " << it->getClients().size() << std::endl; */
         }
         ++it;
     }
@@ -116,14 +111,6 @@ void EventLoop::_processClients() {
                         utils::log("EventLoop.cpp", "generateResponse");
                     it->generateResponse();
                 }
-                /* if (it->getState() == st_send_response) */
-                /* { */
-                /*     if (it_server->getConfig().getDebugLevel() == -9) */
-                /*         utils::log("EventLoop.cpp", "sendResponse"); */
-                /*     it->sendResponse(); */
-                /*     _cnt = _cnt + 1; */
-                /*     /1* std::cout << "_cnt: " << _cnt << std::endl; *1/ */
-                /* } */
                 if (it->getState() == st_close_connection)
                 {
                     if (it_server->getConfig().getDebugLevel() == -9)
@@ -142,17 +129,6 @@ void EventLoop::_processClients() {
                     utils::log("EventLoop.cpp", "sendResponse");
                 it->sendResponse();
                 _cnt = _cnt + 1;
-                /* if (it->getState() == st_close_connection) */
-                /* { */
-                /*     if (it_server->getConfig().getDebugLevel() == -9) */
-                /*         utils::log("EventLoop.cpp", */ 
-                /*                 "Connection " + */ 
-                /*                 utils::to_string(it->getFd()) + " closed"); */
-                /*     it->closeConnection(); */
-                /*     FD_CLR(it->getFd(), &_writefds); */
-                /*     it = it_server->getClients().erase(it); */
-                /*     continue; */
-                /* } */
             }
             ++it;
         }
@@ -166,7 +142,9 @@ void show_speed(int* _last_count, int* _last_select_time, int _cnt)
     size_t cnt_diff = _cnt - *_last_count;
     if (time_diff > 5000 && _cnt > 10)
     {
-        std::cout << "\033[0;32m" << "Speed: " << "\033[0m";
+        std::cout << "\033[0;32m";
+        std::cout << utils::get_current_time_fmt() << " ";
+        std::cout << "Speed: " << "\033[0m";
         std::cout << cnt_diff * 1000 / time_diff << " trans/sec" << std::endl;
         *_last_count = _cnt;
         *_last_select_time = time;
@@ -192,12 +170,14 @@ void EventLoop::runLoop() {
 
         show_speed(&_last_count, &_last_select_time, _cnt);
 
-        /* ________ main cycle wait here _____ */
+        /* ________ wait point of server _____ */
         int res = select(_max_fd + 1, &_readfds, &_writefds, NULL, &timeout);
         if (res == 0)
         {
             shutdown();
-            std::cout << "\033[0;32m" << "Shutdown by timeout" << "\033[0m" << std::endl;
+            std::cout << "\033[0;32m";
+            std::cout << utils::get_current_time_fmt() << " ";
+            std::cout << "Shutdown by timeout" << "\033[0m" << std::endl;
             exit(EXIT_SUCCESS);
         }
         if (res < 1)

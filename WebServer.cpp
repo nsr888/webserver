@@ -56,6 +56,8 @@ void WebServer::initServer() {
         throw std::runtime_error(std::string("bind: ") + strerror(errno));
     if (listen(_ls, 150) < 0)
         throw std::runtime_error(std::string("listen: ") + strerror(errno));
-    std::cout << "\033[0;32m" << "Webserver started " << "\033[0m";
+    std::cout << "\033[0;32m";
+    std::cout << utils::get_current_time_fmt() << " ";
+    std::cout << "Webserver started " << "\033[0m";
     std::cout << "(port " << _config.getPort() << ", listen socket: " << _ls << ")" << std::endl;
 }
