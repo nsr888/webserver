@@ -373,5 +373,8 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
         _response->setCode(200);
         /* if (_request->getHeaderField("Content-Length") != "100000") */
         unlink(request_body);
+        /* Clear memory used by _buf, using clear() method insufficient */
+        /* https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Clear-and-minimize */
+        std::vector<char>().swap(buf);
     }
 }

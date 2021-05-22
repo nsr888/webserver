@@ -295,12 +295,18 @@ void    Request::setChunkState(chunk_states chunk_state)
     _chunk_state = chunk_state;
 }
 
+void Request::buf_clear() {
+    /* Clear memory used by vectors, using clear() method insufficient */
+    /* https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Clear-and-minimize */
+    std::vector<char>().swap(_buf);
+    std::vector<char>().swap(_body);
+}
+
 void Request::clear() {
     _request_state = st_header_feed;
     _start_line = t_start_line();
     _header.clear();
-    _buf.clear();
-    _body.clear();
+    buf_clear();
     _chunk_state = ch_header_feed;
     _chunk_size = 0;
 }

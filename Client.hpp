@@ -40,7 +40,6 @@ class Client {
     std::vector<char>           _response;
     Request                     _request;
     Response                    _response_struct;
-    size_t                      _time_last_response;
     Setting*                    _config;
     std::string                 _last_request_target;
 

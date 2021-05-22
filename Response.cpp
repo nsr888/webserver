@@ -754,8 +754,10 @@ void        Response::clear()
     _start_line.message = "";
     _start_line.http_version = "";
     _header.clear();
-    _buf.clear();
-	_body = "";
+    /* Clear memory used by _buf, using clear() method insufficient */
+    /* https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Clear-and-minimize */
+    std::vector<char>().swap(_buf);
+    std::string().swap(_body);
 	_body_size = 0;
 	_header_size = 0;
     _real_path = "";

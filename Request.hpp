@@ -49,6 +49,7 @@ public:
     void                push_back(std::vector<char> buf_read);
     void                setChunkState(chunk_states chunk_state);
     void                clear();
+    void                buf_clear();
 
     request_states                      getState() const;
     t_start_line                        getStartLine(void) const;
