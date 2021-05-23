@@ -149,8 +149,8 @@ void show_speed(int* _last_count, int* _last_select_time, int _cnt)
 void EventLoop::runLoop() {
     /* http://www.stolyarov.info/books/programming_intro/vol3 (page 227) */
     /* https://rsdn.org/article/unix/sockets.xml */
-    int                     _last_count = 0;
-    int                     _last_select_time;
+    int _last_count = 0;
+    int _last_select_time;
     _last_select_time = utils::get_current_time_in_ms();
     for (;;) {
         _max_fd = _getMaxLs();
@@ -169,10 +169,7 @@ void EventLoop::runLoop() {
         int res = select(_max_fd + 1, &_readfds, &_writefds, NULL, &timeout);
         if (res == 0)
         {
-            shutdown();
-            std::cout << "\033[0;32m";
-            std::cout << utils::get_current_time_fmt() << " ";
-            std::cout << "Shutdown by timeout" << "\033[0m" << std::endl;
+            stopServers();
             exit(EXIT_SUCCESS);
         }
         if (res < 1)
@@ -188,7 +185,7 @@ void EventLoop::runLoop() {
     }
 }
 
-void EventLoop::shutdown() {
+void EventLoop::stopServers() {
     for (std::vector<WebServer>::iterator server = _webservers.begin();
          server != _webservers.end(); ++server)
     {
@@ -204,4 +201,7 @@ void EventLoop::shutdown() {
             ++client;
         }
     }
+    std::cout << "\033[0;32m";
+    std::cout << utils::get_current_time_fmt() << " ";
+    std::cout << "Shutdown by timeout" << "\033[0m" << std::endl;
 }

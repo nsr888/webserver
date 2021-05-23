@@ -16,7 +16,7 @@ class EventLoop {
 
     void                    initServers();
     void                    runLoop();
-    void                    shutdown();
+    void                    stopServers();
     void                    appendWebServer(WebServer server);
 
  private:
