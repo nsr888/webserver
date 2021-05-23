@@ -28,9 +28,9 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-     EventLoop *loop = new EventLoop(config);
+    EventLoop *loop = new EventLoop(config);
 
-     try {
+    try {
          loop->initServers();
          loop->runLoop();
      } catch (const std::exception& e) {
