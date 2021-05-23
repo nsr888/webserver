@@ -171,8 +171,7 @@ void		Response::generateResponseMsg(Request &request)
     std::string error_msg;
     std::string headers;
 
-    if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "generateResponseMsg");
+    utils::log(*_config, __FILE__, "generateResponseMsg");
     check_syntax(request);
     if (_code == 0) 
     {
@@ -208,14 +207,13 @@ void		Response::generateResponseMsg(Request &request)
     if (request.getStartLine().method != "HEAD")
         addBody(error_msg);
     if (_config->getDebugLevel() == -1)
-        utils::log("Response.cpp", _start_line.http_version 
+        utils::log(*_config, "HTTP HEADER", _start_line.http_version 
                 + " " + _start_line.code + " " + _start_line.message );
 }
 
 std::string	Response::generateErrorMsg()
 {
-    if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "generateErrorMsg");
+    utils::log(*_config, __FILE__, "generateErrorMsg");
     std::string error;
     std::string	error_path = "./files/error.html";
 
@@ -332,8 +330,7 @@ std::vector<std::string> str_split(std::string str, std::string token)
 
 void	Response::check_path(Request &request)
 {
-	if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "check_path");
+    utils::log(*_config, __FILE__, "check_path");
 	t_start_line temp = request.getStartLine();
 	size_t limit = 1;
 	int i = 0;
@@ -439,11 +436,10 @@ void	Response::check_path(Request &request)
         _locationRespond = 1;
     }
 	if (_config->getDebugLevel() > 1) {
-        utils::log("Response.cpp", "setPath is " + getPath());
+        utils::log(*_config, __FILE__, "setPath is " + getPath());
 		if (_config->getDebugLevel() > 2)
-            utils::log("Response.cpp", 
-                    "Location in config for response is " + 
-                    utils::to_string(_locationRespond));
+            utils::log(*_config, __FILE__, "Location in config for response is ",
+                    _locationRespond);
 	}
 }
 
@@ -465,8 +461,7 @@ void		Response::set_Allow_to_Header()
 void		Response::check_error(const std::string &error_msg, Request &request)
 {
     (void)(request);
-    if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "check_error");
+    utils::log(*_config, __FILE__, "check_error");
     if (_code >= 400)
     {
 		if (_code == 405 || _code == 501)
@@ -480,8 +475,7 @@ void		Response::check_error(const std::string &error_msg, Request &request)
 
 void		Response::check_syntax(Request &request)
 {
-    if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "check_syntax");
+    utils::log(*_config, __FILE__, "check_syntax");
     if (!request.isMethodValid())
     {
         setCode(400); 
@@ -511,14 +505,12 @@ void		Response::check_auth(Request &request)
     size_t len = getTargetFile().first.length() + getTargetFile().second.length();
     std::string path_to_htpasswd(path.begin(), path.end() - len - 1);
     path_to_htpasswd += ".htpasswd";
-    /* utils::log("Response.cpp", "path_to_htpasswd: " + path_to_htpasswd); */
     if (utils::file_exists(path_to_htpasswd))
     {
         std::map<std::string, std::string> header = request.getHeader();
         if (header.find("Authorization") == header.end())
         {
-            if (_config->getDebugLevel() > 1)
-                utils::log("Response.cpp", "Authorization not found");
+            utils::log(*_config, __FILE__, "Authorization not found");
             setCode(401);
             _header["WWW-Authenticate"] = "Basic realm=\"simple\"";
         }
@@ -527,10 +519,9 @@ void		Response::check_auth(Request &request)
             std::vector<char> htpasswd(utils::read_file(path_to_htpasswd));
             std::string htpasswd_str(htpasswd.begin(), htpasswd.end());
             std::string auth_line = header["Authorization"].substr(6);
-            if (_config->getDebugLevel() > 1)
-                utils::log("Response.cpp", "Authorization found, htpasswd_str: "
-                        + htpasswd_str + ", auth_line decoded: "
-                        + utils::base64decode(auth_line));
+            utils::log(*_config, __FILE__, "Authorization found, htpasswd_str: "
+                    + htpasswd_str + ", auth_line decoded: "
+                    + utils::base64decode(auth_line));
             if (htpasswd_str != utils::base64decode(auth_line))
             {
                 setCode(401);
@@ -541,8 +532,7 @@ void		Response::check_auth(Request &request)
 
 void		Response::check_method(Request &request)
 {
-    if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "check_method");
+    utils::log(*_config, __FILE__, "check_method");
     std::string method = request.getStartLine().method;
 	ProcessMethod process;
 
@@ -551,8 +541,7 @@ void		Response::check_method(Request &request)
 
 void		Response::check_accept(Request &request)
 {
-	if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "check_accept");
+    utils::log(*_config, __FILE__, "check_accept");
 	
 	if (request.getHeader().count("Accept-Language"))
 		if (request.getHeader()["Accept-Language"].find("ru") == std::string::npos && request.getHeader()["Accept-Language"].find("en") == std::string::npos)
@@ -643,8 +632,7 @@ std::string Response::get_time()
 
 void		Response::addHeader(Request &request, std::string &headers)
 {
-    if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "addHeader");
+    utils::log(*_config, __FILE__, "addHeader");
     _start_line.http_version = HTTP;
 	_start_line.code = toString(_code);
 	_start_line.message = getMessage(_code);
@@ -718,8 +706,7 @@ void Response::setContentType(std::string type)
 
 void		Response::addBody(const std::string &error_msg)
 {	
-    if (_config->getDebugLevel() > 1)
-        utils::log("Response.cpp", "addBody");
+    utils::log(*_config, __FILE__, "addBody");
     if (_code < 400)
     {
 		/* std::cout << "проверка!" << _body << std::endl; */

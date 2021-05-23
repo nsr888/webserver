@@ -47,68 +47,57 @@ void Client::readRequest() {
     }
     if (_client_state == st_close_connection)
     {
-        if (_config->getDebugLevel() > 2)
-            utils::log("Client.cpp", "Can't close _fd");
+        utils::log(*_config, __FILE__, "Can't close _fd");
         return;
     }
     buf_read.resize(bytes_read);
     _request.push_back(buf_read);
     if (_request.isHeaderParsed())
     {
-        if (_config->getDebugLevel() > 2)
-            utils::log("Client.cpp", "Header parsed with method " + _request.getStartLine().method);
+        std::string method = _request.getStartLine().method;
+        utils::log(*_config, __FILE__, "Header parsed with method " + method);
         if (!_request.isHeaderValid())
         {
             _client_state = st_generate_response; 
             return;
         }
-        if (_request.getStartLine().method == "GET" || 
-                _request.getStartLine().method == "HEAD")
+        if (method == "GET" || method == "HEAD")
         {
-            if (_config->getDebugLevel() > 2)
-                utils::log("Client.cpp", "GET or HEAD header parsed");
+            utils::log(*_config, __FILE__, "GET or HEAD header parsed");
             _client_state = st_generate_response; 
         }
-        else if ((_request.getStartLine().method == "POST" || 
-                   _request.getStartLine().method == "PUT") 
-                    && _request.isBodyParsed())
+        else if ((method == "POST" || method == "PUT") && _request.isBodyParsed())
         {
-            if (_config->getDebugLevel() > 2)
-                utils::log("Client.cpp", "POST or PUT header and body parsed");
+            utils::log(*_config, __FILE__, "POST or PUT header and body parsed");
             _client_state = st_generate_response; 
         }
     }
     else if (_request.isBodyParsed())
     {
-        if (_config->getDebugLevel() > 2)
-            utils::log("Client.cpp", "Body parsed");
+        utils::log(*_config, __FILE__, "Body parsed");
         _client_state = st_generate_response; 
     }
 }
 
 void Client::closeConnection()
 {
-    if (_config->getDebugLevel() > 3)
-        utils::log("Client.cpp", "Connection closed");
+    utils::log(*_config, __FILE__, "Connection closed");
     close(_fd);
 }
 
 void Client::sendResponse() {
     int bytes_sent = send(_fd, &_response[0], _response.size(), 0);
-    if (_config->getDebugLevel() > 3)
-        utils::log("Client.cpp", "bytes_sent: " + utils::to_string(bytes_sent));
+    utils::log(*_config, __FILE__, "bytes_sent: ", bytes_sent);
     if (bytes_sent < 0)
     {
-        if (_config->getDebugLevel() == 3)
-            utils::log("Client.cpp", "Sent error");
+        utils::log(*_config, __FILE__, "Sent error");
         shutdown(_fd, SHUT_WR);
         _client_state = st_close_connection;
         return ;
     }
     if (static_cast<size_t>(bytes_sent) == _response.size())
     {
-        if (_config->getDebugLevel() == -10)
-            utils::log("Client.cpp", "Full response was sent (" + utils::to_string(bytes_sent) + " bytes)");
+        utils::log(*_config, __FILE__, "Full response sent, bytes: ", bytes_sent);
         std::map<std::string, std::string> headers = _request.getHeader();
         if (headers.find("Connection") != headers.end() && 
                 headers["Connection"] == "close")
@@ -126,8 +115,7 @@ void Client::sendResponse() {
     else
     {
         _response.erase(_response.begin(), _response.begin() + bytes_sent);
-        if (_config->getDebugLevel() == -10)
-            utils::log("Client.cpp", "Partial response was sent (" + utils::to_string(bytes_sent) + " bytes)");
+        utils::log(*_config, __FILE__, "Partial response sent, bytes: ", bytes_sent);
         _client_state = st_send_response;
     }
 }

@@ -255,71 +255,69 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     char request_body[] = "./tmp/request_body.XXXXXX";
     mkstemp(request_body);
     std::vector<char> body = _request->getBody();
-	if (_config->getDebugLevel() > 1)
-        utils::log("ProcessMethod.cpp", "body_size: " + utils::to_string(body.size()));
-        utils::write_file_raw(request_body, body);
+    utils::log(*_config, __FILE__, "body_size: ", body.size());
+    utils::write_file_raw(request_body, body);
 
-        /* https://stackoverflow.com/a/39395978 */
-        int child_to_parent[2];
-        /* int parent_to_child[2]; */
-        if (pipe(child_to_parent) == -1)
-            throw std::runtime_error(std::string("_cgi pipe") +
-                                     std::strerror(errno));
-        /* if (fcntl(parent_to_child[1], F_SETFL, O_NONBLOCK) < 0) */
-        /*     throw std::runtime_error(std::string("execCGI fcntl: ") +
-         * strerror(errno)); */
-        /* if (fcntl(child_to_parent[0], F_SETFL, O_NONBLOCK) < 0) */
-        /*     throw std::runtime_error(std::string("execCGI fcntl: ") +
-         * strerror(errno)); */
+    /* https://stackoverflow.com/a/39395978 */
+    int child_to_parent[2];
+    /* int parent_to_child[2]; */
+    if (pipe(child_to_parent) == -1)
+        throw std::runtime_error(std::string("_cgi pipe") +
+                                 std::strerror(errno));
+    /* if (fcntl(parent_to_child[1], F_SETFL, O_NONBLOCK) < 0) */
+    /*     throw std::runtime_error(std::string("execCGI fcntl: ") +
+     * strerror(errno)); */
+    /* if (fcntl(child_to_parent[0], F_SETFL, O_NONBLOCK) < 0) */
+    /*     throw std::runtime_error(std::string("execCGI fcntl: ") +
+     * strerror(errno)); */
 
-        pid_t pid = fork();
+    pid_t pid = fork();
 
-        if (pid == 0)
+    if (pid == 0)
+    {
+        /* In child process */
+        /* Output setup */
+        dup2(child_to_parent[1], STDOUT_FILENO);
+        close(child_to_parent[0]);
+
+        /* Input setup */
+        /* dup2(parent_to_child[0], STDIN_FILENO); */
+        /* close(parent_to_child[1]); */
+
+        /* char *arg[] = { const_cast<char*>(exec_prog.c_str()), 0 }; */
+
+        /* EXECVE */
+
+        int fd2 = open(request_body, O_RDONLY);
+        if (fd2 < 0)
+            throw std::runtime_error(std::string("_execCGI open fd2: ") +
+                                     strerror(errno));
+        if (dup2(fd2, STDIN_FILENO) < 0)
+            throw std::runtime_error(std::string("_execCGI dup2 fd2: ") +
+                                     strerror(errno));
+        close(fd2);
+
+        /* std::cerr << "execve" << std::endl; */
+        char *arg[] = {const_cast<char *>(_response->getPath().c_str()), 0};
+        int execve_ret = execve(exec_prog.c_str(), &arg[0], &env[0]);
+        /* close(parent_to_child[0]); */
+        if (execve_ret < 0)
         {
-            /* In child process */
-            /* Output setup */
-            dup2(child_to_parent[1], STDOUT_FILENO);
-            close(child_to_parent[0]);
-
-            /* Input setup */
-            /* dup2(parent_to_child[0], STDIN_FILENO); */
-            /* close(parent_to_child[1]); */
-
-            /* char *arg[] = { const_cast<char*>(exec_prog.c_str()), 0 }; */
-
-            /* EXECVE */
-
-            int fd2 = open(request_body, O_RDONLY);
-            if (fd2 < 0)
-                throw std::runtime_error(std::string("_execCGI open fd2: ") +
-                                         strerror(errno));
-            if (dup2(fd2, STDIN_FILENO) < 0)
-                throw std::runtime_error(std::string("_execCGI dup2 fd2: ") +
-                                         strerror(errno));
-            close(fd2);
-
-            /* std::cerr << "execve" << std::endl; */
-            char *arg[] = {const_cast<char *>(_response->getPath().c_str()), 0};
-            int execve_ret = execve(exec_prog.c_str(), &arg[0], &env[0]);
-            /* close(parent_to_child[0]); */
-            if (execve_ret < 0)
-            {
-                std::cerr << "EXIT_FAILURE" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-            else
-            {
-                std::cerr << "EXIT_FAILURE" << std::endl;
-                exit(EXIT_SUCCESS);
-            }
+            std::cerr << "EXIT_FAILURE" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        else
+        {
+            std::cerr << "EXIT_FAILURE" << std::endl;
+            exit(EXIT_SUCCESS);
+        }
     } else {
         /* In parent process */
         close(child_to_parent[1]);
         /* close(parent_to_child[0]); */
 
         /* READ START */
-        if (_config->getDebugLevel() > 1)
-            utils::log("ProcessMethod.cpp", "read to parent start");
+        utils::log(*_config, __FILE__, "read to parent start");
         char                line[10000];
         int                 m;
         std::vector<char>   buf;
@@ -341,8 +339,7 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
         /*     buf.erase(it, buf.end()); */
         /* } */
 
-        if (_config->getDebugLevel() > 1)
-            utils::log("ProcessMethod.cpp", "read buf size: " + utils::to_string(buf.size()));
+        utils::log(*_config, __FILE__, "read buf size: ", buf.size());
         /* std::cout << std::string(buf.begin(), buf.end()) << std::endl; */
         /* READ END */
 

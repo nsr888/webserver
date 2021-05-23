@@ -6,11 +6,13 @@ EventLoop::EventLoop(const EventLoop & other) {
     *this = other;
 }
 
-EventLoop::EventLoop(std::vector<Setting> config)
+EventLoop::EventLoop(std::vector<Setting> config_vector)
 {
-    for ( std::vector<Setting>::iterator it = config.begin();
-            it != config.end();++it)
-        this->appendWebServer(WebServer(*it));
+    for (std::vector<Setting>::iterator config = config_vector.begin();
+            config != config_vector.end(); ++config)
+    {
+        this->appendWebServer(WebServer(*config));
+    }
 }
 
 EventLoop::EventLoop(void) {}
@@ -28,53 +30,53 @@ void EventLoop::appendWebServer(WebServer server) {
 
 int EventLoop::_getMaxLs() {
     int ls = -1;
-    for (std::vector<WebServer>::iterator it = _webservers.begin();
-            it != _webservers.end(); ++it)
+    for (std::vector<WebServer>::iterator server = _webservers.begin();
+         server != _webservers.end(); ++server)
     {
-        if (it->getLs() > ls)
-            ls = it->getLs();
+        if (server->getLs() > ls)
+            ls = server->getLs();
     }
     return ls;
 }
 
 void EventLoop::initServers() {
-    for ( std::vector<WebServer>::iterator it = _webservers.begin();
-            it != _webservers.end(); ++it)
-        it->initServer();
+    for (std::vector<WebServer>::iterator server = _webservers.begin();
+         server != _webservers.end(); ++server)
+    {
+        server->initServer();
+    }
 }
 
 void EventLoop::_prepairSelect() {
-    for (std::vector<WebServer>::iterator it_server = _webservers.begin();
-            it_server != _webservers.end();++it_server)
+    for (std::vector<WebServer>::iterator server = _webservers.begin();
+         server != _webservers.end(); ++server)
     {
-        if (it_server->getConfig().getDebugLevel() == -9)
-            utils::log("EventLoop.cpp", "prepairSelect");
-        FD_SET(it_server->getLs(), &_readfds);
-        std::vector<Client>::iterator it = it_server->getClients().begin();
-        while (it != it_server->getClients().end())
+        utils::log(server->getConfig(), __FILE__, __func__);
+        FD_SET(server->getLs(), &_readfds);
+        std::vector<Client>::iterator client = server->getClients().begin();
+        while (client != server->getClients().end())
         {
-            if (it->getState() == st_read_request 
-                    || it->getState() == st_close_connection)
-                FD_SET(it->getFd(), &_readfds);
-            if (it->getState() == st_send_response)
-                FD_SET(it->getFd(), &_writefds);
-            if (it->getFd() > this->_max_fd)
-                this->_max_fd = it->getFd();
-            ++it;
+            enum client_states state = client->getState();
+            if (state == st_read_request || state == st_close_connection)
+                FD_SET(client->getFd(), &_readfds);
+            if (state == st_send_response)
+                FD_SET(client->getFd(), &_writefds);
+            if (client->getFd() > this->_max_fd)
+                this->_max_fd = client->getFd();
+            ++client;
         }
     }
 }
 
 void EventLoop::_acceptConnection() {
-    std::vector<WebServer>::iterator it = _webservers.begin();
-    while (it != _webservers.end())
+    std::vector<WebServer>::iterator server = _webservers.begin();
+    while (server != _webservers.end())
     {
-        int ls = it->getLs();
-        sockaddr_in addr = it->getAddr();
+        int ls = server->getLs();
+        sockaddr_in addr = server->getAddr();
         if (FD_ISSET(ls, &_readfds))
         {
-            if (it->getConfig().getDebugLevel() == -9)
-                utils::log("EventLoop.cpp", "acceptConnection");
+            utils::log(server->getConfig(), __FILE__, __func__);
             int sd;
             socklen_t len = sizeof(addr);
             sd = accept(ls, (struct sockaddr*) &addr, &len);
@@ -82,55 +84,48 @@ void EventLoop::_acceptConnection() {
                 throw std::runtime_error(std::string("accept: ") + strerror(errno));
             if (fcntl(sd, F_SETFL, O_NONBLOCK) < 0)
                 throw std::runtime_error(std::string("fcntl: ") + strerror(errno));
-            if (it->getConfig().getDebugLevel() == -9)
-                utils::log("EventLoop.cpp", 
-                        "Append client with fd: " + utils::to_string(sd));
-            it->appendClient(Client(sd, &it->getConfig()));
+            utils::log(server->getConfig(), __FILE__, "Append client #", sd);
+            server->appendClient(Client(sd, &server->getConfig()));
         }
-        ++it;
+        ++server;
     }
 }
 
 void EventLoop::_processClients() {
-    for (std::vector<WebServer>::iterator it_server = _webservers.begin();
-            it_server != _webservers.end();++it_server)
+    for (std::vector<WebServer>::iterator server = _webservers.begin();
+         server != _webservers.end(); ++server)
     {
-        if (it_server->getConfig().getDebugLevel() == -9)
-            utils::log("EventLoop.cpp", "processClients");
-        std::vector<Client>::iterator it = it_server->getClients().begin();
-        while (it != it_server->getClients().end())
+        Setting &config = server->getConfig();
+        utils::log(config, __FILE__, __func__);
+        std::vector<Client>::iterator client = server->getClients().begin();
+        while (client != server->getClients().end())
         {
-            if (FD_ISSET(it->getFd(), &_readfds))
+            if (FD_ISSET(client->getFd(), &_readfds))
             {
-                if (it_server->getConfig().getDebugLevel() == -9)
-                    utils::log("EventLoop.cpp", "readRequest");
-                it->readRequest();
-                if (it->getState() == st_generate_response)
+                utils::log(config, __FILE__, "readRequest");
+                client->readRequest();
+                if (client->getState() == st_generate_response)
                 {
-                    if (it_server->getConfig().getDebugLevel() == -9)
-                        utils::log("EventLoop.cpp", "generateResponse");
-                    it->generateResponse();
+                    utils::log(config, __FILE__, "generateResponse");
+                    client->generateResponse();
                 }
-                if (it->getState() == st_close_connection)
+                if (client->getState() == st_close_connection)
                 {
-                    if (it_server->getConfig().getDebugLevel() == -9)
-                        utils::log("EventLoop.cpp", 
-                                "Connection " + 
-                                utils::to_string(it->getFd()) + " closed");
-                    it->closeConnection();
-                    FD_CLR(it->getFd(), &_readfds);
-                    it = it_server->getClients().erase(it);
+                    utils::log(config, __FILE__, "Connection closed #",
+                               client->getFd());
+                    client->closeConnection();
+                    FD_CLR(client->getFd(), &_readfds);
+                    client = server->getClients().erase(client);
                     continue;
                 }
             }
-            if (FD_ISSET(it->getFd(), &_writefds))
+            if (FD_ISSET(client->getFd(), &_writefds))
             {
-                if (it_server->getConfig().getDebugLevel() == -9)
-                    utils::log("EventLoop.cpp", "sendResponse");
-                it->sendResponse();
+                utils::log(config, __FILE__, "sendResponse");
+                client->sendResponse();
                 _cnt = _cnt + 1;
             }
-            ++it;
+            ++client;
         }
     }
 }
@@ -196,22 +191,22 @@ void EventLoop::runLoop() {
 }
 
 void EventLoop::shutdown() {
-    for (std::vector<WebServer>::iterator it_server = _webservers.begin();
-            it_server != _webservers.end();++it_server)
+    for (std::vector<WebServer>::iterator server = _webservers.begin();
+         server != _webservers.end(); ++server)
     {
-        if(close(it_server->getLs()) < 0)
+        if (close(server->getLs()) < 0)
         {
-                throw std::runtime_error(
-                        std::string("listen socket close: ") + strerror(errno));
+            throw std::runtime_error(std::string("listen socket close: ")
+                    + strerror(errno));
         }
-        std::vector<Client>::iterator it = it_server->getClients().begin();
-        while (it != it_server->getClients().end())
+        std::vector<Client>::iterator client = server->getClients().begin();
+        while (client != server->getClients().end())
         {
-            it->closeConnection();
-            it = it_server->getClients().erase(it);
-            if (it == it_server->getClients().end())
+            client->closeConnection();
+            client = server->getClients().erase(client);
+            if (client == server->getClients().end())
                 break;
-            ++it;
+            ++client;
         }
     }
 }

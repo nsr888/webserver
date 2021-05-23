@@ -9,6 +9,7 @@
 # include <iostream>
 # include <cstdlib>
 # include <sys/time.h>
+# include "Setting.hpp"
 
 extern "C" {
     int                 get_next_line(int fd, char **line);
@@ -33,7 +34,8 @@ namespace utils {
     std::string         base64encode(std::vector<char> buf);
     std::string         base64decode(const std::string & s);
     std::string         to_string(int n);
-    void                log(const std::string & filename, const std::string & msg);
+    void                log(Setting & config, const std::string & filename,
+                            const std::string & msg, int n = -1);
     std::string         get_current_time_fmt();
 
     const char YEL[] = "\033[0;33m";

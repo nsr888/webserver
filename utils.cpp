@@ -1,6 +1,8 @@
+#include <iostream>
 #include <unistd.h>
 #include <sys/stat.h>
 #include "utils.hpp"
+#include "Setting.hpp"
 #include <cstring> // for linux
 
 namespace utils {
@@ -255,18 +257,27 @@ namespace utils {
         return str;
     }
 
-    void log(const std::string & filename, const std::string & msg)
+    void log_print_template(const char *color, const std::string & filename, const std::string & msg, int n)
     {
-        /* std::cout << "["; */
-        if (filename == "Response.cpp")
-            std::cout << CYN;
-        else if (filename == "ProcessMethod.cpp")
-            std::cout << MAG;
-        else if (filename == "Client.cpp")
-            std::cout << BLU;
-        else if (filename == "EventLoop.cpp")
-            std::cout << GRA;
+        std::cout << color;
         std::cout << get_current_time_fmt() << " ";
-        std::cout << filename << ":" << RES << " " << msg << std::endl;
+        std::cout << filename << ":" << RES << " " << msg;
+        if (n != -1) std::cout << n;
+        std::cout << std::endl;
+    }
+
+    void log(Setting & config, const std::string & filename,
+            const std::string & msg, int n)
+    {
+        if (filename == "EventLoop.cpp" && config.getDebugLevel() == -9)
+            log_print_template(GRA, filename, msg, n);
+        if (filename == "Response.cpp" && config.getDebugLevel() > 1)
+            log_print_template(CYN, filename, msg, n);
+        if (filename == "ProcessMethod.cpp" && config.getDebugLevel() > 1)
+            log_print_template(MAG, filename, msg, n);
+        if (filename == "Client.cpp" && config.getDebugLevel() > 2)
+            log_print_template(BLU, filename, msg, n);
+        if (filename == "HTTP HEADER" && config.getDebugLevel() == -1)
+            log_print_template(GRN, filename, msg, n);
     }
 }
