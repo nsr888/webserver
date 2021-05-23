@@ -12,7 +12,7 @@ namespace utils {
         char*               line;
 
         if ((fd = open(filename.c_str(), O_RDONLY)) < 0)
-            throw std::runtime_error(std::string("open: ") + strerror(errno));
+            utils::e_throw("open", __FILE__, __LINE__);
         while (get_next_line(fd, &line) > 0)
             buf.insert(buf.end(), line, line + std::strlen(line));
         buf.insert(buf.end(), line, line + std::strlen(line));
@@ -27,11 +27,11 @@ namespace utils {
         int                 m;
 
         if ((fd = open(filename.c_str(), O_RDONLY)) < 0)
-            throw std::runtime_error(std::string("open: ") + strerror(errno));
+            utils::e_throw("open", __FILE__, __LINE__);
         while ((m = read(fd, line, 5)) > 0)
         {
             if (m == -1)
-                throw std::runtime_error(std::string("read: ") + strerror(errno));
+                utils::e_throw("read", __FILE__, __LINE__);
             buf.insert(buf.end(), line, line + m);
         }
         close(fd);
@@ -46,15 +46,14 @@ namespace utils {
         offset = 0;
         m = 0;
         if ((fd = open(filename.c_str(), O_TRUNC | O_WRONLY | O_CREAT, 0644)) < 0)
-            throw std::runtime_error(std::string("open: ") + strerror(errno));
+            utils::e_throw("open", __FILE__, __LINE__);
         std::vector<char>::iterator it = buf.begin();
         while (it != buf.end())
         {
             if(lseek(fd, 0, SEEK_CUR) == -1)
-                throw std::runtime_error(std::string("lseek: ") + strerror(errno));
+                utils::e_throw("lseek", __FILE__, __LINE__);
             if ((m = write(fd, &buf[offset], buf.size())) < 0)
-                throw std::runtime_error(std::string("write_file_raw: ") + strerror(errno));
-            /* std::cout << "bytes writed :" << m << std::endl; */
+                utils::e_throw("write_file_raw", __FILE__, __LINE__);
             offset = offset + m;
             it = it + m;
         }
@@ -279,5 +278,11 @@ namespace utils {
             log_print_template(BLU, filename, msg, n);
         if (filename == "HTTP HEADER" && config.getDebugLevel() == -1)
             log_print_template(GRN, filename, msg, n);
+    }
+
+    void e_throw(const std::string & msg, const std::string & filename, int line)
+    {
+        throw std::runtime_error(msg + ": " + strerror(errno) 
+                + " at "+ filename + ":" + to_string(line));
     }
 }

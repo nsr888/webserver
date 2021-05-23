@@ -77,15 +77,15 @@ void EventLoop::_acceptConnection() {
         if (FD_ISSET(ls, &_readfds))
         {
             utils::log(server->getConfig(), __FILE__, __func__);
-            int sd;
             socklen_t len = sizeof(addr);
-            sd = accept(ls, (struct sockaddr*) &addr, &len);
-            if (sd == -1)
-                throw std::runtime_error(std::string("accept: ") + strerror(errno));
-            if (fcntl(sd, F_SETFL, O_NONBLOCK) < 0)
-                throw std::runtime_error(std::string("fcntl: ") + strerror(errno));
-            utils::log(server->getConfig(), __FILE__, "Append client #", sd);
-            server->appendClient(Client(sd, &server->getConfig()));
+            int fd;
+            fd = accept(ls, (struct sockaddr*) &addr, &len);
+            if (fd == -1)
+                utils::e_throw("accept", __FILE__, __LINE__);
+            if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
+                utils::e_throw("accept fcntl", __FILE__, __LINE__);
+            utils::log(server->getConfig(), __FILE__, "Append client #", fd);
+            server->appendClient(Client(fd, &server->getConfig()));
         }
         ++server;
     }
@@ -178,11 +178,9 @@ void EventLoop::runLoop() {
         if (res < 1)
         {
             if (errno != EINTR)
-                throw std::runtime_error(
-                        std::string("select error: ") + strerror(errno));
+                utils::e_throw("select error", __FILE__, __LINE__);
             else
-                throw std::runtime_error(
-                        std::string("select signal: ") + strerror(errno));
+                utils::e_throw("select signal", __FILE__, __LINE__);
         }
 
         this->_acceptConnection();
@@ -195,10 +193,7 @@ void EventLoop::shutdown() {
          server != _webservers.end(); ++server)
     {
         if (close(server->getLs()) < 0)
-        {
-            throw std::runtime_error(std::string("listen socket close: ")
-                    + strerror(errno));
-        }
+            utils::e_throw("listen socket close", __FILE__, __LINE__);
         std::vector<Client>::iterator client = server->getClients().begin();
         while (client != server->getClients().end())
         {

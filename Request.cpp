@@ -241,7 +241,7 @@ bool    Request::_parseChunk()
                 /* _printBuf("_buf, ch_body_feed, _chunk_size == 0"); */ 
                 char *body_size = ft_itoa(_body.size());
                 if (!body_size)
-                    throw std::runtime_error(std::string("ft_itoa: ") + strerror(errno));
+                    utils::e_throw("ft_itoa: ", __FILE__, __LINE__);
                 _header["Content-Length"] = std::string(body_size);
                 _header.erase("Transfer-Encoding");
                 free(body_size);

@@ -37,6 +37,7 @@ namespace utils {
     void                log(Setting & config, const std::string & filename,
                             const std::string & msg, int n = -1);
     std::string         get_current_time_fmt();
+    void                e_throw(const std::string & msg, const std::string & filename, int line);
 
     const char YEL[] = "\033[0;33m";
     const char RED[] = "\033[0;31m";

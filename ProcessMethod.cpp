@@ -262,8 +262,7 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     int child_to_parent[2];
     /* int parent_to_child[2]; */
     if (pipe(child_to_parent) == -1)
-        throw std::runtime_error(std::string("_cgi pipe") +
-                                 std::strerror(errno));
+        utils::e_throw("_cgi pipe", __FILE__, __LINE__);
     /* if (fcntl(parent_to_child[1], F_SETFL, O_NONBLOCK) < 0) */
     /*     throw std::runtime_error(std::string("execCGI fcntl: ") +
      * strerror(errno)); */
@@ -290,11 +289,9 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
 
         int fd2 = open(request_body, O_RDONLY);
         if (fd2 < 0)
-            throw std::runtime_error(std::string("_execCGI open fd2: ") +
-                                     strerror(errno));
+            utils::e_throw("_cgi open fd2", __FILE__, __LINE__);
         if (dup2(fd2, STDIN_FILENO) < 0)
-            throw std::runtime_error(std::string("_execCGI dup2 fd2: ") +
-                                     strerror(errno));
+            utils::e_throw("_cgi dup2 fd2", __FILE__, __LINE__);
         close(fd2);
 
         /* std::cerr << "execve" << std::endl; */
