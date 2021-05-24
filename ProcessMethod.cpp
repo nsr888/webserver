@@ -252,8 +252,7 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
         std::cout << utils::GRA << "------" << " CGI envirements end " << "------" << utils::RES << std::endl;
     }
 
-    char request_body[] = "./tmp/request_body.XXXXXX";
-    mkstemp(request_body);
+    char request_body[] = "./tmp/request_body.tmp";
     std::vector<char> body = _request->getBody();
     utils::log(*_config, __FILE__, "body_size: ", body.size());
     utils::write_file_raw(request_body, body);
