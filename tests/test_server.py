@@ -1,8 +1,6 @@
 import http.client
 import pytest
 import urllib.parse
-import pprint
-import requests
 
 
 @pytest.fixture(scope="session")
@@ -41,7 +39,7 @@ def test_get_index_html_request(connection):
 
 def test_post_request(connection):
     params = urllib.parse.urlencode({'key1': 'val', 'key2': 'va2'})
-    headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+    headers = {"Content-type": "application/x-www-form-urlencoded"}
     connection.request("POST", "/post_body", params, headers)
     resp = connection.getresponse()
     body = resp.read()
@@ -100,12 +98,21 @@ def test_get_test_txt_request(connection):
     assert resp.status == 200
 
 
+def test_wrong_auth(connection):
+    connection.request("GET", "/auth/")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.status == 401
+    assert 'text/html' in resp.getheader('Content-Type')
+
+
 def test_auth(connection):
+    print('test_auth')
     headers = {
             "Content-type": "application/x-www-form-urlencoded",
             "Authorization": "Basic QWRtaW46MTIzNDU2"
             }
-    connection.request("PUT", "/put_test/test.txt", "", headers)
+    connection.request("GET", "/auth/", "", headers)
     resp = connection.getresponse()
     resp.read()
     assert (resp.status == 200)
@@ -124,6 +131,22 @@ def test_get_directory(connection):
     resp = connection.getresponse()
     body = resp.read()
     assert "youpi.bad_extension" in body.decode('utf-8')
+    assert resp.status == 200
+
+
+def test_get_directory_nop(connection):
+    connection.request("GET", "/directory/nop/")
+    resp = connection.getresponse()
+    body = resp.read()
+    assert "youpi.bad_extension" in body.decode('utf-8')
+    assert resp.status == 200
+
+
+def test_get_directory_youpibla(connection):
+    connection.request("GET", "/directory/youpi.bla")
+    resp = connection.getresponse()
+    body = resp.read()
+    assert "youpi.bla" in body.decode('utf-8')
     assert resp.status == 200
 
 # =============== error requests ===================
@@ -145,8 +168,7 @@ def test_wrong_target_request(connection):
 def test_post_wrong_target_request(connection):
     params = urllib.parse.urlencode({'key1': 'val', 'key2': 'va2'})
     headers = {
-            "Content-type": "application/x-www-form-urlencoded",
-            "Accept": "text/plain"
+            "Content-type": "application/x-www-form-urlencoded"
             }
     connection.request("POST", "/onhuneothunheo", params, headers)
     resp = connection.getresponse()
@@ -167,14 +189,6 @@ def test_head_wrong_request(connection):
     resp.read()  # dont delete read, it important to call read()
     assert resp.version == 11
     assert resp.status == 405
-
-
-def test_wrong_auth(connection):
-    connection.request("GET", "/auth/")
-    resp = connection.getresponse()
-    resp.read()
-    assert 'text/plain' in resp.getheader('Content-Type')
-    assert resp.status == 401
 
 
 def test_get_directory_nop_wrong(connection):
@@ -201,13 +215,20 @@ def test_get_directory_yeah(connection):
 def test_http_location(connection):
     connection.request("GET", "http://localhost:8080/directory/")
     resp = connection.getresponse()
-    body = resp.read()
+    resp.read()
     assert 'application/octet-stream' in resp.getheader('Content-Type')
     assert resp.status == 200
 
 def test_http_location_root(connection):
     connection.request("GET", "http://localhost:8080/index.html")
     resp = connection.getresponse()
-    body = resp.read()
+    resp.read()
     assert 'text/html' in resp.getheader('Content-Type')
     assert resp.status == 200
+
+
+def test_get_directory_youplabla(connection):
+    connection.request("GET", "/directory/youpla.bla")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.status == 404
