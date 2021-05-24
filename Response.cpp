@@ -249,6 +249,7 @@ std::string	Response::pathCompare(std::vector<std::string> requesty,std::vector<
 		if (requesty[0] == utils::ft_strtrim(_config->getLocationName(i), "/")) {
 			match = 1;
 			loc = 1;
+			_locationRespond = i;
 			break;
 		}
 		i++;
@@ -277,12 +278,16 @@ std::string	Response::pathCompare(std::vector<std::string> requesty,std::vector<
 		}
 		return (ret);
 	}
-	if (match == 1 && loc == 1) {
+	else if (match == 1 && loc == 1) {
 		std::string ret;
+		int r = 1;
 		ret = _config->getLocationPath(i);
-		_locationRespond = i;
-		if (!_config->getLocationFile(i).empty()) {
-			ret = ret + _config->getLocationFile(i);
+		while (r < static_cast<int>(requesty.size())) {
+			ret = ret + "/" + requesty[r];
+			r++;
+		}
+		if (!_config->getLocationFile(i).empty() && requesty.size() == 1) {
+			ret = ret + "/" + _config->getLocationFile(i);
 		}
 		return (ret);
 	}
@@ -328,119 +333,116 @@ std::vector<std::string> str_split(std::string str, std::string token)
     return result;
 }
 
+
+void 	Response::rootPath(void) {
+	int i = 0;
+	while (i < _config->getLocationSize()) {
+		if (_config->getLocationName(i) == "/") {
+			_locationRespond = i;
+			setPath(_config->getLocationPath(i));
+			break;
+		}
+		i++;
+	}
+}
+
+void 	Response::httpPath(Request &request) {
+	t_start_line temp = request.getStartLine();
+	temp.request_target = utils::ft_strtrim(temp.request_target, "http://");
+	temp.request_target = utils::ft_strtrim(temp.request_target, _config->getServerName());
+	temp.request_target = utils::ft_strtrim(temp.request_target, ":");
+	temp.request_target = utils::ft_strtrim(temp.request_target, toString(_config->getPort()));
+}
+
+void 	Response::checkExist() {
+	std::string temp = getPath();
+	if (temp.find(".", 0, 1)) {
+		const char *path = getPath().c_str();
+		std::ifstream ifs;
+		ifs.open (path, std::ifstream::in);
+		if(!ifs) {
+			setCode(404);
+		}
+		ifs.close();
+	}
+	else {
+		const char *path = getPath().c_str();
+		DIR* dir = opendir(path);
+		if(!dir) {
+			setCode(404);
+		}
+		else {
+			closedir(dir);
+		}
+	}
+}
+
+void	Response::addLog() {
+	if (_config->getDebugLevel() > 1) {
+        utils::log(*_config, __FILE__, "setPath is " + getPath());
+		if (_config->getDebugLevel() > 2) {
+            utils::log(*_config, __FILE__, "Location in config for response is ", _locationRespond);
+		}
+	}
+}
+
 void	Response::check_path(Request &request)
 {
     utils::log(*_config, __FILE__, "check_path");
 	t_start_line temp = request.getStartLine();
-	size_t limit = 1;
-	int i = 0;
-	_locationRespond = -1;
 	std::string tempo = utils::ft_strtrim(temp.request_target, "/");
-	if (temp.request_target.find("http://localhost:", 0, 17) != std::string::npos) {
-		temp.request_target = utils::ft_strtrim(temp.request_target, "http://localhost:");
-		temp.request_target = utils::ft_strtrim(temp.request_target, toString(_config->getPort()));
-		std::cout << " temp.request_target " << temp.request_target << std::endl;
+	_locationRespond = -1;
+	int i = 0;
+	if (temp.request_target.find("http://", 0, 7) != std::string::npos) {
+		httpPath(request);
 	}
-	else if (temp.request_target.find("/", 0, 1) != std::string::npos && tempo.find("/", 0, 1) == std::string::npos &&
-		tempo.find(".", 0, 1) != std::string::npos) {
-			setPath(_config->getLocationPath(i) + "/" + tempo);
+	if (temp.request_target == "/") {
+		rootPath();
+		setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
+		addLog();
+		return;
+	}
+	while (i < _config->getLocationSize()) {
+		if (_config->getLocationName(i) == temp.request_target) {
+			setPath(_config->getLocationPath(i));
 			_locationRespond = i;
-		}
-	else {
-		_locationRespond = -1;
-	}
-	if (temp.request_target.size() <= limit) {
-		if (temp.request_target == "/") {
-			while (i < _config->getLocationSize()) {
-				if (_config->getLocationName(i) == "/") {
-					setPath(_config->getLocationPath(i));
-					_locationRespond = i;
-					if (!_config->getLocationFile(i).empty()) {
-						setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
-					}
-				}
-				i++;
+			if (!_config->getLocationFile(i).empty()) {
+				setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
 			}
 		}
-		else {
-			setCode(404);
-		}
+		i++;
 	}
-	else {
-		while (i < _config->getLocationSize()) {
-			if (_config->getLocationName(i) == temp.request_target) {
-				setPath(_config->getLocationPath(i));
-				_locationRespond = i;
-				if (!_config->getLocationFile(i).empty()) {
-					setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
+	if (temp.request_target.find("/", 0, 1) != std::string::npos && tempo.find("/", 0, 1) == std::string::npos && _locationRespond == -1) {
+		rootPath();
+		setPath((_config->getLocationPath(_locationRespond) + "/" + tempo));
+		checkExist();
+	}
+	if (_locationRespond == -1) {
+		std::vector<std::string>	requesty;
+		std::vector<std::string>	locationy;
+		std::string					pathForSet;
+		i = 0;
+		requesty = slashSplit(temp.request_target);
+		while(i < _config->getLocationSize()) {
+			locationy = slashSplit(_config->getLocationPath(i));
+			pathForSet = pathCompare(requesty, locationy);
+			if (!pathForSet.empty()) {
+				setPath(pathForSet);
+				if (_locationRespond == -1) {
+					_locationRespond = i;
 				}
+				break;
 			}
 			i++;
 		}
-		if (_locationRespond == -1) {
-			std::vector<std::string>	requesty;
-			std::vector<std::string>	locationy;
-			std::string					pathForSet;
-			i = 0;
-			requesty = slashSplit(temp.request_target);
-			while(i < _config->getLocationSize()) {
-				locationy = slashSplit(_config->getLocationPath(i));
-				pathForSet = pathCompare(requesty, locationy);
-				if (!pathForSet.empty()) {
-					setPath(pathForSet);
-					if (pathForSet.find(".", 0, 1) == std::string::npos) {
-						_locationRespond = i;
-						if (!_config->getLocationFile(i).empty()) {
-							setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));
-						}
-						break;
-					}
-				}
-				i++;
-			}
-		}
-		if (_locationRespond == -1) {
-			setCode(404);
-		}
 	}
-    if (temp.request_target == "/directory/oulalala"
-            || temp.request_target == "/directory/nop/other.pouac"
-            || temp.request_target == "/directory/Yeah")
-    {
-        _locationRespond = 3;
-        setCode(404);
-    }
-    if (temp.request_target == "/put_test/file_should_exist_after")
-    {
-        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/put_test/file_should_exist_after");
-        _locationRespond = 1;
-    }
-    if (temp.request_target == "/directory/youpi.bla")
-    {
-        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/YoupiBanane/youpi.bla");
-        _locationRespond = 3;
-    }
-    if (temp.request_target == "/directory/youpla.bla")
-    {
-        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/YoupiBanane/youpla.bla");
-        _locationRespond = 3;
-    }
-    if (temp.request_target == "/directory/nop")
-    {
-        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/YoupiBanane/nop/youpi.bad_extension");
-        _locationRespond = 3;
-    }
-    if (temp.request_target == "/put_test/multiple_same")
-    {
-        setPath("/Users/anasyrov/Documents/21/webserver/_webserver/files/put_test/multiple_same");
-        _locationRespond = 1;
-    }
-	if (_config->getDebugLevel() > 1) {
-        utils::log(*_config, __FILE__, "setPath is " + getPath());
-		if (_config->getDebugLevel() > 2)
-            utils::log(*_config, __FILE__, "Location in config for response is ",
-                    _locationRespond);
+	if (_locationRespond == -1) {
+		setCode(404);
 	}
+	else {
+		checkExist();
+	}
+	addLog();
 }
 
 void		Response::set_Allow_to_Header()

@@ -98,7 +98,11 @@ public:
 	std::vector<std::string>			slashSplit(std::string forsplit);
 	std::string							pathCompare(std::vector<std::string> requesty,std::vector<std::string> locationy);
 	void								set_Allow_to_Header();
-	
+	void 								rootPath(void);
+	void 								httpPath(Request &request);
+	void 								checkExist(void);
+	void								addLog(void);
+
 };
 
 #endif
