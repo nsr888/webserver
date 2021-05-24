@@ -388,13 +388,12 @@ void	Response::check_path(Request &request)
 {
     utils::log(*_config, __FILE__, "check_path");
 	t_start_line temp = request.getStartLine();
-	std::string tempo = utils::ft_strtrim(temp.request_target, "/");
 	_locationRespond = -1;
 	int i = 0;
 	if (temp.request_target.find("http://", 0, 7) != std::string::npos) {
 		temp.request_target = httpPath(request);
-		std::cout << temp.request_target << std::endl;
 	}
+	std::string tempo = utils::ft_strtrim(temp.request_target, "/");
 	if (temp.request_target == "/") {
 		rootPath();
 		setPath(_config->getLocationPath(i) + "/" + _config->getLocationFile(i));

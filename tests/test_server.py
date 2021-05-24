@@ -204,3 +204,10 @@ def test_http_location(connection):
     body = resp.read()
     assert 'application/octet-stream' in resp.getheader('Content-Type')
     assert resp.status == 200
+
+def test_http_location_root(connection):
+    connection.request("GET", "http://localhost:8080/index.html")
+    resp = connection.getresponse()
+    body = resp.read()
+    assert 'text/html' in resp.getheader('Content-Type')
+    assert resp.status == 200
