@@ -12,7 +12,7 @@ def connection():
     _connection.close()
 
 
-# =============== good requests ===================
+# =============== ok requests ===================
 
 def test_get_request(connection):
     connection.request("GET", "/")
@@ -72,14 +72,14 @@ def test_post_chunked_request(connection):
     resp = connection.getresponse()
     body = resp.read()
     assert "ksinistr, ceccentr, resther" in body.decode('utf-8')
-    # assert resp.getheader('Content-Type') == 'text/plain'
     assert resp.status == 200
 
 
 def test_head_request(connection):
     connection.request("HEAD", "/head_test")
     resp = connection.getresponse()
-    resp.read()
+    body = resp.read()
+    assert len(body) == 0
     assert resp.status == 200
 
 
@@ -100,7 +100,33 @@ def test_get_test_txt_request(connection):
     assert resp.status == 200
 
 
-# =============== wrong requests ===================
+def test_auth(connection):
+    headers = {
+            "Content-type": "application/x-www-form-urlencoded",
+            "Authorization": "Basic QWRtaW46MTIzNDU2"
+            }
+    connection.request("PUT", "/put_test/test.txt", "", headers)
+    resp = connection.getresponse()
+    resp.read()
+    assert (resp.status == 200)
+    assert 'text/html' in resp.getheader('Content-Type')
+
+
+def test_get_directory_nop_otherpouic(connection):
+    connection.request("GET", "/directory/nop/other.pouic")
+    resp = connection.getresponse()
+    resp.read()  # dont delete read, it important to call read()
+    assert resp.status == 200
+
+
+def test_get_directory(connection):
+    connection.request("GET", "/directory/")
+    resp = connection.getresponse()
+    body = resp.read()
+    assert "youpi.bad_extension" in body.decode('utf-8')
+    assert resp.status == 200
+
+# =============== error requests ===================
 
 def test_wrong_method_request(connection):
     connection.request("GETZ", "/")
@@ -118,7 +144,10 @@ def test_wrong_target_request(connection):
 
 def test_post_wrong_target_request(connection):
     params = urllib.parse.urlencode({'key1': 'val', 'key2': 'va2'})
-    headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+    headers = {
+            "Content-type": "application/x-www-form-urlencoded",
+            "Accept": "text/plain"
+            }
     connection.request("POST", "/onhuneothunheo", params, headers)
     resp = connection.getresponse()
     resp.read()  # dont delete read, it important to call read()
@@ -137,4 +166,33 @@ def test_head_wrong_request(connection):
     resp = connection.getresponse()
     resp.read()  # dont delete read, it important to call read()
     assert resp.version == 11
-    assert resp.status >= 400
+    assert resp.status == 405
+
+
+def test_wrong_auth(connection):
+    connection.request("GET", "/auth/")
+    resp = connection.getresponse()
+    resp.read()
+    assert 'text/plain' in resp.getheader('Content-Type')
+    assert resp.status == 401
+
+
+def test_get_directory_nop_wrong(connection):
+    connection.request("GET", "/directory/nop/wrong")
+    resp = connection.getresponse()
+    resp.read()  # dont delete read, it important to call read()
+    assert resp.status == 404
+
+
+def test_get_directory_nop_otherpouic_wrong(connection):
+    connection.request("GET", "/directory/nop/other.pouic/wrong")
+    resp = connection.getresponse()
+    resp.read()  # dont delete read, it important to call read()
+    assert resp.status == 404
+
+
+def test_get_directory_yeah(connection):
+    connection.request("GET", "/directory/Yeah/")
+    resp = connection.getresponse()
+    resp.read()  # dont delete read, it important to call read()
+    assert resp.status == 404

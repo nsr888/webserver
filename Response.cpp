@@ -190,9 +190,6 @@ void		Response::generateResponseMsg(Request &request)
         check_error(error_msg, request);
     }
 
-	//_body = "Hello world!"; /* Пока не понимаю из чего формируется боди, видимо нужна отдельная функция */
-	//_body_size = _body.length(); /* Размер боди должен считаться когда формируется боди */
-
 	addHeader(request, headers);
 	headers.append(CRLF);
 
@@ -503,10 +500,11 @@ void		Response::check_syntax(Request &request)
 void		Response::check_auth(Request &request)
 {
     (void)(request);
-    std::string path = getPath();
-    size_t len = getTargetFile().first.length() + getTargetFile().second.length();
-    std::string path_to_htpasswd(path.begin(), path.end() - len - 1);
+    std::string real_path = getPath();
+    size_t filename_length = getTargetFile().first.length() + getTargetFile().second.length();
+    std::string path_to_htpasswd(real_path.begin(), real_path.end() - filename_length);
     path_to_htpasswd += ".htpasswd";
+    utils::log(*_config, __FILE__, ".htpasswd" + path_to_htpasswd);
     if (utils::file_exists(path_to_htpasswd))
     {
         std::map<std::string, std::string> header = request.getHeader();
@@ -641,7 +639,8 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_header["Date"] = get_time();
 	_header["Server"] = _config->getServerName();
 	_header["Content-Length"] = toString(_body_size);
-	setContentType(_target_file.second);
+    if (_header.find("Content-Type") == _header.end())
+        setContentType(_target_file.second);
 	_header["Content-Language"] = "en-US, ru-RU";
 	/* _header["Connection"] = "close"; */
 	_header["Content-Location"] = request.getStartLine().request_target;
@@ -673,6 +672,7 @@ void Response::setTargetFile()
 	size_t dot_pos;
 	size_t slash_pos;
 
+    std::cout << "_real_path:" << _real_path << std::endl;
 	dot_pos = _real_path.rfind('.');
 	slash_pos = _real_path.rfind('/');
 	if (dot_pos != std::string::npos)
