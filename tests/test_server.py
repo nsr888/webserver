@@ -100,65 +100,6 @@ def test_get_test_txt_request(connection):
     assert resp.status == 200
 
 
-# =============== old requests ===================
-
-# def test_get_large_request(connection):
-#     '''Test get request'''
-#     connection.request("GET", "/files/test_large_file.html")
-#     resp = connection.getresponse()
-#     print(resp.status, resp.reason)
-#     resp.read()
-#     # assert "Hello world!" in resp.read().decode('utf-8')
-#     assert resp.getheader('Content-Type') == 'text/html'
-#     assert resp.version == 11
-#     assert resp.status == 200
-#     assert resp.reason == 'OK'
-
-
-# def test_delete_request(connection):
-#     connection.request("DELETE", "/test.txt")
-#     resp = connection.getresponse()
-#     resp.read()
-#     assert resp.version == 11
-#     assert (resp.status in [200, 202, 204])
-
-
-# def test_options_server_request(connection):
-#     connection.request("OPTIONS", "*")
-#     resp = connection.getresponse()
-#     resp.read()
-#     assert resp.version == 11
-#     assert resp.status == 200
-
-
-# def test_options_request(connection):
-#     connection.request("OPTIONS", "/")
-#     resp = connection.getresponse()
-#     resp.read()
-#     assert resp.version == 11
-#     assert resp.status == 200
-
-
-# example: http://publib.boulder.ibm.com/httpserv/ihsdiag/http_trace.html
-# def test_trace_request(connection):
-#     connection.request("TRACE", "/")
-#     resp = connection.getresponse()
-#     resp.read()
-#     assert resp.version == 11
-#     assert resp.status == 200
-#     assert resp.getheader('Content-Type') == 'message/http'
-
-# def test_large_wrong_target_request(connection):
-#     target = "a" * 8001
-#     connection.request("GET", "/" + target)
-#     resp = connection.getresponse()
-#     # dont delet read, it important to call read()
-#     resp.read()
-#     assert resp.version == 11
-#     assert resp.status == 501
-#     assert resp.reason == 'Not Implemented'
-
-
 # =============== wrong requests ===================
 
 def test_wrong_method_request(connection):
