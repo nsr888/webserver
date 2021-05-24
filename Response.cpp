@@ -343,12 +343,13 @@ void 	Response::rootPath(void) {
 	}
 }
 
-void 	Response::httpPath(Request &request) {
+std::string 	Response::httpPath(Request &request) {
 	t_start_line temp = request.getStartLine();
 	temp.request_target = utils::ft_strtrim(temp.request_target, "http://");
 	temp.request_target = utils::ft_strtrim(temp.request_target, _config->getServerName());
 	temp.request_target = utils::ft_strtrim(temp.request_target, ":");
 	temp.request_target = utils::ft_strtrim(temp.request_target, toString(_config->getPort()));
+	return (temp.request_target);
 }
 
 void 	Response::checkExist() {
@@ -391,7 +392,8 @@ void	Response::check_path(Request &request)
 	_locationRespond = -1;
 	int i = 0;
 	if (temp.request_target.find("http://", 0, 7) != std::string::npos) {
-		httpPath(request);
+		temp.request_target = httpPath(request);
+		std::cout << temp.request_target << std::endl;
 	}
 	if (temp.request_target == "/") {
 		rootPath();
@@ -400,7 +402,7 @@ void	Response::check_path(Request &request)
 		return;
 	}
 	while (i < _config->getLocationSize()) {
-		if (_config->getLocationName(i) == temp.request_target) {
+		if (utils::ft_strtrim2(_config->getLocationName(i), "/") == utils::ft_strtrim2(temp.request_target, "/")) {
 			setPath(_config->getLocationPath(i));
 			_locationRespond = i;
 			if (!_config->getLocationFile(i).empty()) {
@@ -436,7 +438,7 @@ void	Response::check_path(Request &request)
 	if (_locationRespond == -1) {
 		setCode(404);
 	}
-	else {
+	else if (temp.method != "PUT" && temp.method != "POST") {
 		checkExist();
 	}
 	addLog();
@@ -639,8 +641,9 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_header["Date"] = get_time();
 	_header["Server"] = _config->getServerName();
 	_header["Content-Length"] = toString(_body_size);
-    if (_header.find("Content-Type") == _header.end())
+    if (_header.find("Content-Type") == _header.end()) {
         setContentType(_target_file.second);
+	}
 	_header["Content-Language"] = "en-US, ru-RU";
 	/* _header["Connection"] = "close"; */
 	_header["Content-Location"] = request.getStartLine().request_target;

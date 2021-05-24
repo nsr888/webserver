@@ -99,7 +99,7 @@ public:
 	std::string							pathCompare(std::vector<std::string> requesty,std::vector<std::string> locationy);
 	void								set_Allow_to_Header();
 	void 								rootPath(void);
-	void 								httpPath(Request &request);
+	std::string 						httpPath(Request &request);
 	void 								checkExist(void);
 	void								addLog(void);
 

@@ -196,3 +196,11 @@ def test_get_directory_yeah(connection):
     resp = connection.getresponse()
     resp.read()  # dont delete read, it important to call read()
     assert resp.status == 404
+
+
+def test_http_location(connection):
+    connection.request("GET", "http://localhost:8080/directory/")
+    resp = connection.getresponse()
+    body = resp.read()
+    assert 'application/octet-stream' in resp.getheader('Content-Type')
+    assert resp.status == 200

@@ -27,6 +27,7 @@ namespace utils {
     size_t              get_current_time_in_ms(void);
     void				ft_usleep(int ms);
     std::string			ft_strtrim(const std::string &s1, const std::string& set);
+    std::string     	ft_strtrim2(const std::string &s1, const std::string& set);
     int					ft_strchr(const std::string& str, int ch);
     std::map<std::string, std::string>  parseBufToHeaderMap(
                             const std::map<std::string, std::string> & header,
