@@ -229,3 +229,10 @@ def test_wrong_auth(connection):
     resp.read()
     assert resp.status == 401
     assert 'text/html' in resp.getheader('Content-Type')
+
+def test_wro(connection):
+    connection.request("PUT", "http://localhost:8080/put_test/file_should_exist_after")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.status == 401
+    assert 'text/html' in resp.getheader('Content-Type')

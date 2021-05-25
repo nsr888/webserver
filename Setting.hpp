@@ -12,7 +12,7 @@ struct Location {
 	std::string					_path;
 	std::string					_locationName;
 	std::string					_file;
-	std::string					_ErrorPage;
+	std::string					_errorPage;
 	int							_get;
 	int							_put;
 	int							_post;
@@ -61,6 +61,7 @@ public:
     int							getLocationHead(int i) { return _location[i]._head; }
     int							getLocationAutoindex(int i) { return _location[i]._autoindex; }
     int							getLocationSize() { return _location.size(); }
+	std::string&				getLocationError(int i) { return _location[i]._errorPage; }
 	int							getLocationMaxBodySize(int i) { return _location[i]._maxBodySizeMB; }
 
 	
