@@ -303,10 +303,7 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
             exit(EXIT_FAILURE);
         }
         else
-        {
-            std::cerr << "EXIT_FAILURE" << std::endl;
             exit(EXIT_SUCCESS);
-        }
     } else {
         /* In parent process */
         close(child_to_parent[1]);
