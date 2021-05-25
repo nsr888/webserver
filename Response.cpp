@@ -502,9 +502,16 @@ void		Response::check_auth(Request &request)
 {
     (void)(request);
     std::string real_path = getPath();
-    size_t filename_length = getTargetFile().first.length() + getTargetFile().second.length();
-    std::string path_to_htpasswd(real_path.begin(), real_path.end() - filename_length);
-    path_to_htpasswd += ".htpasswd";
+    std::string path_to_htpasswd;
+    if (real_path.back() == '/')
+        path_to_htpasswd = real_path + ".htpasswd";
+    else
+    {
+        utils::log(*_config, __FILE__, "getTargetFile: " + getTargetFile().first + "." + getTargetFile().second);
+        size_t filename_length = getTargetFile().first.length() + getTargetFile().second.length();
+        path_to_htpasswd = std::string(real_path.begin(), real_path.end() - filename_length - 1);
+        path_to_htpasswd += ".htpasswd";
+    }
     utils::log(*_config, __FILE__, ".htpasswd" + path_to_htpasswd);
     if (utils::file_exists(path_to_htpasswd))
     {
