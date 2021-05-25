@@ -98,14 +98,6 @@ def test_get_test_txt_request(connection):
     assert resp.status == 200
 
 
-def test_wrong_auth(connection):
-    connection.request("GET", "/auth/")
-    resp = connection.getresponse()
-    resp.read()
-    assert resp.status == 401
-    assert 'text/html' in resp.getheader('Content-Type')
-
-
 def test_auth(connection):
     print('test_auth')
     headers = {
@@ -133,23 +125,12 @@ def test_get_directory(connection):
     assert "youpi.bad_extension" in body.decode('utf-8')
     assert resp.status == 200
 
-
-def test_get_directory_nop(connection):
-    connection.request("GET", "/directory/nop/")
-    resp = connection.getresponse()
-    body = resp.read()
-    assert "youpi.bad_extension" in body.decode('utf-8')
-    assert resp.status == 200
-
-
 def test_get_directory_youpibla(connection):
     connection.request("GET", "/directory/youpi.bla")
     resp = connection.getresponse()
     body = resp.read()
     assert "youpi.bla" in body.decode('utf-8')
     assert resp.status == 200
-
-# =============== error requests ===================
 
 def test_wrong_method_request(connection):
     connection.request("GETZ", "/")
@@ -232,3 +213,19 @@ def test_get_directory_youplabla(connection):
     resp = connection.getresponse()
     resp.read()
     assert resp.status == 404
+
+# =============== error requests ===================
+
+def test_get_directory_nop(connection):
+    connection.request("GET", "/directory/nop/")
+    resp = connection.getresponse()
+    body = resp.read()
+    assert "youpi.bad_extension" in body.decode('utf-8')
+    assert resp.status == 200
+
+def test_wrong_auth(connection):
+    connection.request("GET", "/auth/")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.status == 401
+    assert 'text/html' in resp.getheader('Content-Type')
