@@ -10,8 +10,6 @@ def connection():
     _connection.close()
 
 
-# =============== ok requests ===================
-
 def test_get_request(connection):
     connection.request("GET", "/")
     resp = connection.getresponse()
@@ -214,8 +212,6 @@ def test_get_directory_youplabla(connection):
     resp.read()
     assert resp.status == 404
 
-# =============== error requests ===================
-
 def test_get_directory_nop(connection):
     connection.request("GET", "/directory/nop/")
     resp = connection.getresponse()
@@ -225,13 +221,6 @@ def test_get_directory_nop(connection):
 
 def test_wrong_auth(connection):
     connection.request("GET", "/auth/")
-    resp = connection.getresponse()
-    resp.read()
-    assert resp.status == 401
-    assert 'text/html' in resp.getheader('Content-Type')
-
-def test_wro(connection):
-    connection.request("PUT", "http://localhost:8080/put_test/file_should_exist_after")
     resp = connection.getresponse()
     resp.read()
     assert resp.status == 401
