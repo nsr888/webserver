@@ -45,7 +45,7 @@ Location	Parser::getLocation(std::vector<std::string> temp, int i) {
 			newLoc._file = getArgument(temp[i], utils::ft_strchr(temp[i], ':'));
 		}
 		else if (temp[i].find("error_page:", 0, 11) != std::string::npos) {
-			newLoc._ErrorPage = getArgument(temp[i], utils::ft_strchr(temp[i], ':'));
+			newLoc._errorPage = getArgument(temp[i], utils::ft_strchr(temp[i], ':'));
 		}
 		else if (temp[i].find("MaxBodySize:", 0, 12) != std::string::npos) {
 			newLoc._maxBodySizeMB = ft_atoi(getArgument(temp[i], utils::ft_strchr(temp[i], ':')).c_str());
