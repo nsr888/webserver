@@ -429,6 +429,9 @@ void	Response::check_path(Request &request)
 				if (_locationRespond == -1) {
 					_locationRespond = i;
 				}
+				if (_real_path.find(".", 0, 1) == std::string::npos) {
+					setPath(_real_path + "/" + _config->getLocationFile(_locationRespond));
+				}
 				break;
 			}
 			i++;
