@@ -510,12 +510,12 @@ void		Response::check_auth(Request &request)
         path_to_htpasswd = real_path + ".htpasswd";
     else
     {
-        utils::log(*_config, __FILE__, "getTargetFile: " + getTargetFile().first + "." + getTargetFile().second);
-        size_t filename_length = getTargetFile().first.length() + getTargetFile().second.length();
-        path_to_htpasswd = std::string(real_path.begin(), real_path.end() - filename_length - 1);
+        utils::log(*_config, __FILE__, "check_auth filename: " + getTargetFile().first);
+        path_to_htpasswd = real_path.substr(0,
+                real_path.length() - getTargetFile().first.length());
         path_to_htpasswd += ".htpasswd";
     }
-    utils::log(*_config, __FILE__, ".htpasswd" + path_to_htpasswd);
+    utils::log(*_config, __FILE__, ".htpasswd: " + path_to_htpasswd);
     if (utils::file_exists(path_to_htpasswd))
     {
         std::map<std::string, std::string> header = request.getHeader();
@@ -687,12 +687,15 @@ void Response::setTargetFile()
     std::cout << "_real_path:" << _real_path << std::endl;
 	dot_pos = _real_path.rfind('.');
 	slash_pos = _real_path.rfind('/');
-	if (dot_pos != std::string::npos)
-	{
-		_target_file.first = _real_path.substr(slash_pos + 1, dot_pos - slash_pos - 1);
-		_target_file.second = _real_path.substr(dot_pos + 1);
-	}
-
+    if (slash_pos != std::string::npos)
+    {
+        _target_file.first = _real_path.substr(slash_pos + 1);
+        if (dot_pos != std::string::npos)
+        {
+            /* _target_file.first = _real_path.substr(slash_pos + 1, dot_pos - slash_pos - 1); */
+            _target_file.second = _real_path.substr(dot_pos + 1);
+        }
+    }
 }
 
 int	Response::getLocationRespond()
@@ -762,4 +765,6 @@ void        Response::clear()
 	_body_size = 0;
 	_header_size = 0;
     _real_path = "";
+    _target_file.first = "";
+    _target_file.second = "";
 }

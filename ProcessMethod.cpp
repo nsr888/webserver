@@ -210,9 +210,7 @@ void ProcessMethod::_execCGI(const std::string & exec_prog)
     envVector.push_back(const_cast<char*>(request_method.c_str()));
     std::string request_uri = "REQUEST_URI=" + _request->getStartLine().request_target;
     envVector.push_back(const_cast<char*>(request_uri.c_str()));
-    std::string script_name = "SCRIPT_NAME="
-        + _response->getTargetFile().first + "."
-        + _response->getTargetFile().second;
+    std::string script_name = "SCRIPT_NAME=" + _response->getTargetFile().first;
     envVector.push_back(const_cast<char*>(script_name.c_str()));
     envVector.push_back(const_cast<char*>("REDIRECT_STATUS=200"));
     std::string server_name = "SERVER_NAME=" + _config->getServerName();
