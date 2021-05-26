@@ -506,35 +506,31 @@ void		Response::check_auth(Request &request)
     (void)(request);
     std::string real_path = getPath();
     std::string path_to_htpasswd;
-    if (real_path.back() == '/')
+    if (real_path.back() == '/') {
         path_to_htpasswd = real_path + ".htpasswd";
-    else
-    {
+	}
+    else {
         utils::log(*_config, __FILE__, "check_auth filename: " + getTargetFile().first);
         path_to_htpasswd = real_path.substr(0,
                 real_path.length() - getTargetFile().first.length());
         path_to_htpasswd += ".htpasswd";
     }
     utils::log(*_config, __FILE__, ".htpasswd: " + path_to_htpasswd);
-    if (utils::file_exists(path_to_htpasswd))
-    {
+    if (utils::file_exists(path_to_htpasswd)) {
         std::map<std::string, std::string> header = request.getHeader();
-        if (header.find("Authorization") == header.end())
-        {
+        if (header.find("Authorization") == header.end()) {
             utils::log(*_config, __FILE__, "Authorization not found");
             setCode(401);
             _header["WWW-Authenticate"] = "Basic realm=\"simple\"";
         }
-        else
-        {
+        else {
             std::vector<char> htpasswd(utils::read_file(path_to_htpasswd));
             std::string htpasswd_str(htpasswd.begin(), htpasswd.end());
             std::string auth_line = header["Authorization"].substr(6);
             utils::log(*_config, __FILE__, "Authorization found, htpasswd_str: "
                     + htpasswd_str + ", auth_line decoded: "
                     + utils::base64decode(auth_line));
-            if (htpasswd_str != utils::base64decode(auth_line))
-            {
+            if (htpasswd_str != utils::base64decode(auth_line)) {
                 setCode(401);
             }
         }

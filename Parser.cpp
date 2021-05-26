@@ -82,6 +82,7 @@ Setting Parser::get_config(std::vector<std::string> temp) {
 	size_t size = temp.size();
 	size_t i = _stringReaded;
 	new_config.setDebugLevel(0);
+	int port_counter = 0;
 	while(temp[i].find("server:") == std::string::npos)
 		i++;
 	i++;
@@ -91,6 +92,7 @@ Setting Parser::get_config(std::vector<std::string> temp) {
 		}
 		else if (temp[i].find("port:", 0, 5) != std::string::npos) {
 			new_config.setPort(ft_atoi(getArgument(temp[i], utils::ft_strchr(temp[i], ':')).c_str()));
+			port_counter++;
 		}
 		else if (temp[i].find("server_name:", 0, 12) != std::string::npos) {
 			new_config.setServerName(getArgument(temp[i], utils::ft_strchr(temp[i], ':')));
@@ -112,6 +114,9 @@ Setting Parser::get_config(std::vector<std::string> temp) {
 	else {
 		_isOneMoreServer = 1;
 		_stringReaded = i;
+	}
+	if (port_counter > 1) {
+		new_config.setPort(-1);
 	}
 	return new_config;
 	
@@ -204,6 +209,10 @@ int			Parser::checkConfig(std::vector<Setting> config) {
 		}
 		if (config[i].getServerName().empty()) {
 			std::cout << "Config error: config not contain server name" << std::endl;
+			return (0);
+		}
+		if (config[i].getPort() == -1) {
+			std::cout << "Config error: config contain few port in one config" << std::endl;
 			return (0);
 		}
 		i++;
