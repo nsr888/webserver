@@ -718,7 +718,13 @@ void Response::setContentType(std::string type)
 	else if (type == "ico")
 		_header["Content-Type"] = "image/vnd.microsoft.icon;";
 	else
+    {
 		_header["Content-Type"] = "application/octet-stream";
+        if (_target_file.first != "")
+        {
+            _header["Content-Disposition"] = "inline; filename=\"" + _target_file.first + "\"";
+        }
+    }
 }
 
 void		Response::addBody(const std::string &error_msg)
