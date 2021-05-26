@@ -506,7 +506,7 @@ void		Response::check_auth(Request &request)
     (void)(request);
     std::string real_path = getPath();
     std::string path_to_htpasswd;
-    if (real_path.back() == '/')
+    if (real_path[real_path.length() - 1] == '/')
         path_to_htpasswd = real_path + ".htpasswd";
     else
     {
