@@ -680,7 +680,6 @@ void Response::setTargetFile()
 	size_t dot_pos;
 	size_t slash_pos;
 
-    std::cout << "_real_path:" << _real_path << std::endl;
 	dot_pos = _real_path.rfind('.');
 	slash_pos = _real_path.rfind('/');
     if (slash_pos != std::string::npos)
