@@ -108,7 +108,6 @@ void Client::sendResponse() {
         }
         else
             _client_state = st_read_request;
-
         /* clear, because we can get new request on same connection */
         _request.clear();
     }
@@ -127,21 +126,6 @@ void Client::generateResponse() {
         std::cout << _request << std::endl;
         std::cout << utils::YEL << "------ Request (parsed) End (body only 400 symbols) -------" << utils::RES << std::endl;
     }
-    /* if ((_request.getStartLine().request_target == "/" */ 
-    /*         || _request.getStartLine().request_target == "/directory/nop") */
-    /*         && _request.getStartLine().method == "GET") */
-    /* { */
-    /*     std::string msg = "HTTP/1.1 200 OK\n" */
-    /*         "Content-Type: text/plain\n" */
-    /*         "Content-Length: 12\n\n" */
-    /*         "Hello world!"; */
-    /*     _response.assign(msg.begin(), msg.end()); */
-    /* } */
-    /* else */
-    /* { */
-    /*     _response_struct.generateResponseMsg(_request); */
-    /*     _response.assign(_response_struct.getBuf().begin(), _response_struct.getBuf().end()); */
-    /* } */
     if (_request.getStartLine().method != "GET"
             || _request.getStartLine().request_target != _last_request_target
             || _request.getHeaderField("Cache-control") == "no-cache")
@@ -153,7 +137,6 @@ void Client::generateResponse() {
         _response_struct.clear();
         _request.buf_clear();
     }
-
     _client_state = st_send_response;
     if (_config->getDebugLevel() > 0)
     {
