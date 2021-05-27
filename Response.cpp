@@ -212,7 +212,7 @@ std::string	Response::generateErrorMsg()
 {
     utils::log(*_config, __FILE__, "generateErrorMsg");
     std::string error;
-    std::string	error_path = "./files/error.html";
+    std::string	error_path = _config->getLocationPath(0) + "/" + _config->getLocationError(_locationRespond);
 
 	if (_code == 404)
 	{
