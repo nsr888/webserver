@@ -225,3 +225,17 @@ def test_wrong_auth(connection):
     resp.read()
     assert resp.status == 401
     assert 'text/html' in resp.getheader('Content-Type')
+
+def test_111(connection):
+    connection.request("GET", "/111")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.status == 404
+    assert 'text/html' in resp.getheader('Content-Type')
+
+def test_111_slash(connection):
+    connection.request("GET", "/111/")
+    resp = connection.getresponse()
+    resp.read()
+    assert resp.status == 404
+    assert 'text/html' in resp.getheader('Content-Type')
