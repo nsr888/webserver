@@ -6,6 +6,8 @@
 #include <cstring>
 #include <fstream> 
 #include <set>
+#include <sys/types.h>
+#include <dirent.h>
 
 Parser::Parser() {
 	_isOneMoreServer = 1;
@@ -215,7 +217,34 @@ int			Parser::checkConfig(std::vector<Setting> config) {
 			std::cout << "Config error: config contain few port in one config" << std::endl;
 			return (0);
 		}
+		int q = 0;
+		while (q < config[i].getLocationSize()) {
+			const char *path =  config[i].getLocationPath(q).c_str();
+			DIR* dir = opendir(path);
+			if(!dir) {
+				std::cout << "Config error: path in location " << (q + 1) << " is not exist" << std::endl;
+				return (0);
+			}
+			else {
+				closedir(dir);
+			}
+			if (!config[i].getLocationError(q).empty()) {
+				std::string tempstr = config[i].getLocationPath(0) + "/" + config[i].getLocationError(q);
+				const char *path = tempstr.c_str();
+				std::ifstream ifs;
+				ifs.open (path, std::ifstream::in);
+				if(!ifs) {
+					std::cout << "Config error: error file in location " << (q + 1) << " is not exist" << std::endl;
+					return (0);
+				}
+				ifs.close();
+			}
+			q++;
+		}
 		i++;
+	}
+	if (config[i].getDebugLevel() >= 2) {
+		std::cout << "Check config is successful" << std::endl;
 	}
 	return (1);
 }

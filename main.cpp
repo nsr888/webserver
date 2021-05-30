@@ -11,8 +11,8 @@
 
 int main(int argc, char** argv) {
     // const char *config_file = "config/default.conf";			// Конфиг по умолчанию для Артура
-    //const char *config_file = "config/defaultIgor.conf";		// Конфиг по умолчанию для Игоря
-      const char *config_file = "config/defaultDenis.conf";	// Конфиг по умолчанию для Дениса
+    const char *config_file = "config/defaultIgor.conf";		// Конфиг по умолчанию для Игоря
+    //   const char *config_file = "config/defaultDenis.conf";	// Конфиг по умолчанию для Дениса
     if (argc != 1) {
         config_file = argv[1];									// Если при запуске дают другой конфиг берём его
     }
