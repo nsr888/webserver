@@ -98,7 +98,10 @@ void	ProcessMethod::processGetRequest(int i)
 	if (S_ISLNK(_stat.st_mode) || S_ISREG(_stat.st_mode))
 		_response->setBody(readPath(_response->getPath()));
 	else if (S_ISDIR(_stat.st_mode) && autoindex == true)
-		_response->setBody(generateAutoindex(_response->getPath()));
+    {
+        _response->setBody(generateAutoindex(_response->getPath()));
+        _response->setContentType("html");
+    }
 	else
 		_response->setCode(404);
 }

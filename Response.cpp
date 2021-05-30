@@ -213,10 +213,10 @@ std::string	Response::generateErrorMsg()
     utils::log(*_config, __FILE__, "generateErrorMsg");
     std::string error;
     std::string	error_path = _config->getLocationPath(0) + "/" + _config->getLocationError(_locationRespond);
+	int fd = open(error_path.c_str(), O_RDONLY);
 
-	if (_code == 404)
+	if (_code == 404 && fd > 0)
 	{
-		int fd = open(error_path.c_str(), O_RDONLY);
 		char buf[100];
 		bzero(buf, 100);
 		int pos = 0;
@@ -580,60 +580,49 @@ void	Response::setPath(std::string path)
 	_real_path = path;
 }
 
-int get_day_of_week(tm &timeinfo) 
+struct tm getCalendarTime(time_t tv_sec) 
 {
-	int last_number = timeinfo.tm_year % 100;
-	int year_code = (6 + last_number + last_number / 4) % 7;
-	int month = timeinfo.tm_mon + 1;
-	int month_code;
-	if (month == 1 || month == 10)		month_code = 1;
-	else if (month == 5) 				month_code = 2;
-	else if (month == 8)				month_code = 3;
-	else if (month == 6)				month_code = 5;
-	else if (month == 12 || month == 9)	month_code = 6;
-	else if (month == 7 || month == 4)	month_code = 0;
-	else								month_code = 4;
-	int day_of_week = (timeinfo.tm_mday + month_code + year_code) % 7;
-	if (day_of_week == 0 || day_of_week == 1)
-		day_of_week = (day_of_week == 0) ? 6 : 0;
-	return day_of_week;
+	struct tm calendar_time;
+	int days = tv_sec / 86400;
+	days += 719468;
+	int era = (days >= 0 ? days : days - 146096) / 146097;
+	int doe = days - era * 146097;          // [0, 146096]
+	int yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;  // [0, 399]
+	int y = yoe + era * 400;
+	int doy = doe - (365 * yoe + yoe / 4 - yoe / 100);                // [0, 365]
+	int mp = (5 * doy + 2) / 153;                                   // [0, 11]
+	int d = doy - (153 * mp + 2) / 5 + 1;                             // [1, 31]
+	int m = mp + (mp < 10 ? 3 : -9);                            // [1, 12]
+
+	calendar_time.tm_sec = tv_sec % 60;
+	calendar_time.tm_min = tv_sec % 3600 / 60;
+	calendar_time.tm_hour = tv_sec % 86400 / 3600;
+
+	calendar_time.tm_mday = d;
+	calendar_time.tm_mon = m - 1;
+	calendar_time.tm_year = y + (m <= 2) - 1900;
+
+	days = tv_sec / 86400;
+	calendar_time.tm_wday = (days >= -4 ? (days + 4) % 7 : (days + 5) % 7 + 6);
+	return calendar_time;
 }
 
-void get_date(tm &timeinfo, long time) 
+struct tm get_date(time_t tv_sec) 
 {
-	int year = 70;
-	int number_month = 1;
-	timeinfo.tm_min = time % 3600 / 60;
-	timeinfo.tm_sec = time % 3600 % 60;
-	time /= 3600;
-	timeinfo.tm_hour = time % 24 + 3;
-	if (timeinfo.tm_hour >= 24) { timeinfo.tm_hour -= 24; ++timeinfo.tm_mday; }
-	time = (time - (timeinfo.tm_hour - 3)) / 24 + 1;
-	for (; time >= 365; ++year)
-		time -= (year % 4 == 0) ? 366 : 365;
-	timeinfo.tm_year = year;
-	bool leap = timeinfo.tm_year % 4 == 0;
-	for (; time >= 28 || (time >= 29 && leap); ++number_month)
-		if (number_month == 2)
-			time -= (leap) ? 29 : 28;
-		else if (number_month <= 8)
-			time -= (number_month % 2 != 0) ? 31 : 30;
-		else
-			time -= (number_month % 2 != 0) ? 30 : 31;
-	timeinfo.tm_mon = number_month - 1;
-	timeinfo.tm_mday = time;
-	timeinfo.tm_wday = get_day_of_week(timeinfo);
+	struct tm calendar_time;
+	calendar_time = getCalendarTime(tv_sec);
+	return calendar_time;
 }
 
 std::string Response::get_time() 
 {
 	struct timeval time;
 	struct tm timeinfo;
-	char buff[100];
+	char buff[30];
 
 	gettimeofday(&time, NULL);
-	get_date(timeinfo, time.tv_sec + (time.tv_usec / 1000000));
-	strftime(buff, 100, "%a,  %d %b %Y %X GTM", &timeinfo);
+	timeinfo = get_date(time.tv_sec);
+	strftime(buff, 100, "%a, %d %b %Y %H:%M:%S GMT", &timeinfo);
 	return std::string(buff);
 }
 
@@ -645,6 +634,7 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
 	_header["Server"] = _config->getServerName();
+	std::cout << "!!! : " << _body_size << std::endl;
 	_header["Content-Length"] = toString(_body_size);
     if (_header.find("Content-Type") == _header.end()) {
         setContentType(_target_file.second);
