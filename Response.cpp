@@ -442,7 +442,8 @@ void	Response::check_path(Request &request)
 	}
 	if (_locationRespond == -1) {
 		setCode(404);
-		std::cout << "404" << std::endl;
+		setPath(_config->getLocationPath(0));
+		_locationRespond = 0;
 	}
 	else if (temp.method != "PUT" && temp.method != "POST") {
 		checkExist();
