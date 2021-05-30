@@ -215,7 +215,7 @@ std::string	Response::generateErrorMsg()
     std::string	error_path = _config->getLocationPath(0) + "/" + _config->getLocationError(_locationRespond);
 	int fd = open(error_path.c_str(), O_RDONLY);
 
-	if (_code == 404 && fd > 0)
+	if (_code == 404 && fd >= 0 && _locationRespond >= 0)
 	{
 		char buf[100];
 		bzero(buf, 100);
@@ -634,7 +634,6 @@ void		Response::addHeader(Request &request, std::string &headers)
 	_start_line.message = getMessage(_code);
 	_header["Date"] = get_time();
 	_header["Server"] = _config->getServerName();
-	std::cout << "!!! : " << _body_size << std::endl;
 	_header["Content-Length"] = toString(_body_size);
     if (_header.find("Content-Type") == _header.end()) {
         setContentType(_target_file.second);
