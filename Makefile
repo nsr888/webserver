@@ -3,8 +3,8 @@ SRC = main.cpp Client.cpp WebServer.cpp EventLoop.cpp Request.cpp Response.cpp \
 	  Setting.cpp Parser.cpp utils.cpp ProcessMethod.cpp
 OBJ = $(SRC:%.cpp=%.o)
 DEPENDS := $(patsubst %.cpp,%.d,$(SRC))
-# CXX = g++-11
-CXX = clang++
+CXX = g++
+# CXX = clang++
 CXXFLAGS = -Wall -Wextra -Werror -g -O2 -std=c++98 -pedantic
 INC = -I.
 
