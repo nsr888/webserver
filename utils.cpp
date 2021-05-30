@@ -115,17 +115,16 @@ namespace utils {
 
     std::string	ft_strtrim(const std::string &s1, const std::string& set)
     {
-        size_t	start;
-        size_t	end;
+        size_t	start = 0;
+        size_t	end = 0;
         size_t	index = 0;
 
-        while (s1[index] && utils::ft_strchr(set, s1[index]) != -1)
+        while (s1.c_str()[index] && utils::ft_strchr(set, s1.c_str()[index]) != -1) {
             index++;
+        }
         start = index;
         end = s1.length();
-        while (end && utils::ft_strchr(set, s1[end]) != -1)
-            --end;
-        return s1.substr(start, end + 1);
+        return s1.substr(start, end);
     }
 
     std::string	ft_strtrim2(const std::string &s1, const std::string& set)
@@ -134,12 +133,14 @@ namespace utils {
         size_t	end;
         size_t	index = 0;
 
-        while (s1[index] && utils::ft_strchr(set, s1[index]) != -1)
+        while (s1[index] && utils::ft_strchr(set, s1[index]) != -1) {
             index++;
+        }
         start = index;
         end = s1.length();
-        while (end && utils::ft_strchr(set, s1[end]) != -1)
+        while (end && utils::ft_strchr(set, s1[end]) != -1) {
             --end;
+        }
         return s1.substr(start, end);
     }
 
